@@ -1,0 +1,21 @@
+# Git ignore rules
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.env
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+instance/
+*.sqlite3
+*.db

@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "retirement-planner-app"
+version = "0.1.0"
+description = "Ontario Retirement Withdrawal Planning App"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "app" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.9" # Or your preferred Python version
+fastapi = "^0.100.0"
+uvicorn = {extras = ["standard"], version = "^0.23.2"}
+pydantic = "^2.0.0" # Check compatibility if using older Pydantic features
+pydantic-settings = "^2.0.0"
+psycopg2-binary = "^2.9.6" # For PostgreSQL
+python-jose = {extras = ["cryptography"], version = "^3.3.0"} # For JWTs if needed
+passlib = {extras = ["bcrypt"], version = "^1.7.4"} # For password hashing if needed
+PyYAML = "^6.0" # For reading YAML files
+numpy = "^1.25.0" # For Monte Carlo
+pandas = "^2.0.0" # For data manipulation in Monte Carlo
+openai = "^1.78.1"
+redis = "^6.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+httpx = "^0.24.0" # For testing API calls
+ruff = "^0.0.285" # For linting
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 88
+select = ["E", "W", "F", "I", "C", "B"] # flake8 error, warning, pyflakes, isort, flake8-comprehensions, flake8-bugbear
+ignore = ["E501"] # Allow longer lines if necessary, handled by formatter (like Black)
