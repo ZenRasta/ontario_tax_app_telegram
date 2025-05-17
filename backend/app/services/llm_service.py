@@ -1,12 +1,14 @@
 # app/services/llm.py
 from __future__ import annotations
+
 import logging
-from typing import Any # Keep Any for now, but ideally SummaryMetrics from results
+
 import httpx
 
-from app.core.config import settings # Use the singleton settings
-from app.data_models.scenario import ScenarioInput, StrategyCodeEnum, GoalEnum
+from app.core.config import settings  # Use the singleton settings
 from app.data_models.results import SummaryMetrics
+from app.data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
+
 # from app.data_models.strategy import get_strategy_meta # If you have strategy descriptions there
 
 logger = logging.getLogger(__name__)
@@ -33,7 +35,8 @@ STRATEGY_TRADEOFFS = {
 }
 
 
-async def explain_strategy_with_context(
+async def explain_strategy_with_context(  # noqa: C901
+
     scenario: ScenarioInput,
     strategy_code: StrategyCodeEnum,
     # strategy_name: str, # Can get from StrategyMeta or build from code
@@ -60,13 +63,13 @@ async def explain_strategy_with_context(
         "You are a friendly and highly experienced Canadian Certified Financial Planner (CFP), specializing in tax-efficient retirement income planning for Ontario residents aged 55 and older.",
         "Your client has provided their financial situation and a retirement goal. You have run a simulation for a specific withdrawal strategy. Your task is to explain the key outcomes of this strategy and its trade-offs in plain, empathetic English, as if you were advising them directly. Focus on what matters most for their stated goal.",
         "Avoid excessive financial jargon. If a term like 'OAS clawback' or 'marginal tax rate' is essential, briefly explain it.",
-        
+
         "\n--- Client's Situation & Goal ---",
         f"Your client is {scenario.age} years old.",
     ]
     if scenario.spouse:
         prompt_parts.append(f"Their spouse is {scenario.spouse.age} years old.")
-    
+
     goal_description = goal.value.replace('_', ' ')
     if goal == GoalEnum.MINIMIZE_TAX:
         goal_description = "minimize their lifetime income tax burden"
@@ -156,7 +159,7 @@ async def explain_strategy_with_context(
                 },
             )
             resp.raise_for_status() # Raises HTTPStatusError for 4xx/5xx responses
-            
+
             response_data = resp.json()
             if response_data.get("choices") and response_data["choices"][0].get("message"):
                 content = response_data["choices"][0]["message"].get("content", "")
