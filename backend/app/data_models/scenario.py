@@ -1,1 +1,229 @@
-# TODO: Implement Python module
+# app/data_models/scenario.py
+"""
+Pydantic data‑models used throughout the engine layer.
+
+• ScenarioInput           – user facts for a single projection
+• StrategyParamsInput     – optional overrides per strategy
+• SpouseInput             – extra data for spousal logic
+• SimulateRequest / CompareRequest – thin request wrappers for the API
+"""
+
+from __future__ import annotations
+
+from enum import Enum
+from typing import List, Optional
+from uuid import UUID, uuid4
+
+from pydantic import (
+    BaseModel,
+    Field,
+    conint,
+    confloat,
+    root_validator,
+)
+
+# --------------------------------------------------------------------------- #
+# Enumerations
+# --------------------------------------------------------------------------- #
+
+
+class GoalEnum(str, Enum):
+    MINIMIZE_TAX = "minimize_tax"
+    MAXIMIZE_SPENDING = "maximize_spending"
+    PRESERVE_ESTATE = "preserve_estate"
+    SIMPLIFY = "simplify"
+
+
+class ProvinceEnum(str, Enum):
+    ON = "ON"  # Ontario
+    # TODO: add QC, BC, AB … once tax tables are in place
+
+
+class StrategyCodeEnum(str, Enum):
+    BF = "BF"    # Bracket‑Filling
+    E65 = "E65"  # Early RRIF Conversion @65
+    CD = "CD"    # CPP / OAS Delay (RRSP bridge)
+    GM = "GM"    # Gradual Meltdown (default)
+    SEQ = "SEQ"  # Spousal Equalisation
+    IO = "IO"    # Interest‑Offset Loan
+    LS = "LS"    # Lump‑Sum Withdrawal
+    EBX = "EBX"  # Empty‑by‑X
+    MIN = "MIN"  # RRIF Minimums only (baseline)
+
+# --------------------------------------------------------------------------- #
+# Strategy‑specific knobs
+# --------------------------------------------------------------------------- #
+
+
+class StrategyParamsInput(BaseModel):
+    # --- Bracket‑Filling
+    bracket_fill_ceiling: Optional[confloat(gt=0)] = Field(
+        None, description="Taxable‑income ceiling for BF strategy."
+    )
+
+    # --- Early RRIF Conversion
+    rrif_conversion_age: Optional[conint(ge=55, le=71)] = Field(
+        65, description="Age to convert RRSP→RRIF (E65 strategy)."
+    )
+
+    # --- CPP/OAS Delay
+    cpp_start_age: Optional[conint(ge=60, le=70)] = Field(
+        65, description="Age CPP starts (CD strategy)."
+    )
+    oas_start_age: Optional[conint(ge=65, le=70)] = Field(
+        65, description="Age OAS starts (CD strategy)."
+    )
+
+    # --- Empty‑by‑X
+    target_depletion_age: Optional[conint(ge=70, le=120)] = Field(
+        None,
+        description="Age by which RRIF should be ~depleted (EBX strategy).",
+    )
+
+    # --- Lump‑Sum
+    lump_sum_year_offset: Optional[conint(ge=0)] = Field(
+        None,
+        description="Year offset (0 = first projection year) for LS strategy.",
+    )
+    lump_sum_amount: Optional[confloat(gt=0)] = Field(
+        None, description="One‑time withdrawal amount for LS strategy."
+    )
+
+    # --- Interest‑Offset
+    loan_interest_rate_pct: Optional[confloat(gt=0, lt=100)] = Field(
+        5.0, description="Annual deductible interest rate (%)."
+    )
+    loan_amount_as_pct_of_rrif: Optional[confloat(gt=0, le=100)] = Field(
+        20.0, description="Notional loan principal as % of RRIF balance."
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "bracket_fill_ceiling": 92_000,
+                "cpp_start_age": 70,
+                "oas_start_age": 70,
+                "target_depletion_age": 85,
+                "lump_sum_year_offset": 0,
+                "lump_sum_amount": 50_000,
+            }
+        }
+
+# --------------------------------------------------------------------------- #
+# Spouse model
+# --------------------------------------------------------------------------- #
+
+
+class SpouseInput(BaseModel):
+    age: conint(gt=0, lt=120)
+    rrsp_balance: confloat(ge=0)
+    other_income: confloat(ge=0) = 0.0
+    cpp_at_65: confloat(ge=0) = 0.0
+    oas_at_65: confloat(ge=0) = 0.0
+    tfsa_balance: confloat(ge=0) = 0.0
+    defined_benefit_pension: confloat(ge=0) = 0.0
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "age": 63,
+                "rrsp_balance": 250_000,
+                "other_income": 10_000,
+                "cpp_at_65": 9_000,
+                "oas_at_65": 7_000,
+                "tfsa_balance": 50_000,
+                "defined_benefit_pension": 0,
+            }
+        }
+
+# --------------------------------------------------------------------------- #
+# Core scenario input
+# --------------------------------------------------------------------------- #
+
+
+class ScenarioInput(BaseModel):
+    age: conint(gt=17, lt=120)
+    rrsp_balance: confloat(ge=0)
+    defined_benefit_pension: confloat(ge=0) = 0.0
+    cpp_at_65: confloat(ge=0)
+    oas_at_65: confloat(ge=0)
+    tfsa_balance: confloat(ge=0) = 0.0
+    desired_spending: confloat(gt=0)
+    expect_return_pct: confloat(ge=-20, le=30)
+    stddev_return_pct: confloat(ge=0, le=100)
+    life_expectancy_years: conint(gt=0, lt=70)
+    province: ProvinceEnum = ProvinceEnum.ON
+    goal: GoalEnum
+    spouse: Optional[SpouseInput] = None
+    # user‑supplied overrides – alias accepts "params" in JSON
+    strategy_params_override: Optional[StrategyParamsInput] = Field(
+        None,
+        alias="params",
+        description="Per‑strategy override knobs.",
+    )
+
+    # ----------------------- validators ------------------------------- #
+
+    @root_validator(skip_on_failure=True)
+    def _check_horizon_and_lump(cls, v):
+        if v["age"] + v["life_expectancy_years"] > 120:
+            raise ValueError("Projection exceeds age 120.")
+
+        sp = v.get("strategy_params_override")
+        if sp and sp.lump_sum_year_offset is not None:
+            if sp.lump_sum_year_offset > v["life_expectancy_years"]:
+                raise ValueError("lump_sum_year_offset beyond projection horizon.")
+        return v
+
+    # ----------------------- config ----------------------------------- #
+
+    class Config:
+        use_enum_values = True
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "age": 65,
+                "rrsp_balance": 500_000,
+                "defined_benefit_pension": 20_000,
+                "cpp_at_65": 12_000,
+                "oas_at_65": 8_000,
+                "tfsa_balance": 100_000,
+                "desired_spending": 60_000,
+                "expect_return_pct": 5,
+                "stddev_return_pct": 8,
+                "life_expectancy_years": 25,
+                "province": "ON",
+                "goal": "maximize_spending",
+                "spouse": {
+                    "age": 63,
+                    "rrsp_balance": 250_000,
+                    "other_income": 10_000,
+                    "cpp_at_65": 9_000,
+                    "oas_at_65": 7_000,
+                    "tfsa_balance": 50_000,
+                    "defined_benefit_pension": 0,
+                },
+                "params": {
+                    "bracket_fill_ceiling": 92_000,
+                    "cpp_start_age": 70,
+                    "oas_start_age": 70,
+                },
+            }
+        }
+
+# --------------------------------------------------------------------------- #
+# API request wrappers
+# --------------------------------------------------------------------------- #
+
+
+class SimulateRequest(BaseModel):
+    scenario: ScenarioInput
+    strategy_code: StrategyCodeEnum
+    request_id: UUID = Field(default_factory=uuid4)
+
+
+class CompareRequest(BaseModel):
+    scenario: ScenarioInput
+    strategies: List[StrategyCodeEnum]  # routing layer may accept ["auto"]
+    request_id: UUID = Field(default_factory=uuid4)
+

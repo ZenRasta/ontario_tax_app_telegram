@@ -13,7 +13,7 @@ python = "^3.9" # Or your preferred Python version
 fastapi = "^0.100.0"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
 pydantic = "^2.0.0" # Check compatibility if using older Pydantic features
-pydantic-settings = "^2.0.0"
+pydantic-settings = "^2.2"
 psycopg2-binary = "^2.9.6" # For PostgreSQL
 python-jose = {extras = ["cryptography"], version = "^3.3.0"} # For JWTs if needed
 passlib = {extras = ["bcrypt"], version = "^1.7.4"} # For password hashing if needed
@@ -22,6 +22,8 @@ numpy = "^1.25.0" # For Monte Carlo
 pandas = "^2.0.0" # For data manipulation in Monte Carlo
 openai = "^1.78.1"
 redis = "^6.1.0"
+sqlalchemy = {version = "^2.0", extras = ["asyncio"]}
+aiosqlite = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
