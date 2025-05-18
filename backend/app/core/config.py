@@ -29,22 +29,25 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ #
     API_PREFIX: str = Field(default="/api/v1", env="API_PREFIX")
     ALLOWED_CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000"], env="ALLOWED_CORS_ORIGINS"
+        default=["http://localhost:5173"], env="ALLOWED_CORS_ORIGINS"
     )
 
     @field_validator("ALLOWED_CORS_ORIGINS", mode="before")
     @classmethod
     def _parse_origins(cls, v):
-        """
-        Allow either JSON list or comma‑separated string in .env:
-        ALLOWED_CORS_ORIGINS='["https://a.com","https://b.com"]'
-        or
-        ALLOWED_CORS_ORIGINS=https://a.com,https://b.com
-        """
+        """Parse CORS origins from environment."""
+        if not v:
+            return ["http://localhost:5173"]
         if isinstance(v, str):
-            if v.strip().startswith("["):
+            v = v.strip()
+            if not v:
+                return ["http://localhost:5173"]
+            if v.startswith("["):
                 import json
-                return json.loads(v)
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
             return [o.strip() for o in v.split(",") if o.strip()]
         return v
 
@@ -89,5 +92,4 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-
 
