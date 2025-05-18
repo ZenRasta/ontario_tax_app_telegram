@@ -8,11 +8,17 @@ Pydantic models for representing simulation results, both yearly and summary.
 – SimulationResponse: Wrapper for /simulate endpoint response.
 – ComparisonResponseItem & CompareResponse: Wrappers for /compare endpoint response.
 """
-from __future__ import annotations # Ensures type hints are treated as strings at definition time
+from __future__ import (
+    annotations,  # Ensures type hints are treated as strings at definition time
+)
 
-from typing import List, Optional # Dict, Any removed as not strictly needed in this version
+from typing import (  # Dict, Any removed as not strictly needed in this version
+    List,
+    Optional,
+)
 from uuid import UUID
-from pydantic import BaseModel, Field, conint, confloat
+
+from pydantic import BaseModel, Field, confloat, conint
 
 # Import StrategyCodeEnum from scenario.py
 from app.data_models.scenario import StrategyCodeEnum
@@ -39,10 +45,6 @@ class TaxBreakdown(BaseModel):
         }
 
 
-class ComparisonResponseItem(BaseModel):
-    # ... existing fields ...
-    summary: Optional[SummaryMetrics] = None # Make summary optional
-    error_detail: Optional[str] = Field(default=None, description="Details if an error occurred for this strategy.")
 
 class IncomeSources(BaseModel):
     """Detailed breakdown of income sources in a given year."""
@@ -83,23 +85,23 @@ class YearlyResult(BaseModel):
 
     tax_breakdown: TaxBreakdown = Field(..., description="Detailed breakdown of taxes paid.")
     total_tax_paid: confloat(ge=0) = Field(..., description="Total income taxes paid (federal + provincial, including OAS clawback) (CAD).")
-    
+
     # Changed type to float as per feedback
     after_tax_income: float = Field(
         ...,
         description="Total income after all taxes (CAD). May be negative in rare edge cases."
     )
-    
+
     oas_net_received: confloat(ge=0) = Field(..., description="Net OAS benefit received (after recovery tax/clawback) (CAD).")
-    
+
     actual_spending: confloat(ge=0) = Field(..., description="Actual after-tax spending achieved in the year (CAD).")
-    
+
     end_rrif_balance: confloat(ge=0) = Field(..., description="RRSP/RRIF portfolio balance at the end of the year (CAD).")
     end_tfsa_balance: confloat(ge=0) = Field(..., description="TFSA balance at the end of the year (CAD).")
     end_non_reg_balance: confloat(ge=0) = Field(
         default=0.0, description="Non-registered investment account balance at the end of the year (CAD)."
     )
-    
+
     marginal_tax_rate: Optional[confloat(ge=0, le=100)] = Field(
         default=None, description="Effective marginal tax rate on the last dollar of RRIF withdrawal (%)."
     )
@@ -175,7 +177,7 @@ class SummaryMetrics(BaseModel):
     sequence_risk_score: Optional[confloat(ge=0)] = Field(
         default=None, description="Measure of sensitivity to poor market returns early in retirement (e.g., difference between median and 10th percentile terminal wealth)."
     )
-    
+
     # Strategy Characteristics
     strategy_complexity_score: conint(ge=1, le=5) = Field(
         ..., description="Subjective score of strategy complexity (1=simple, 5=complex)."
@@ -250,7 +252,7 @@ class SimulationResponse(BaseModel):
     """Response for the /simulate endpoint (single strategy)."""
     strategy_code: StrategyCodeEnum # Typed with imported enum
     strategy_name: str = Field(..., description="Full human-readable name of the strategy.")
-    
+
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )
@@ -274,7 +276,7 @@ class ComparisonResponseItem(BaseModel):
     """Represents the results for a single strategy within a /compare response."""
     strategy_code: StrategyCodeEnum # Typed with imported enum
     strategy_name: str = Field(..., description="Full human-readable name of the strategy.")
-    
+
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )

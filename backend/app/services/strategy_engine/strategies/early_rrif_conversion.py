@@ -4,7 +4,7 @@ Early RRIF Conversion  (code = E65)
 • Converts the entire RRSP balance to a RRIF in the calendar year the
   retiree reaches `params.rrif_conversion_age` (default 65).
 
-• Withdraws **only the CRA minimum** each year thereafter.  
+• Withdraws **only the CRA minimum** each year thereafter.
   That $2 000+ of eligible pension income unlocks both the federal and
   Ontario pension‑income credits at age 65 +.
 
@@ -26,8 +26,9 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
-from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
+
+from .base_strategy import BaseStrategy, EngineState, YearScratch
 
 # shared constants (kept in sync with other strategies)
 ASSUMED_INFLATION = Decimal("0.02")
