@@ -250,3 +250,14 @@ def eligible_pension_income(age: int, rrif_withdrawal: float, db_pension: float)
     """RRIF income qualifies for the credit at 65+."""
     return db_pension + (rrif_withdrawal if age >= 65 else 0.0)
 
+
+# --------------------------------------------------------------------------- #
+# Backwards-compatibility wrapper
+# --------------------------------------------------------------------------- #
+
+def get_eligible_pension_income_for_credit(
+    rrif_withdrawal: float, db_pension_income: float, age: int
+) -> float:
+    """Return pension income eligible for the federal/Ontario credit."""
+    return eligible_pension_income(age, rrif_withdrawal, db_pension_income)
+
