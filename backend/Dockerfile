@@ -1,5 +1,5 @@
 # Stage 1: Build the application with Poetry
-FROM python:3.9-slim as builder
+FROM python:3.10-slim as builder
 
 WORKDIR /app
 
@@ -15,12 +15,12 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry config virtualenvs.create false && poetry install --no-root --no-dev --no-interaction --no-ansi
 
 # Stage 2: Create the runtime image
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
 # Copy installed dependencies from builder stage
-COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy the application code

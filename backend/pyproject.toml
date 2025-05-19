@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9" # Or your preferred Python version
+python = "^3.10" # Or your preferred Python version
 fastapi = "^0.100.0"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
 pydantic = "^2.0.0" # Check compatibility if using older Pydantic features
