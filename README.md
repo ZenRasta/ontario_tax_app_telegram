@@ -8,7 +8,7 @@ This repository contains two main components:
 ## Requirements
 
 - Python 3.9+
-- Node.js 18+
+ - Node.js 18.18+ or 20.9+
 
 ## Setup
 
@@ -27,6 +27,8 @@ npm install
 # ensure the dev dependency is pinned to a React 18 compatible version:
 #
 #   npm install --save-dev @types/react-dom@18.0.11
+# If npm prints "Unsupported engine" warnings, upgrade Node to
+# a compatible version (Node.js 18.18+ or 20.9+).
 ```
 
 ## Running in Development
