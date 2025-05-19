@@ -35,3 +35,8 @@ npm run dev
 ```
 The app will be served by Vite (typically on `http://localhost:5173`).
 
+## Tax Data
+
+Year-specific tax constants live under `tax/<year>.yaml`. Older years are kept
+in `backend/data/tax_years.yml` for reference.
+

@@ -3,8 +3,9 @@
 Core Canadian tax helpers: RRIF minimums, OAS clawback, CPP/OAS deferral
 adjustments, federal + Ontario tax (including surtax) and related credits.
 
-The module expects a dict loaded from `data/tax_years.yml`
-to be passed in (or imported via a loader) as `TaxYearData`.
+The module expects a dict loaded from `tax/<year>.yaml` or from the
+legacy `data/tax_years.yml` file to be passed in (or imported via a loader) as
+`TaxYearData`.
 """
 
 from __future__ import annotations
