@@ -147,7 +147,7 @@ def create_project_structure(base_dir_name):
                         "readme = \"README.md\"\n"
                         "\n"
                         "[tool.poetry.dependencies]\n"
-                        "python = \"^3.9\" # Or your preferred Python version\n"
+                        "python = \"^3.10\" # Or your preferred Python version\n"
                         "fastapi = \"^0.100.0\"\n"
                         "uvicorn = {extras = [\"standard\"], version = \"^0.23.2\"}\n"
                         "pydantic = \"^2.0.0\" # Check compatibility if using older Pydantic features\n"
@@ -189,7 +189,7 @@ def create_project_structure(base_dir_name):
                 elif file_rel_path_str == "Dockerfile":
                     f.write(
                         "# Stage 1: Build the application with Poetry\n"
-                        "FROM python:3.9-slim as builder\n\n"
+                        "FROM python:3.10-slim as builder\n\n"
                         "WORKDIR /app\n\n"
                         "# Install poetry\n"
                         "RUN pip install poetry\n\n"
@@ -200,10 +200,10 @@ def create_project_structure(base_dir_name):
                         "# --no-dev: don't install dev dependencies\n"
                         "RUN poetry config virtualenvs.create false && poetry install --no-root --no-dev --no-interaction --no-ansi\n\n"
                         "# Stage 2: Create the runtime image\n"
-                        "FROM python:3.9-slim\n\n"
+                        "FROM python:3.10-slim\n\n"
                         "WORKDIR /app\n\n"
                         "# Copy installed dependencies from builder stage\n"
-                        "COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages\n"
+                        "COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages\n"
                         "COPY --from=builder /usr/local/bin /usr/local/bin\n\n"
                         "# Copy the application code\n"
                         "COPY ./app /app/app\n"
@@ -252,7 +252,7 @@ def create_project_structure(base_dir_name):
     print(f"\nProject '{base_path.name}' structure created successfully in '{base_path.parent.resolve()}'!")
     print("Next steps suggestion:")
     print("1. Review the generated files, especially pyproject.toml, Dockerfile, and .env.example.")
-    print(f"2. Navigate into the project: `cd {base_path_name}`")
+    print(f"2. Navigate into the project: `cd {base_path.name}`")
     print("3. Initialize Git: `git init && git add . && git commit -m \"Initial project structure\"`")
     print("4. If using Poetry: `poetry install` (to install dependencies and create .lock file)")
     print("5. If using PDM: `pdm install`")

@@ -30,6 +30,7 @@ from app.data_models.results import (
 from app.data_models.scenario import (
     CompareRequest,
     GoalEnum,
+
     ScenarioInput,
     SimulateRequest,
     StrategyCodeEnum,
@@ -136,6 +137,11 @@ def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenari
 async def simulate(req: SimulateRequest):
     logger.info("simulate request_id=%s strategy=%s", req.request_id, req.strategy_code)
 
+    if req.scenario is None:
+        raise HTTPException(status_code=422, detail="scenario is required")
+    if req.strategy_code is None:
+        raise HTTPException(status_code=422, detail="strategy_code is required")
+
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)
     yearly, summary = engine.run(req.scenario, req.strategy_code, params)
@@ -152,6 +158,11 @@ async def simulate(req: SimulateRequest):
 @router.post("/compare", response_model=CompareApiResponse, tags=["Simulation"])
 async def compare(req: CompareRequest):
     logger.info("compare request_id=%s", req.request_id)
+
+    if req.scenario is None:
+        raise HTTPException(status_code=422, detail="scenario is required")
+    if req.strategies is None:
+        raise HTTPException(status_code=422, detail="strategies list is required")
 
     # decide which strategies to run
     if req.strategies == ["auto"]:
@@ -208,6 +219,11 @@ async def simulate_mc(req: SimulateRequest):
     }
     """
     logger.info("simulate_mc request_id=%s strategy=%s", req.request_id, req.strategy_code)
+
+    if req.scenario is None:
+        raise HTTPException(status_code=422, detail="scenario is required")
+    if req.strategy_code is None:
+        raise HTTPException(status_code=422, detail="strategy_code is required")
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)

@@ -25,7 +25,9 @@ import yaml
 
 from app.services.strategy_engine.tax_rules import TaxYearData
 
-DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "tax_years.yml"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DATA_PATH = REPO_ROOT / "backend" / "data" / "tax_years.yml"
+YEAR_DIR = REPO_ROOT / "tax"
 
 
 # --------------------------------------------------------------------------- #
@@ -49,7 +51,7 @@ def _normalise_year_block(block: dict) -> Dict[str, TaxYearData]:
 
 
 def _load_yaml() -> Dict[int, Dict[str, TaxYearData]]:
-    """Parse YAML file into {year:int → {prov:str → TaxYearData}}."""
+    """Parse fallback YAML file into {year:int → {prov:str → TaxYearData}}."""
     if not DATA_PATH.exists():
         raise FileNotFoundError(f"tax_years.yml not found at {DATA_PATH}")
 
@@ -60,6 +62,23 @@ def _load_yaml() -> Dict[int, Dict[str, TaxYearData]]:
     for yr_str, block in raw.items():
         out[int(yr_str)] = _normalise_year_block(block)
     return out
+
+
+def _load_single_year(year: int) -> Dict[str, TaxYearData] | None:
+    """Load a single-year YAML if present."""
+    path = YEAR_DIR / f"{year}.yaml"
+    if not path.exists():
+        return None
+
+    with path.open(encoding="utf-8") as fh:
+        raw: Dict[str, Any] = yaml.safe_load(fh) or {}
+
+    if str(year) in raw:
+        block = raw[str(year)]
+    else:
+        block = raw
+
+    return _normalise_year_block(block)
 
 
 @lru_cache(maxsize=1)
@@ -77,14 +96,18 @@ def load_tax_year_data(year: int, province: str = "ON") -> TaxYearData:
 
     Rolls back to the closest earlier year present in the file.
     """
-    table = _data_cache()
+    year_block = _load_single_year(year)
+    chosen_year = year
 
-    available_years = [y for y in table if y <= year]
-    if not available_years:
-        raise KeyError(f"No tax table available for years ≤ {year}")
+    if year_block is None:
+        table = _data_cache()
 
-    chosen_year = max(available_years)
-    year_block = table[chosen_year]
+        available_years = [y for y in table if y <= year]
+        if not available_years:
+            raise KeyError(f"No tax table available for years ≤ {year}")
+
+        chosen_year = max(available_years)
+        year_block = table[chosen_year]
 
     try:
         return year_block[province]

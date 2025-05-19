@@ -3,8 +3,9 @@
 Core Canadian tax helpers: RRIF minimums, OAS clawback, CPP/OAS deferral
 adjustments, federal + Ontario tax (including surtax) and related credits.
 
-The module expects a dict loaded from `data/tax_years.yml`
-to be passed in (or imported via a loader) as `TaxYearData`.
+The module expects a dict loaded from `tax/<year>.yaml` or from the
+legacy `data/tax_years.yml` file to be passed in (or imported via a loader) as
+`TaxYearData`.
 """
 
 from __future__ import annotations
@@ -170,6 +171,23 @@ def _federal_credits(income: float, age: int, pension_inc: float, td: TaxYearDat
         else:
             frac = (income - start) / (end - start)
             credit_base = credit_base - frac * (credit_base - min_pa)
+
+    # Basic personal amount phase‑out for high income earners
+    phase_start = td.get("federal_bpa_phaseout_start")
+    phase_end = td.get("federal_bpa_phaseout_end")
+    personal_min = td.get("federal_personal_amount_low")
+    if (
+        phase_start is not None
+        and phase_end is not None
+        and personal_min is not None
+        and income > phase_start
+    ):
+        if income >= phase_end:
+            credit_base = personal_min
+        else:
+            frac = (income - phase_start) / (phase_end - phase_start)
+            reduction = (td["federal_personal_amount"] - personal_min) * frac
+            credit_base = td["federal_personal_amount"] - reduction
 
     if age >= 65:
         reduction = max(0.0, (income - td["federal_age_amount_threshold"]) * 0.15)
