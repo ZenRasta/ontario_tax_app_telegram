@@ -23,6 +23,10 @@ poetry install
 ```bash
 cd frontend
 npm install
+# If you encounter peer dependency errors for `@types/react-dom`,
+# ensure the dev dependency is pinned to a React 18 compatible version:
+#
+#   npm install --save-dev @types/react-dom@18.0.11
 ```
 
 ## Running in Development
