@@ -4,6 +4,17 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import SimulationForm from './components/SimulationForm'
 import './App.css'
+
+import { Tooltip } from 'react-tooltip'
+import 'react-tooltip/dist/react-tooltip.css'
+
+function App() {
+  const [apiStatus, setApiStatus] = useState<string | null>(null);
+  const [results] = useState([
+    { year: 2024, rrsp: 10000, tfsa: 6000, oasClawback: 0 },
+    { year: 2025, rrsp: 10500, tfsa: 7000, oasClawback: 50 },
+  ]);
+=======
 import type { StrategyParamsInput, ScenarioInput, SimulateRequest } from './types'
 
 const BASE_SCENARIO: ScenarioInput = {
@@ -41,6 +52,7 @@ function App() {
   useEffect(() => {
     reset(paramsState)
   }, [paramsState, reset])
+
 
   const checkHealth = async () => {
     try {
@@ -82,6 +94,47 @@ function App() {
       >
         Check API Health
       </button>
+
+      {apiStatus && (
+        <p className="mt-4">API status: {apiStatus}</p>
+      )}
+      <table className="mt-8 border-collapse border text-left">
+        <thead>
+          <tr>
+            <th className="border px-4 py-2">Year</th>
+            <th className="border px-4 py-2">RRSP Balance</th>
+            <th className="border px-4 py-2">TFSA Balance</th>
+            <th className="border px-4 py-2">
+              <div className="flex items-center">
+                OAS Clawback
+                <span
+                  className="ml-1 text-sm text-blue-600 cursor-pointer"
+                  data-tooltip-id="oas-info"
+                  data-tooltip-content="Old Age Security payments are reduced by 15% of net income over the threshold."
+                  aria-label="Explanation of OAS clawback calculation"
+                  aria-describedby="oas-info"
+                  role="button"
+                  tabIndex={0}
+                >
+                  ℹ️
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map((row) => (
+            <tr key={row.year}>
+              <td className="border px-4 py-2">{row.year}</td>
+              <td className="border px-4 py-2">{row.rrsp}</td>
+              <td className="border px-4 py-2">{row.tfsa}</td>
+              <td className="border px-4 py-2">{row.oasClawback}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Tooltip id="oas-info" place="top" />
+=======
       {apiStatus && <p className="mt-2">API status: {apiStatus}</p>}
 
       <form
@@ -188,6 +241,7 @@ function App() {
       <div className="w-full max-w-2xl mt-6">
         <SimulationForm />
       </div>
+
     </div>
   )
 }
