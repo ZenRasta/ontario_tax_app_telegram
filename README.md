@@ -2,7 +2,7 @@
 
 This repository contains two main components:
 
-- **backend/** – a FastAPI application managed with [Poetry](https://python-poetry.org/).
+- **backend/** – a FastAPI application managed with [Poetry](https://python-poetry.org/). Requires Python 3.9 or newer (see `pyproject.toml` for the exact version range).
 - **frontend/** – a React application using Vite and TypeScript.
 
 ## Setup
