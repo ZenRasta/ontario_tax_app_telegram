@@ -35,20 +35,5 @@ npm run dev
 ```
 The app will be served by Vite (typically on `http://localhost:5173`).
 
-## 2025 Tax Assumptions
 
-Tax calculations rely on indexed figures for the 2025 calendar year. Key
-constants include the basic personal amounts, Ontario surtax brackets and the
-Old Age Security (OAS) clawback threshold of `$93\,454`.
-
-## Strategy-Specific Inputs
-
-Each withdrawal method exposes optional parameters. Omitting them triggers
-default behaviours. Notable examples:
-
-- **Bracket Filling** – ceiling defaults to the OAS clawback threshold when not
-  provided.
-- **CPP/OAS Delay** – missing start ages are set to 70.
-- **Interest Offset** – interest rate and loan percent default to 5 % and
-  20 %, respectively.
 
