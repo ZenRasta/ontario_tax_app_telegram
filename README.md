@@ -13,6 +13,7 @@ This repository contains two main components:
 ## Setup
 
 ### Backend
+Requires **Python 3.10** or later.
 ```bash
 cd backend
 poetry install
