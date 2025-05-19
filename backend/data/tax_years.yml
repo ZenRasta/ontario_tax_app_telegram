@@ -11,16 +11,19 @@
   # --------------------------------------------------------------------------
   # Federal personal taxes
   # --------------------------------------------------------------------------
-  federal_personal_amount: 15705
+  federal_personal_amount: 15978
+  federal_personal_amount_min: 14156
+  federal_personal_amount_phaseout_start: 173205
+  federal_personal_amount_phaseout_end: 246752
   federal_age_amount: 8396
   federal_age_amount_threshold: 43179
   federal_pension_income_credit_max: 2000
 
-  # 2025 federal brackets (indexed 4.7 % over 2024)
+  # 2025 federal brackets
   federal_tax_brackets:
-    - {upto:  58579, rate: 0.1500}
-    - {upto: 117158, rate: 0.2050}
-    - {upto: 172620, rate: 0.2600}
+    - {upto:  55868, rate: 0.1500}
+    - {upto: 111733, rate: 0.2050}
+    - {upto: 173205, rate: 0.2600}
     - {upto: 246752, rate: 0.2900}
     - {upto: null,   rate: 0.3300}
 
@@ -92,7 +95,7 @@
   # --------------------------------------------------------------------------
   # Ontario personal taxes
   # --------------------------------------------------------------------------
-  ontario_personal_amount: 11865
+  ontario_personal_amount: 12122
   ontario_age_amount: 5750
   ontario_age_amount_threshold: 43179
   ontario_pension_income_credit_max: 1500
@@ -104,9 +107,9 @@
     - {upto: 220000, rate: 0.1216}
     - {upto: null,   rate: 0.1316}
 
-  ontario_surtax_threshold_1: 5554
+  ontario_surtax_threshold_1: 5315
   ontario_surtax_rate_1:      0.20
-  ontario_surtax_threshold_2: 7108
+  ontario_surtax_threshold_2: 6802
   ontario_surtax_rate_2:      0.36
 
 ###############################################################################
