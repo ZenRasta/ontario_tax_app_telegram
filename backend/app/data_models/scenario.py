@@ -20,6 +20,7 @@ from pydantic import (
     Field,
     conint,
     condecimal,
+    confloat,
     root_validator,
 )
 
@@ -56,6 +57,29 @@ class StrategyCodeEnum(str, Enum):
 # --------------------------------------------------------------------------- #
 # Strategy‑specific knobs
 # --------------------------------------------------------------------------- #
+
+
+class SpouseInput(BaseModel):
+    age: conint(gt=0, lt=120)
+    rrsp_balance: confloat(ge=0)
+    other_income: confloat(ge=0) = 0.0
+    cpp_at_65: confloat(ge=0) = 0.0
+    oas_at_65: confloat(ge=0) = 0.0
+    tfsa_balance: confloat(ge=0) = 0.0
+    defined_benefit_pension: confloat(ge=0) = 0.0
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "age": 63,
+                "rrsp_balance": 250_000,
+                "other_income": 10_000,
+                "cpp_at_65": 9_000,
+                "oas_at_65": 7_000,
+                "tfsa_balance": 50_000,
+                "defined_benefit_pension": 0,
+            }
+        }
 
 
 class StrategyParamsInput(BaseModel):
@@ -116,33 +140,6 @@ class StrategyParamsInput(BaseModel):
                 "lump_sum_year_offset": 0,
                 "lump_sum_amount": 50_000,
                 "spouse": SpouseInput.Config.json_schema_extra["example"],
-            }
-        }
-
-# --------------------------------------------------------------------------- #
-# Spouse model
-# --------------------------------------------------------------------------- #
-
-
-class SpouseInput(BaseModel):
-    age: conint(gt=0, lt=120)
-    rrsp_balance: confloat(ge=0)
-    other_income: confloat(ge=0) = 0.0
-    cpp_at_65: confloat(ge=0) = 0.0
-    oas_at_65: confloat(ge=0) = 0.0
-    tfsa_balance: confloat(ge=0) = 0.0
-    defined_benefit_pension: confloat(ge=0) = 0.0
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "age": 63,
-                "rrsp_balance": 250_000,
-                "other_income": 10_000,
-                "cpp_at_65": 9_000,
-                "oas_at_65": 7_000,
-                "tfsa_balance": 50_000,
-                "defined_benefit_pension": 0,
             }
         }
 
