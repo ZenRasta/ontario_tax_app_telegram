@@ -16,24 +16,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 
 from app.core.config import settings
-from app.db.session_manager import create_db_and_tables
-from app.data_models.scenario import (
-    SimulateRequest,
-    CompareRequest,
-    StrategyParamsInput,
-    ScenarioInput,
-    GoalEnum,
-    StrategyCodeEnum,
+from app.data_models.results import (
+    CompareResponse as CompareApiResponse,
 )
 from app.data_models.results import (
-    SimulationResponse as SimulationApiResponse,
-    CompareResponse as CompareApiResponse,
     ComparisonResponseItem,
     MonteCarloPath,
     SummaryMetrics,
 )
-from app.services.strategy_engine.engine import StrategyEngine, _STRATEGY_REGISTRY
+from app.data_models.results import (
+    SimulationResponse as SimulationApiResponse,
+)
+from app.data_models.scenario import (
+    CompareRequest,
+    GoalEnum,
+    ScenarioInput,
+    SimulateRequest,
+    StrategyCodeEnum,
+    StrategyParamsInput,
+)
+from app.db.session_manager import create_db_and_tables
 from app.services.monte_carlo_service import MonteCarloService
+from app.services.strategy_engine.engine import _STRATEGY_REGISTRY, StrategyEngine
 from app.utils.year_data_loader import load_tax_year_data
 
 # ------------------------------------------------------------------ #
@@ -91,15 +95,14 @@ def _strategy_display(code: StrategyCodeEnum) -> str:
 
 def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
     """Very simple goal ➜ strategies mapping."""
-    match goal:
-        case GoalEnum.MINIMIZE_TAX:
-            return [StrategyCodeEnum.BF, StrategyCodeEnum.SEQ, StrategyCodeEnum.GM]
-        case GoalEnum.MAXIMIZE_SPENDING:
-            return [StrategyCodeEnum.CD, StrategyCodeEnum.GM, StrategyCodeEnum.LS]
-        case GoalEnum.PRESERVE_ESTATE:
-            return [StrategyCodeEnum.EBX, StrategyCodeEnum.LS, StrategyCodeEnum.SEQ]
-        case GoalEnum.SIMPLIFY:
-            return [StrategyCodeEnum.MIN, StrategyCodeEnum.GM]
+    if goal == GoalEnum.MINIMIZE_TAX:
+        return [StrategyCodeEnum.BF, StrategyCodeEnum.SEQ, StrategyCodeEnum.GM]
+    elif goal == GoalEnum.MAXIMIZE_SPENDING:
+        return [StrategyCodeEnum.CD, StrategyCodeEnum.GM, StrategyCodeEnum.LS]
+    elif goal == GoalEnum.PRESERVE_ESTATE:
+        return [StrategyCodeEnum.EBX, StrategyCodeEnum.LS, StrategyCodeEnum.SEQ]
+    elif goal == GoalEnum.SIMPLIFY:
+        return [StrategyCodeEnum.MIN, StrategyCodeEnum.GM]
     return [StrategyCodeEnum.GM]
 
 # ------------------------------------------------------------------ #
