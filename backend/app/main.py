@@ -21,6 +21,7 @@ from app.data_models.scenario import (
     SimulateRequest,
     CompareRequest,
     StrategyParamsInput,
+    ScenarioInput,
     GoalEnum,
     StrategyCodeEnum,
 )
@@ -106,12 +107,34 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
 # ------------------------------------------------------------------ #
 router = APIRouter()
 
+
+def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenario: ScenarioInput) -> None:
+    if code == StrategyCodeEnum.BF and params.bracket_fill_ceiling is None:
+        raise HTTPException(422, "bracket_fill_ceiling required for BF strategy")
+    if code == StrategyCodeEnum.LS and (
+        params.lump_sum_amount is None or params.lump_sum_year_offset is None
+    ):
+        raise HTTPException(422, "lump_sum_amount and lump_sum_year_offset required for LS strategy")
+    if code == StrategyCodeEnum.EBX and params.target_depletion_age is None:
+        raise HTTPException(422, "target_depletion_age required for EBX strategy")
+    if code == StrategyCodeEnum.CD and (
+        params.cpp_start_age is None or params.oas_start_age is None
+    ):
+        raise HTTPException(422, "cpp_start_age and oas_start_age required for CD strategy")
+    if code == StrategyCodeEnum.IO and (
+        params.loan_interest_rate_pct is None or params.loan_amount_as_pct_of_rrif is None
+    ):
+        raise HTTPException(422, "loan_interest_rate_pct and loan_amount_as_pct_of_rrif required for IO strategy")
+    if code == StrategyCodeEnum.SEQ and not (scenario.spouse or params.spouse):
+        raise HTTPException(422, "spouse info required for SEQ strategy")
+
 # ---------- deterministic simulation --------------------------------
 @router.post("/simulate", response_model=SimulationApiResponse, tags=["Simulation"])
 async def simulate(req: SimulateRequest):
     logger.info("simulate request_id=%s strategy=%s", req.request_id, req.strategy_code)
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
+    _require_params(req.strategy_code, params, req.scenario)
     yearly, summary = engine.run(req.scenario, req.strategy_code, params)
 
     return SimulationApiResponse(
@@ -140,6 +163,7 @@ async def compare(req: CompareRequest):
 
     for code in codes:
         try:
+            _require_params(code, params, req.scenario)
             yearly, summary = engine.run(req.scenario, code, params)
             items.append(
                 ComparisonResponseItem(
@@ -183,6 +207,7 @@ async def simulate_mc(req: SimulateRequest):
     logger.info("simulate_mc request_id=%s strategy=%s", req.request_id, req.strategy_code)
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
+    _require_params(req.strategy_code, params, req.scenario)
 
     paths: List[MonteCarloPath]
     mc_summary: SummaryMetrics

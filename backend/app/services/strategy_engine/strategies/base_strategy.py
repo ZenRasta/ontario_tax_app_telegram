@@ -57,6 +57,12 @@ class BaseStrategy(ABC):
         self.params = params
         self._tax_loader = tax_loader
         self.start_year = _dt.datetime.now().year  # e.g., 2025
+        self.validate_params()
+
+    # -------------------------------------------------------------- #
+    def validate_params(self) -> None:
+        """Hook for subclasses to enforce required parameters."""
+        return
 
     # ================================================================== #
     # abstract hook every concrete strategy must implement

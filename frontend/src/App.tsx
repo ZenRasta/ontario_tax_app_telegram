@@ -1,5 +1,8 @@
+
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import SimulationForm from './components/SimulationForm'
 import './App.css'
 import type { StrategyParamsInput, ScenarioInput, SimulateRequest } from './types'
 
@@ -181,6 +184,10 @@ function App() {
       <pre className="mt-4 w-full max-w-md bg-gray-100 p-2 text-left overflow-x-auto text-xs">
         {JSON.stringify(paramsState, null, 2)}
       </pre>
+      {apiStatus && <p className="mt-4">API status: {apiStatus}</p>}
+      <div className="w-full max-w-2xl mt-6">
+        <SimulationForm />
+      </div>
     </div>
   )
 }

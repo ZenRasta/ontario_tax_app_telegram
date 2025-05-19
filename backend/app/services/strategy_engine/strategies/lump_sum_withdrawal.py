@@ -31,15 +31,24 @@ class LumpSumWithdrawalStrategy(BaseStrategy):
     complexity = 2
 
     # alias for backward compatibility / tests
-    pass
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure lump-sum parameters provided."""
+        if (
+            self.params.lump_sum_amount is None
+            or self.params.lump_sum_year_offset is None
+        ):
+            raise ValueError(
+                "lump_sum_amount and lump_sum_year_offset required for Lump-Sum strategy"
+            )
 
 
 # Keep the implementation outside the class body, then mix in
 def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> None:
     yr = state.start_year + idx
     age = self.scenario.age + idx
+    spouse = self.params.spouse or self.scenario.spouse
     spouse_age_this_year: Optional[int] = (
-        self.scenario.spouse.age + idx if self.scenario.spouse else None
+        spouse.age + idx if spouse else None
     )
     td = self.tax_data(yr)
 
@@ -56,8 +65,11 @@ def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> 
     taxable_nonreg_income = non_reg_growth * TAXABLE_PORTION_NONREG_GROWTH
 
     # -------------- CRA minimum withdrawal ------------------------ #
+    rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
     min_rrif = Decimal(
-        str(tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), age))
+        str(
+            tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), rrif_age)
+        )
     )
 
     # -------------- Binary‑search withdrawal to hit spend target --- #

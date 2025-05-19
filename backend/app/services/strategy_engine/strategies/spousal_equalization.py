@@ -43,9 +43,15 @@ class SpousalEqualizationStrategy(BaseStrategy):
     code = StrategyCodeEnum.SEQ
     complexity = 3
 
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure spouse data provided."""
+        if not (self.scenario.spouse or self.params.spouse):
+            raise ValueError("spouse information required for Spousal Equalization strategy")
+
     # ------------------------------------------------------------------ #
     def run_year(self, idx: int, state: EngineState) -> None:
-        if not self.scenario.spouse:
+        spouse = self.params.spouse or self.scenario.spouse
+        if not spouse:
             # No spouse data → fall back to Gradual Meltdown goal‑seek behaviour
             from app.services.strategy_engine.strategies.gradual_meltdown import (
                 GradualMeltdownStrategy,
@@ -61,7 +67,7 @@ class SpousalEqualizationStrategy(BaseStrategy):
         # ----------------------------------------------------------------
         Yr = state.start_year + idx
         age_p = self.scenario.age + idx
-        sp = self.scenario.spouse
+        sp = spouse
         age_s = sp.age + idx
         td = self.tax_data(Yr)
 
