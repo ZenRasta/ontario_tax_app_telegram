@@ -1,20 +1,12 @@
 
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
 import SimulationForm from './components/SimulationForm'
 import './App.css'
 
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
 
-function App() {
-  const [apiStatus, setApiStatus] = useState<string | null>(null);
-  const [results] = useState([
-    { year: 2024, rrsp: 10000, tfsa: 6000, oasClawback: 0 },
-    { year: 2025, rrsp: 10500, tfsa: 7000, oasClawback: 50 },
-  ]);
-=======
 import type { StrategyParamsInput, ScenarioInput, SimulateRequest } from './types'
 
 const BASE_SCENARIO: ScenarioInput = {
@@ -43,6 +35,10 @@ const BASE_SCENARIO: ScenarioInput = {
 
 function App() {
   const [apiStatus, setApiStatus] = useState<string | null>(null)
+  const [results] = useState([
+    { year: 2024, rrsp: 10000, tfsa: 6000, oasClawback: 0 },
+    { year: 2025, rrsp: 10500, tfsa: 7000, oasClawback: 50 },
+  ])
   const [paramsState, setParamsState] = useState<StrategyParamsInput>({})
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<StrategyParamsInput>({
@@ -134,7 +130,6 @@ function App() {
         </tbody>
       </table>
       <Tooltip id="oas-info" place="top" />
-=======
       {apiStatus && <p className="mt-2">API status: {apiStatus}</p>}
 
       <form
