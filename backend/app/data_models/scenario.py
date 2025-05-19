@@ -19,6 +19,7 @@ from pydantic import (
     Field,
     conint,
     confloat,
+    condecimal,
     root_validator,
 )
 
@@ -57,7 +58,7 @@ class StrategyCodeEnum(str, Enum):
 
 class StrategyParamsInput(BaseModel):
     # --- Bracket‑Filling
-    bracket_fill_ceiling: Optional[confloat(gt=0)] = Field(
+    bracket_fill_ceiling: Optional[condecimal(gt=0)] = Field(
         None, description="Taxable‑income ceiling for BF strategy."
     )
 
@@ -85,7 +86,7 @@ class StrategyParamsInput(BaseModel):
         None,
         description="Year offset (0 = first projection year) for LS strategy.",
     )
-    lump_sum_amount: Optional[confloat(gt=0)] = Field(
+    lump_sum_amount: Optional[condecimal(gt=0)] = Field(
         None, description="One‑time withdrawal amount for LS strategy."
     )
 
@@ -97,6 +98,12 @@ class StrategyParamsInput(BaseModel):
         20.0, description="Notional loan principal as % of RRIF balance."
     )
 
+    # --- Spousal override ---
+    spouse: Optional["SpouseInput"] = Field(
+        None,
+        description="Override spouse info for strategy calculations.",
+    )
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -106,6 +113,7 @@ class StrategyParamsInput(BaseModel):
                 "target_depletion_age": 85,
                 "lump_sum_year_offset": 0,
                 "lump_sum_amount": 50_000,
+                "spouse": SpouseInput.Config.json_schema_extra["example"],
             }
         }
 
@@ -173,6 +181,9 @@ class ScenarioInput(BaseModel):
         if sp and sp.lump_sum_year_offset is not None:
             if sp.lump_sum_year_offset > v["life_expectancy_years"]:
                 raise ValueError("lump_sum_year_offset beyond projection horizon.")
+        if sp and sp.target_depletion_age is not None:
+            if sp.target_depletion_age < v["age"]:
+                raise ValueError("target_depletion_age cannot be less than current age.")
         return v
 
     # ----------------------- config ----------------------------------- #
