@@ -10,6 +10,7 @@ Pydantic data‑models used throughout the engine layer.
 
 from __future__ import annotations
 
+import datetime as _dt
 from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -17,10 +18,12 @@ from uuid import UUID, uuid4
 from pydantic import (
     BaseModel,
     Field,
-    conint,
     confloat,
+    conint,
     root_validator,
 )
+
+from app.utils.year_data_loader import load_tax_year_data
 
 # --------------------------------------------------------------------------- #
 # Enumerations
@@ -221,9 +224,47 @@ class SimulateRequest(BaseModel):
     strategy_code: StrategyCodeEnum
     request_id: UUID = Field(default_factory=uuid4)
 
+    # ------------------------------------------------------------------
+    @root_validator(skip_on_failure=True)
+    def _apply_strategy_defaults(cls, v):
+        sc: ScenarioInput = v["scenario"]
+        code: StrategyCodeEnum = v["strategy_code"]
+        params = sc.strategy_params_override or StrategyParamsInput()
+        sc.strategy_params_override = params
+
+        td = load_tax_year_data(_dt.datetime.now().year, sc.province)
+
+        if code == StrategyCodeEnum.BF:
+            if params.bracket_fill_ceiling is None:
+                params.bracket_fill_ceiling = td["oas_clawback_threshold"]
+
+        if code == StrategyCodeEnum.LS:
+            if params.lump_sum_amount is None:
+                raise ValueError("lump_sum_amount required for LS strategy")
+
+        if code == StrategyCodeEnum.CD:
+            if params.cpp_start_age is None:
+                params.cpp_start_age = 70
+            if params.oas_start_age is None:
+                params.oas_start_age = 70
+
+        if code == StrategyCodeEnum.SEQ:
+            if sc.spouse is None:
+                raise ValueError("Spousal strategy requires spouse data")
+
+        v["scenario"] = sc
+        return v
+
 
 class CompareRequest(BaseModel):
     scenario: ScenarioInput
     strategies: List[StrategyCodeEnum]  # routing layer may accept ["auto"]
     request_id: UUID = Field(default_factory=uuid4)
+
+    # ------------------------------------------------------------------
+    @root_validator(skip_on_failure=True)
+    def _apply_defaults_all(cls, v):
+        for code in v["strategies"]:
+            SimulateRequest(scenario=v["scenario"], strategy_code=code)
+        return v
 
