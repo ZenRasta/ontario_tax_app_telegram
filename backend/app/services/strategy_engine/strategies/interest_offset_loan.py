@@ -27,11 +27,22 @@ class InterestOffsetStrategy(BaseStrategy):
     display_name = "Interest‑Offset Meltdown"
     complexity = 4
 
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure loan parameters provided."""
+        if (
+            self.params.loan_interest_rate_pct is None
+            or self.params.loan_amount_as_pct_of_rrif is None
+        ):
+            raise ValueError(
+                "loan_interest_rate_pct and loan_amount_as_pct_of_rrif required for Interest-Offset strategy"
+            )
+
     def run_year(self, idx: int, state: EngineState) -> None:
         yr = state.start_year + idx
         age = self.scenario.age + idx
+        spouse = self.params.spouse or self.scenario.spouse
         spouse_age_this_year: Optional[int] = (
-            self.scenario.spouse.age + idx if self.scenario.spouse else None
+            spouse.age + idx if spouse else None
         )
 
         td = self.tax_data(yr)
@@ -52,8 +63,11 @@ class InterestOffsetStrategy(BaseStrategy):
         taxable_nonreg_income = non_reg_growth * TAXABLE_PORTION_NONREG_GROWTH
 
         # ---------- CRA minimum withdrawal ------------------------- #
+        rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
         min_rrif = Decimal(
-            str(tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), age))
+            str(
+                tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), rrif_age)
+            )
         )
 
         # ---------- spending target (real) ------------------------- #
