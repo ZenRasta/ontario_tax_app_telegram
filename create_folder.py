@@ -252,7 +252,7 @@ def create_project_structure(base_dir_name):
     print(f"\nProject '{base_path.name}' structure created successfully in '{base_path.parent.resolve()}'!")
     print("Next steps suggestion:")
     print("1. Review the generated files, especially pyproject.toml, Dockerfile, and .env.example.")
-    print(f"2. Navigate into the project: `cd {base_path_name}`")
+    print(f"2. Navigate into the project: `cd {base_path.name}`")
     print("3. Initialize Git: `git init && git add . && git commit -m \"Initial project structure\"`")
     print("4. If using Poetry: `poetry install` (to install dependencies and create .lock file)")
     print("5. If using PDM: `pdm install`")
