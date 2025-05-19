@@ -49,8 +49,9 @@ class GradualMeltdownStrategy(BaseStrategy):
     def run_year(self, idx: int, state: EngineState) -> None:
         yr = state.start_year + idx
         age = self.scenario.age + idx
+        spouse = self.params.spouse or self.scenario.spouse
         spouse_age_this_year: Optional[int] = (
-            self.scenario.spouse.age + idx if self.scenario.spouse else None
+            spouse.age + idx if spouse else None
         )
         td = self.tax_data(yr)
 
@@ -77,10 +78,11 @@ class GradualMeltdownStrategy(BaseStrategy):
         # ----------------------------------------------------------------
         # 2. Determine RRIF withdrawal
         # ----------------------------------------------------------------
+        rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
         min_rrif = Decimal(
             str(
                 tax_rules.get_rrif_min_withdrawal_amount(
-                    float(begin_rrif), age, td
+                    float(begin_rrif), rrif_age, td
                 )
             )
         )
@@ -211,4 +213,16 @@ class GradualMeltdownStrategy(BaseStrategy):
             else:
                 low = mid
         return high  # fallback
+
+
+class EmptyByXStrategy(GradualMeltdownStrategy):
+    """Variant requiring target_depletion_age parameter."""
+
+    code = StrategyCodeEnum.EBX
+    complexity = 2
+
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure target_depletion_age is provided."""
+        if self.params.target_depletion_age is None:
+            raise ValueError("target_depletion_age required for Empty-by-X strategy")
 

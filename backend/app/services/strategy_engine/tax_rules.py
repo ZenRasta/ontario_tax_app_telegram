@@ -25,6 +25,9 @@ class TaxBracket(TypedDict):
 class TaxYearData(TypedDict, total=False):
     # --- federal ---
     federal_personal_amount: float
+    federal_personal_amount_min: float
+    federal_personal_amount_phaseout_start: float
+    federal_personal_amount_phaseout_end: float
     federal_age_amount: float
     federal_age_amount_threshold: float
     federal_pension_income_credit_max: float
@@ -152,7 +155,22 @@ def _tax_from_brackets(income: float, brackets: List[TaxBracket]) -> float:
 
 def _federal_credits(income: float, age: int, pension_inc: float, td: TaxYearData) -> float:
     lowest_rate = td["federal_tax_brackets"][0]["rate"]
+
     credit_base = td["federal_personal_amount"]
+    min_pa = td.get("federal_personal_amount_min")
+    start = td.get("federal_personal_amount_phaseout_start")
+    end = td.get("federal_personal_amount_phaseout_end")
+    if (
+        min_pa is not None
+        and start is not None
+        and end is not None
+        and income > start
+    ):
+        if income >= end:
+            credit_base = min_pa
+        else:
+            frac = (income - start) / (end - start)
+            credit_base = credit_base - frac * (credit_base - min_pa)
 
     if age >= 65:
         reduction = max(0.0, (income - td["federal_age_amount_threshold"]) * 0.15)
