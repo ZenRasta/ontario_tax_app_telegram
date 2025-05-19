@@ -5,6 +5,11 @@ This repository contains two main components:
 - **backend/** – a FastAPI application managed with [Poetry](https://python-poetry.org/).
 - **frontend/** – a React application using Vite and TypeScript.
 
+## Requirements
+
+- Python 3.9+
+- Node.js 18+
+
 ## Setup
 
 ### Backend
@@ -35,5 +40,48 @@ npm run dev
 ```
 The app will be served by Vite (typically on `http://localhost:5173`).
 
+## Usage Examples
 
+Check that the API is running:
+```bash
+curl http://localhost:8000/api/v1/health
+```
 
+Run a basic simulation:
+```bash
+curl -X POST http://localhost:8000/api/v1/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "strategy_code": "GM",
+    "scenario": {
+      "age": 65,
+      "rrsp_balance": 500000,
+      "defined_benefit_pension": 20000,
+      "cpp_at_65": 12000,
+      "oas_at_65": 8000,
+      "tfsa_balance": 100000,
+      "desired_spending": 60000,
+      "expect_return_pct": 5,
+      "stddev_return_pct": 8,
+      "life_expectancy_years": 25,
+      "province": "ON",
+      "goal": "maximize_spending"
+    }
+  }'
+```
+
+### Linting & Tests
+
+Backend linting and tests:
+```bash
+cd backend
+poetry run ruff check .
+poetry run pytest
+```
+
+Frontend linting and tests:
+```bash
+cd frontend
+npm run lint
+npm test # if tests are present
+```
