@@ -10,6 +10,7 @@ Pydantic data‑models used throughout the engine layer.
 
 from __future__ import annotations
 
+import datetime as _dt
 from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -18,9 +19,11 @@ from pydantic import (
     BaseModel,
     Field,
     conint,
-    confloat,
+    condecimal,
     root_validator,
 )
+
+from app.utils.year_data_loader import load_tax_year_data
 
 # --------------------------------------------------------------------------- #
 # Enumerations
@@ -57,7 +60,7 @@ class StrategyCodeEnum(str, Enum):
 
 class StrategyParamsInput(BaseModel):
     # --- Bracket‑Filling
-    bracket_fill_ceiling: Optional[confloat(gt=0)] = Field(
+    bracket_fill_ceiling: Optional[condecimal(gt=0)] = Field(
         None, description="Taxable‑income ceiling for BF strategy."
     )
 
@@ -85,7 +88,7 @@ class StrategyParamsInput(BaseModel):
         None,
         description="Year offset (0 = first projection year) for LS strategy.",
     )
-    lump_sum_amount: Optional[confloat(gt=0)] = Field(
+    lump_sum_amount: Optional[condecimal(gt=0)] = Field(
         None, description="One‑time withdrawal amount for LS strategy."
     )
 
@@ -97,6 +100,12 @@ class StrategyParamsInput(BaseModel):
         20.0, description="Notional loan principal as % of RRIF balance."
     )
 
+    # --- Spousal override ---
+    spouse: Optional["SpouseInput"] = Field(
+        None,
+        description="Override spouse info for strategy calculations.",
+    )
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -106,6 +115,7 @@ class StrategyParamsInput(BaseModel):
                 "target_depletion_age": 85,
                 "lump_sum_year_offset": 0,
                 "lump_sum_amount": 50_000,
+                "spouse": SpouseInput.Config.json_schema_extra["example"],
             }
         }
 
@@ -173,6 +183,9 @@ class ScenarioInput(BaseModel):
         if sp and sp.lump_sum_year_offset is not None:
             if sp.lump_sum_year_offset > v["life_expectancy_years"]:
                 raise ValueError("lump_sum_year_offset beyond projection horizon.")
+        if sp and sp.target_depletion_age is not None:
+            if sp.target_depletion_age < v["age"]:
+                raise ValueError("target_depletion_age cannot be less than current age.")
         return v
 
     # ----------------------- config ----------------------------------- #
@@ -221,9 +234,47 @@ class SimulateRequest(BaseModel):
     strategy_code: StrategyCodeEnum
     request_id: UUID = Field(default_factory=uuid4)
 
+    # ------------------------------------------------------------------
+    @root_validator(skip_on_failure=True)
+    def _apply_strategy_defaults(cls, v):
+        sc: ScenarioInput = v["scenario"]
+        code: StrategyCodeEnum = v["strategy_code"]
+        params = sc.strategy_params_override or StrategyParamsInput()
+        sc.strategy_params_override = params
+
+        td = load_tax_year_data(_dt.datetime.now().year, sc.province)
+
+        if code == StrategyCodeEnum.BF:
+            if params.bracket_fill_ceiling is None:
+                params.bracket_fill_ceiling = td["oas_clawback_threshold"]
+
+        if code == StrategyCodeEnum.LS:
+            if params.lump_sum_amount is None:
+                raise ValueError("lump_sum_amount required for LS strategy")
+
+        if code == StrategyCodeEnum.CD:
+            if params.cpp_start_age is None:
+                params.cpp_start_age = 70
+            if params.oas_start_age is None:
+                params.oas_start_age = 70
+
+        if code == StrategyCodeEnum.SEQ:
+            if sc.spouse is None:
+                raise ValueError("Spousal strategy requires spouse data")
+
+        v["scenario"] = sc
+        return v
+
 
 class CompareRequest(BaseModel):
     scenario: ScenarioInput
     strategies: List[StrategyCodeEnum]  # routing layer may accept ["auto"]
     request_id: UUID = Field(default_factory=uuid4)
+
+    # ------------------------------------------------------------------
+    @root_validator(skip_on_failure=True)
+    def _apply_defaults_all(cls, v):
+        for code in v["strategies"]:
+            SimulateRequest(scenario=v["scenario"], strategy_code=code)
+        return v
 

@@ -30,12 +30,18 @@ class BracketFillingStrategy(BaseStrategy):
     code = StrategyCodeEnum.BF
     complexity = 2
 
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure bracket_fill_ceiling is provided."""
+        if self.params.bracket_fill_ceiling is None:
+            raise ValueError("bracket_fill_ceiling required for Bracket-Filling strategy")
+
     # ------------------------------------------------------------------ #
     def run_year(self, idx: int, state: EngineState) -> None:
         yr = state.start_year + idx
         age = self.scenario.age + idx
+        spouse = self.params.spouse or self.scenario.spouse
         spouse_age_this_year: Optional[int] = (
-            self.scenario.spouse.age + idx if self.scenario.spouse else None
+            spouse.age + idx if spouse else None
         )
         td = self.tax_data(yr)
 
@@ -89,8 +95,13 @@ class BracketFillingStrategy(BaseStrategy):
         gross_rrif = max(Decimal("0"), ceiling - base_income)
 
         # ensure ≥ CRA minimum
+        rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
         min_rrif = Decimal(
-            str(tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), age, td))
+            str(
+                tax_rules.get_rrif_min_withdrawal_amount(
+                    float(begin_rrif), rrif_age, td
+                )
+            )
         )
         gross_rrif = max(gross_rrif, min_rrif)
 

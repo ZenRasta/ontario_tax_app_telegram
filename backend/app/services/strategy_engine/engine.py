@@ -27,6 +27,7 @@ from app.services.strategy_engine.strategies.bracket_filling import (
 )
 from app.services.strategy_engine.strategies.gradual_meltdown import (
     GradualMeltdownStrategy,
+    EmptyByXStrategy,
 )
 from app.services.strategy_engine.strategies.early_rrif_conversion import (
     EarlyRRIFConversionStrategy,
@@ -54,7 +55,7 @@ _STRATEGY_REGISTRY: Dict[StrategyCodeEnum, type[BaseStrategy]] = {
     StrategyCodeEnum.SEQ: SpousalEqualizationStrategy,
     StrategyCodeEnum.LS: LumpSumWithdrawalStrategy,
     StrategyCodeEnum.IO: InterestOffsetStrategy,
-    StrategyCodeEnum.EBX: GradualMeltdownStrategy,       # empty‑by‑X via params
+    StrategyCodeEnum.EBX: EmptyByXStrategy,
 }
 
 
