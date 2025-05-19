@@ -23,6 +23,10 @@ poetry install
 ```bash
 cd frontend
 npm install
+# New dependencies were added:
+#   classnames
+#   @floating-ui/dom
+# Run `npm install` again if you installed packages before this change.
 # If you encounter peer dependency errors for `@types/react-dom`,
 # ensure the dev dependency is pinned to a React 18 compatible version:
 #
