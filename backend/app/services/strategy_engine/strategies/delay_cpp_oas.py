@@ -38,12 +38,18 @@ class DelayCppOasStrategy(BaseStrategy):
     display_name = "Delay CPP / OAS (RRSP Bridge)"
     complexity = 3
 
+    def validate_params(self) -> None:  # noqa: D401
+        """Ensure CPP/OAS start ages provided."""
+        if self.params.cpp_start_age is None or self.params.oas_start_age is None:
+            raise ValueError("cpp_start_age and oas_start_age required for Delay CPP/OAS strategy")
+
     # -------------------------------------------------------------- #
     def run_year(self, idx: int, state: EngineState) -> None:
         yr = state.start_year + idx
         age = self.scenario.age + idx
+        spouse = self.params.spouse or self.scenario.spouse
         spouse_age_this_year: Optional[int] = (
-            self.scenario.spouse.age + idx if self.scenario.spouse else None
+            spouse.age + idx if spouse else None
         )
 
         td = self.tax_data(yr)
@@ -89,10 +95,11 @@ class DelayCppOasStrategy(BaseStrategy):
         )
 
         # ------------------ CRA minimum ---------------------------- #
+        rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
         min_rrif = Decimal(
             str(
                 tax_rules.get_rrif_min_withdrawal_amount(
-                    float(begin_rrif), age
+                    float(begin_rrif), rrif_age
                 )
             )
         )
