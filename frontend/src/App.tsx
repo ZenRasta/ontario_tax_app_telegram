@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SimulationForm from './components/SimulationForm'
 import './App.css'
 
 function App() {
@@ -24,9 +25,10 @@ function App() {
       >
         Check API Health
       </button>
-      {apiStatus && (
-        <p className="mt-4">API status: {apiStatus}</p>
-      )}
+      {apiStatus && <p className="mt-4">API status: {apiStatus}</p>}
+      <div className="w-full max-w-2xl mt-6">
+        <SimulationForm />
+      </div>
     </div>
   )
 }
