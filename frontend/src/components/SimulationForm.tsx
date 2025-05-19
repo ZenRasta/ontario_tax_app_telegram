@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
-import { StrategyParamsInput } from '../types/api';
+import type { StrategyParamsInput } from '../types/api';
 
 interface FormValues {
   strategy_params: StrategyParamsInput;
