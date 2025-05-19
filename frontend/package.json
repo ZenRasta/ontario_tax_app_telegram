@@ -14,9 +14,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
 
-    "react-tooltip": "^5.20.0"
+    "react-tooltip": "^5.20.0",
 
-    "react-hook-form": "^7.45.2"
     "@mui/material": "^5.15.20",
     "@mui/x-data-grid": "^6.19.0",
     "react-hook-form": "^7.48.2",
