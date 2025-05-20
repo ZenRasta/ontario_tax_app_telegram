@@ -7,7 +7,12 @@ import './App.css'
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
 
-import type { StrategyParamsInput, ScenarioInput, SimulateRequest } from './types'
+import type {
+  StrategyParamsInput,
+  ScenarioInput,
+  SimulateRequest,
+} from './types'
+import type { StrategiesResponse } from './types/api'
 
 const BASE_SCENARIO: ScenarioInput = {
   age: 65,
@@ -35,6 +40,8 @@ const BASE_SCENARIO: ScenarioInput = {
 
 function App() {
   const [apiStatus, setApiStatus] = useState<string | null>(null)
+  const [goal, setGoal] = useState('maximize_spending')
+  const [strategyList, setStrategyList] = useState<StrategiesResponse | null>(null)
   const [results] = useState([
     { year: 2024, rrsp: 10000, tfsa: 6000, oasClawback: 0 },
     { year: 2025, rrsp: 10500, tfsa: 7000, oasClawback: 50 },
@@ -48,6 +55,20 @@ function App() {
   useEffect(() => {
     reset(paramsState)
   }, [paramsState, reset])
+
+  useEffect(() => {
+    const fetchStrategies = async () => {
+      try {
+        const resp = await fetch(`/api/v1/strategies?goal=${goal}`)
+        if (!resp.ok) throw new Error('failed')
+        const data: StrategiesResponse = await resp.json()
+        setStrategyList(data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchStrategies()
+  }, [goal])
 
 
   const checkHealth = async () => {
@@ -81,6 +102,25 @@ function App() {
     }
   }
 
+  const runCompare = async () => {
+    const body = {
+      scenario: { ...BASE_SCENARIO, goal },
+      strategies: ['auto'],
+    }
+    try {
+      const resp = await fetch('/api/v1/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!resp.ok) throw new Error('Request failed')
+      const data = await resp.json()
+      console.log(data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8 font-sans">
       <h1 className="text-2xl font-bold mb-4">Ontario Retirement Planner</h1>
@@ -93,6 +133,28 @@ function App() {
 
       {apiStatus && (
         <p className="mt-4">API status: {apiStatus}</p>
+      )}
+      <div className="mt-4">
+        <label className="mr-2">Goal:</label>
+        <select value={goal} onChange={(e) => setGoal(e.target.value)} className="border p-1 rounded">
+          <option value="minimize_tax">Minimize Tax</option>
+          <option value="maximize_spending">Maximize Spending</option>
+          <option value="preserve_estate">Preserve Estate</option>
+          <option value="simplify">Simplify</option>
+        </select>
+      </div>
+      {strategyList && (
+        <div className="mt-4 space-y-1">
+          {strategyList.strategies.map((s) => (
+            <label key={s.code} className={strategyList.recommended.includes(s.code) ? 'font-bold text-blue-600 block' : 'block'}>
+              <input type="checkbox" checked={strategyList.recommended.includes(s.code)} readOnly className="mr-1" />
+              {s.label}
+            </label>
+          ))}
+          <button onClick={runCompare} className="mt-2 px-3 py-1 bg-purple-600 text-white rounded">
+            Compare Recommended
+          </button>
+        </div>
       )}
       <table className="mt-8 border-collapse border text-left">
         <thead>
