@@ -9,10 +9,12 @@ import {
   TextField,
   Button,
   Typography,
+  MenuItem,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 import type { StrategyParamsInput } from '../types/api';
+import { strategies } from '../strategies';
 
 interface FormValues {
   strategy_params: StrategyParamsInput;
@@ -117,6 +119,27 @@ export default function SimulationForm() {
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 2 }}>
+      <Controller
+        name="strategy_code"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            select
+            label="Strategy"
+            fullWidth
+            margin="normal"
+            error={!!errors.strategy_code}
+            helperText={errors.strategy_code?.message}
+          >
+            {strategies.map((s) => (
+              <MenuItem key={s.code} value={s.code}>
+                {s.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+      />
       <FormControlLabel
         control={<Checkbox checked={bf} onChange={(_, v) => setBf(v)} />}
         label="Bracket Filling"
