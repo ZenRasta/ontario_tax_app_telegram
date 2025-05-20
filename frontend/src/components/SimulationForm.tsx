@@ -9,17 +9,30 @@ import {
   TextField,
   Button,
   Typography,
+  MenuItem,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
-import type { StrategyParamsInput } from '../types/api';
+import type { StrategyParamsInput, GoalEnum } from '../types/api';
+
+const GOALS: GoalEnum[] = [
+  'minimize_tax',
+  'maximize_spending',
+  'preserve_estate',
+  'simplify',
+];
 
 interface FormValues {
   strategy_params: StrategyParamsInput;
   strategy_code: string;
+  goal: GoalEnum;
 }
 
 const schema = yup.object({
+  goal: yup
+    .string()
+    .oneOf(GOALS)
+    .required(),
   strategy_code: yup.string().required(),
   strategy_params: yup.object({
     bracket_fill_ceiling: yup
@@ -76,6 +89,7 @@ export default function SimulationForm() {
     defaultValues: {
       strategy_params: {},
       strategy_code: 'GM',
+      goal: 'maximize_spending',
     },
     context: { bf, ls, ebx, delay, interest },
     resolver: yupResolver(schema),
@@ -86,6 +100,7 @@ export default function SimulationForm() {
   const onSubmit = async (data: FormValues) => {
     const body = {
       scenario: {
+        goal: data.goal,
         params: data.strategy_params,
       },
       strategy_code: data.strategy_code,
@@ -117,6 +132,27 @@ export default function SimulationForm() {
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 2 }}>
+      <Controller
+        name="goal"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            select
+            label="Goal"
+            error={!!errors.goal}
+            helperText={errors.goal?.message}
+            fullWidth
+            margin="normal"
+          >
+            {GOALS.map((g) => (
+              <MenuItem key={g} value={g}>
+                {g.replace('_', ' ')}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+      />
       <FormControlLabel
         control={<Checkbox checked={bf} onChange={(_, v) => setBf(v)} />}
         label="Bracket Filling"
