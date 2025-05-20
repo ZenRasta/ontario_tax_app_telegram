@@ -19,3 +19,24 @@ export interface StrategyParamsInput {
   loan_pct_rrif?: number;
   spouse?: SpouseInfo;
 }
+
+
+export type GoalEnum =
+  | 'minimize_tax'
+  | 'maximize_spending'
+  | 'preserve_estate'
+  | 'simplify';
+
+export interface StrategyMeta {
+  code: string;
+  label: string;
+  blurb: string;
+  default_complexity: number;
+  typical_goals: string[];
+}
+
+export interface StrategiesResponse {
+  strategies: StrategyMeta[];
+  recommended: string[];
+}
+

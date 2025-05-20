@@ -9,9 +9,10 @@ Run dev server:
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 
@@ -36,6 +37,7 @@ from app.data_models.scenario import (
     StrategyCodeEnum,
     StrategyParamsInput,
 )
+from app.data_models.strategy import ALL_STRATEGIES, StrategyMeta
 from app.db.session_manager import create_db_and_tables
 from app.services.monte_carlo_service import MonteCarloService
 from app.services.strategy_engine.engine import _STRATEGY_REGISTRY, StrategyEngine
@@ -112,6 +114,11 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
 router = APIRouter()
 
 
+class StrategiesResponse(BaseModel):
+    strategies: List[StrategyMeta]
+    recommended: List[StrategyCodeEnum] = []
+
+
 def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenario: ScenarioInput) -> None:
     if code == StrategyCodeEnum.BF and params.bracket_fill_ceiling is None:
         raise HTTPException(422, "bracket_fill_ceiling required for BF strategy")
@@ -131,6 +138,12 @@ def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenari
         raise HTTPException(422, "loan_interest_rate_pct and loan_amount_as_pct_of_rrif required for IO strategy")
     if code == StrategyCodeEnum.SEQ and not (scenario.spouse or params.spouse):
         raise HTTPException(422, "spouse info required for SEQ strategy")
+
+
+@router.get("/strategies", response_model=StrategiesResponse, tags=["Simulation"])
+async def list_strategies(goal: Optional[GoalEnum] = None) -> StrategiesResponse:
+    recommended = _auto_strategies(goal) if goal else []
+    return StrategiesResponse(strategies=ALL_STRATEGIES, recommended=recommended)
 
 # ---------- deterministic simulation --------------------------------
 @router.post("/simulate", response_model=SimulationApiResponse, tags=["Simulation"])
