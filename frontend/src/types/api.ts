@@ -20,6 +20,13 @@ export interface StrategyParamsInput {
   spouse?: SpouseInfo;
 }
 
+
+export type GoalEnum =
+  | 'minimize_tax'
+  | 'maximize_spending'
+  | 'preserve_estate'
+  | 'simplify';
+
 export interface StrategyMeta {
   code: string;
   label: string;
@@ -32,3 +39,4 @@ export interface StrategiesResponse {
   strategies: StrategyMeta[];
   recommended: string[];
 }
+

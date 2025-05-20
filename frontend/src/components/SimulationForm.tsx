@@ -18,6 +18,29 @@ import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
+
+import type { StrategyParamsInput, GoalEnum } from '../types/api';
+
+const GOALS: GoalEnum[] = [
+  'minimize_tax',
+  'maximize_spending',
+  'preserve_estate',
+  'simplify',
+];
+
+interface FormValues {
+  strategy_params: StrategyParamsInput;
+  strategy_code: string;
+  goal: GoalEnum;
+}
+
+const schema = yup.object({
+  goal: yup
+    .string()
+    .oneOf(GOALS)
+    .required(),
+  strategy_code: yup.string().required(),
+=======
 import type { StrategyParamsInput } from '../types/api';
 import { ALL_STRATEGIES, StrategyCodeEnum } from '../strategies';
 import { strategies } from '../strategies';
@@ -28,6 +51,7 @@ interface FormValues {
 }
 
 const schema = yup.object({
+
   strategy_params: yup.object({
     bracket_fill_ceiling: yup
       .number()
@@ -93,6 +117,10 @@ export default function SimulationForm() {
   } = useForm<FormValues>({
     defaultValues: {
       strategy_params: {},
+
+      strategy_code: 'GM',
+      goal: 'maximize_spending',
+
     },
     context: {
       bf: toggles.BF,
@@ -109,6 +137,7 @@ export default function SimulationForm() {
   const onSubmit = async (data: FormValues) => {
     const body: any = {
       scenario: {
+        goal: data.goal,
         params: data.strategy_params,
       },
     };
@@ -152,12 +181,27 @@ export default function SimulationForm() {
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 2 }}>
       <Controller
+
+        name="goal"
+
         name="strategy_code"
+
         control={control}
         render={({ field }) => (
           <TextField
             {...field}
             select
+
+            label="Goal"
+            error={!!errors.goal}
+            helperText={errors.goal?.message}
+            fullWidth
+            margin="normal"
+          >
+            {GOALS.map((g) => (
+              <MenuItem key={g} value={g}>
+                {g.replace('_', ' ')}
+
             label="Strategy"
             fullWidth
             margin="normal"
@@ -167,6 +211,7 @@ export default function SimulationForm() {
             {strategies.map((s) => (
               <MenuItem key={s.code} value={s.code}>
                 {s.label}
+
               </MenuItem>
             ))}
           </TextField>

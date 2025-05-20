@@ -10,6 +10,12 @@ export interface StrategyParamsInput {
   loan_amount_as_pct_of_rrif?: number;
 }
 
+export type GoalEnum =
+  | 'minimize_tax'
+  | 'maximize_spending'
+  | 'preserve_estate'
+  | 'simplify';
+
 export interface ScenarioInput {
   age: number;
   rrsp_balance: number;
@@ -22,7 +28,7 @@ export interface ScenarioInput {
   stddev_return_pct: number;
   life_expectancy_years: number;
   province: string;
-  goal: string;
+  goal: GoalEnum;
   spouse?: {
     age: number;
     rrsp_balance: number;
