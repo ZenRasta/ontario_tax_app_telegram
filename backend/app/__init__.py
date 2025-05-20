@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Backend application package."""

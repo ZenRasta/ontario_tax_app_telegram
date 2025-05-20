@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Application configuration and core utilities."""

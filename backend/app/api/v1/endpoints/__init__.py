@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Endpoint definitions for API v1."""
