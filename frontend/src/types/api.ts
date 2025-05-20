@@ -19,3 +19,16 @@ export interface StrategyParamsInput {
   loan_pct_rrif?: number;
   spouse?: SpouseInfo;
 }
+
+export interface StrategyMeta {
+  code: string;
+  label: string;
+  blurb: string;
+  default_complexity: number;
+  typical_goals: string[];
+}
+
+export interface StrategiesResponse {
+  strategies: StrategyMeta[];
+  recommended: string[];
+}
