@@ -11,6 +11,8 @@ import {
   Typography,
   MenuItem,
 } from '@mui/material';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 import type { StrategyParamsInput } from '../types/api';
@@ -149,15 +151,29 @@ export default function SimulationForm() {
           name="strategy_params.bracket_fill_ceiling"
           control={control}
           render={({ field }) => (
-            <TextField
-              {...field}
-              label="Income ceiling ($)"
-              error={!!errors.strategy_params?.bracket_fill_ceiling}
-              helperText={errors.strategy_params?.bracket_fill_ceiling?.message}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
+            <Box display="flex" alignItems="center">
+              <TextField
+                {...field}
+                label="Income ceiling ($)"
+                error={!!errors.strategy_params?.bracket_fill_ceiling}
+                helperText={errors.strategy_params?.bracket_fill_ceiling?.message}
+                type="number"
+                fullWidth
+                margin="normal"
+              />
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="bf-ceiling-tip"
+                data-tooltip-content="Bracket Fill Ceiling – taxable income target"
+                aria-label="Bracket Fill Ceiling info"
+                aria-describedby="bf-ceiling-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="bf-ceiling-tip" place="top" />
+            </Box>
           )}
         />
       )}
@@ -171,7 +187,8 @@ export default function SimulationForm() {
           <Controller
             name="strategy_params.lump_sum_amount"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="Lump-Sum ($)"
@@ -181,12 +198,26 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="ls-amount-tip"
+                data-tooltip-content="One-time withdrawal amount"
+                aria-label="Lump Sum Amount info"
+                aria-describedby="ls-amount-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="ls-amount-tip" place="top" />
+            </Box>
+          )}
           />
           <Controller
             name="strategy_params.lump_sum_year_offset"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="Year Offset"
@@ -196,7 +227,20 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="ls-offset-tip"
+                data-tooltip-content="Years from now to take lump sum"
+                aria-label="Lump Sum Year Offset info"
+                aria-describedby="ls-offset-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="ls-offset-tip" place="top" />
+            </Box>
+          )}
           />
         </Box>
       )}
@@ -210,15 +254,29 @@ export default function SimulationForm() {
           name="strategy_params.target_depletion_age"
           control={control}
           render={({ field }) => (
-            <TextField
-              {...field}
-              label="Deplete RRIF by age"
-              error={!!errors.strategy_params?.target_depletion_age}
-              helperText={errors.strategy_params?.target_depletion_age?.message}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
+            <Box display="flex" alignItems="center">
+              <TextField
+                {...field}
+                label="Deplete RRIF by age"
+                error={!!errors.strategy_params?.target_depletion_age}
+                helperText={errors.strategy_params?.target_depletion_age?.message}
+                type="number"
+                fullWidth
+                margin="normal"
+              />
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="deplete-age-tip"
+                data-tooltip-content="Age by which RRIF should be empty"
+                aria-label="Target Depletion Age info"
+                aria-describedby="deplete-age-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="deplete-age-tip" place="top" />
+            </Box>
           )}
         />
       )}
@@ -232,7 +290,8 @@ export default function SimulationForm() {
           <Controller
             name="strategy_params.cpp_start_age"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="CPP start age"
@@ -242,12 +301,26 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="cpp-age-tip"
+                data-tooltip-content="Age when CPP starts"
+                aria-label="CPP Start Age info"
+                aria-describedby="cpp-age-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="cpp-age-tip" place="top" />
+            </Box>
+          )}
           />
           <Controller
             name="strategy_params.oas_start_age"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="OAS start age"
@@ -257,7 +330,20 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="oas-age-tip"
+                data-tooltip-content="Age when OAS starts"
+                aria-label="OAS Start Age info"
+                aria-describedby="oas-age-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="oas-age-tip" place="top" />
+            </Box>
+          )}
           />
         </Box>
       )}
@@ -271,7 +357,8 @@ export default function SimulationForm() {
           <Controller
             name="strategy_params.interest_rate"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="Loan interest rate %"
@@ -281,12 +368,26 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="interest-rate-tip"
+                data-tooltip-content="Interest rate for borrowing"
+                aria-label="Loan Interest Rate info"
+                aria-describedby="interest-rate-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="interest-rate-tip" place="top" />
+            </Box>
+          )}
           />
           <Controller
             name="strategy_params.loan_pct_rrif"
             control={control}
-            render={({ field }) => (
+          render={({ field }) => (
+            <Box display="flex" alignItems="center">
               <TextField
                 {...field}
                 label="Loan % of RRIF (0-100)"
@@ -296,7 +397,20 @@ export default function SimulationForm() {
                 fullWidth
                 margin="normal"
               />
-            )}
+              <span
+                className="ml-1 text-sm text-blue-600 cursor-pointer"
+                data-tooltip-id="loan-pct-tip"
+                data-tooltip-content="Loan amount as percentage of RRIF"
+                aria-label="Loan % of RRIF info"
+                aria-describedby="loan-pct-tip"
+                role="button"
+                tabIndex={0}
+              >
+                ℹ️
+              </span>
+              <Tooltip id="loan-pct-tip" place="top" />
+            </Box>
+          )}
           />
         </Box>
       )}
