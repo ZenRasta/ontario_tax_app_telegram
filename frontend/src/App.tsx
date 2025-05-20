@@ -144,6 +144,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('bracket_fill_ceiling', { min: 0 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="bf-ceiling-tip-app"
+            data-tooltip-content="Bracket Fill Ceiling – taxable income target"
+            aria-label="Bracket Fill Ceiling info"
+            aria-describedby="bf-ceiling-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="bf-ceiling-tip-app" place="top" />
         </div>
 
         <div>
@@ -153,6 +165,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('rrif_conversion_age', { min: 55, max: 71 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="rrif-age-tip"
+            data-tooltip-content="Age to convert RRSP into RRIF"
+            aria-label="RRIF Conversion Age info"
+            aria-describedby="rrif-age-tip"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="rrif-age-tip" place="top" />
         </div>
 
         <div>
@@ -162,6 +186,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('cpp_start_age', { min: 60, max: 70 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="cpp-age-tip-app"
+            data-tooltip-content="Age when CPP benefits start"
+            aria-label="CPP Start Age info"
+            aria-describedby="cpp-age-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="cpp-age-tip-app" place="top" />
         </div>
 
         <div>
@@ -171,6 +207,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('oas_start_age', { min: 65, max: 70 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="oas-age-tip-app"
+            data-tooltip-content="Age when OAS benefits start"
+            aria-label="OAS Start Age info"
+            aria-describedby="oas-age-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="oas-age-tip-app" place="top" />
         </div>
 
         <div>
@@ -180,6 +228,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('target_depletion_age', { min: 70, max: 120 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="deplete-age-tip-app"
+            data-tooltip-content="Age to fully deplete RRIF"
+            aria-label="Target Depletion Age info"
+            aria-describedby="deplete-age-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="deplete-age-tip-app" place="top" />
         </div>
 
         <div>
@@ -189,6 +249,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('lump_sum_year_offset', { min: 0 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="ls-offset-tip-app"
+            data-tooltip-content="Years after retirement to withdraw lump sum"
+            aria-label="Lump Sum Year Offset info"
+            aria-describedby="ls-offset-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="ls-offset-tip-app" place="top" />
         </div>
 
         <div>
@@ -199,6 +271,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('lump_sum_amount', { min: 0 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="ls-amount-tip-app"
+            data-tooltip-content="Amount of one-time lump sum"
+            aria-label="Lump Sum Amount info"
+            aria-describedby="ls-amount-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="ls-amount-tip-app" place="top" />
         </div>
 
         <div>
@@ -209,6 +293,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('loan_interest_rate_pct', { min: 0, max: 100 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="loan-rate-tip-app"
+            data-tooltip-content="Interest rate for investment loan"
+            aria-label="Loan Interest Rate info"
+            aria-describedby="loan-rate-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="loan-rate-tip-app" place="top" />
         </div>
 
         <div>
@@ -219,6 +315,18 @@ function App() {
             className="w-full border p-2 rounded"
             {...register('loan_amount_as_pct_of_rrif', { min: 0, max: 100 })}
           />
+          <span
+            className="ml-1 text-sm text-blue-600 cursor-pointer"
+            data-tooltip-id="loan-pct-tip-app"
+            data-tooltip-content="Loan amount as % of RRIF value"
+            aria-label="Loan % of RRIF info"
+            aria-describedby="loan-pct-tip-app"
+            role="button"
+            tabIndex={0}
+          >
+            ℹ️
+          </span>
+          <Tooltip id="loan-pct-tip-app" place="top" />
         </div>
 
         <button
