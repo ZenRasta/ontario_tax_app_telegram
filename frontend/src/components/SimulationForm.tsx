@@ -19,6 +19,11 @@ import 'react-tooltip/dist/react-tooltip.css';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 
+import type { StrategyParamsInput } from '../types/api';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
+
+
 import type { StrategyParamsInput, GoalEnum } from '../types/api';
 
 const GOALS: GoalEnum[] = [
@@ -219,13 +224,46 @@ export default function SimulationForm() {
       />
       <FormControlLabel
         control={<Checkbox checked={bf} onChange={(_, v) => setBf(v)} />}
-        label="Bracket Filling"
+        label={
+          <span>
+            Bracket Filling
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="sim-bf-checkbox-info"
+              data-tooltip-content="Enable bracket-filling strategy"
+            >
+              ℹ️
+            </span>
+            <Tooltip id="sim-bf-checkbox-info" place="top" />
+          </span>
+        }
       />
       {bf && (
         <Controller
           name="strategy_params.bracket_fill_ceiling"
           control={control}
           render={({ field }) => (
+            <TextField
+              {...field}
+              label={
+                <span>
+                  Income ceiling ($)
+                  <span
+                    className="ml-1 text-sm text-blue-600 cursor-pointer"
+                    data-tooltip-id="sim-bf-ceiling-info"
+                    data-tooltip-content="Income ceiling used for Bracket-Filling strategy"
+                  >
+                    ℹ️
+                  </span>
+                  <Tooltip id="sim-bf-ceiling-info" place="top" />
+                </span>
+              }
+              error={!!errors.strategy_params?.bracket_fill_ceiling}
+              helperText={errors.strategy_params?.bracket_fill_ceiling?.message}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
@@ -255,7 +293,19 @@ export default function SimulationForm() {
 
       <FormControlLabel
         control={<Checkbox checked={ls} onChange={(_, v) => setLs(v)} />}
-        label="Lump-Sum"
+        label={
+          <span>
+            Lump-Sum
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="sim-ls-checkbox-info"
+              data-tooltip-content="Enable lump-sum withdrawal"
+            >
+              ℹ️
+            </span>
+            <Tooltip id="sim-ls-checkbox-info" place="top" />
+          </span>
+        }
       />
       {ls && (
         <Box>
@@ -263,6 +313,29 @@ export default function SimulationForm() {
             name="strategy_params.bracket_fill_ceiling"
             control={control}
           render={({ field }) => (
+
+            <TextField
+              {...field}
+              label={
+                <span>
+                  Lump-Sum ($)
+                  <span
+                    className="ml-1 text-sm text-blue-600 cursor-pointer"
+                    data-tooltip-id="sim-ls-amount-info"
+                    data-tooltip-content="One-time withdrawal amount"
+                  >
+                    ℹ️
+                  </span>
+                  <Tooltip id="sim-ls-amount-info" place="top" />
+                </span>
+              }
+              error={!!errors.strategy_params?.lump_sum_amount}
+              helperText={errors.strategy_params?.lump_sum_amount?.message}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
+
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
@@ -333,9 +406,26 @@ export default function SimulationForm() {
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
+                label={
+                  <span>
+                    Year Offset
+                    <span
+                      className="ml-1 text-sm text-blue-600 cursor-pointer"
+                      data-tooltip-id="sim-ls-offset-info"
+                      data-tooltip-content="Years from start to withdraw lump sum"
+                    >
+                      ℹ️
+                    </span>
+                    <Tooltip id="sim-ls-offset-info" place="top" />
+                  </span>
+                }
+                error={!!errors.strategy_params?.lump_sum_year_offset}
+                helperText={errors.strategy_params?.lump_sum_year_offset?.message}
+
                 label="Deplete RRIF by age"
                 error={!!errors.strategy_params?.target_depletion_age}
                 helperText={errors.strategy_params?.target_depletion_age?.message}
+
                 type="number"
                 fullWidth
                 margin="normal"
@@ -435,13 +525,46 @@ export default function SimulationForm() {
 
       <FormControlLabel
         control={<Checkbox checked={ebx} onChange={(_, v) => setEbx(v)} />}
-        label="Empty-by-X"
+        label={
+          <span>
+            Empty-by-X
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="sim-ebx-checkbox-info"
+              data-tooltip-content="Withdraw so RRIF is empty by target age"
+            >
+              ℹ️
+            </span>
+            <Tooltip id="sim-ebx-checkbox-info" place="top" />
+          </span>
+        }
       />
       {ebx && (
         <Controller
           name="strategy_params.target_depletion_age"
           control={control}
           render={({ field }) => (
+            <TextField
+              {...field}
+              label={
+                <span>
+                  Deplete RRIF by age
+                  <span
+                    className="ml-1 text-sm text-blue-600 cursor-pointer"
+                    data-tooltip-id="sim-target-age-info"
+                    data-tooltip-content="Age by which RRIF should be depleted"
+                  >
+                    ℹ️
+                  </span>
+                  <Tooltip id="sim-target-age-info" place="top" />
+                </span>
+              }
+              error={!!errors.strategy_params?.target_depletion_age}
+              helperText={errors.strategy_params?.target_depletion_age?.message}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
@@ -477,7 +600,19 @@ export default function SimulationForm() {
             checked={mode === 'compare'}
             onChange={(_, v) => setMode(v ? 'compare' : 'simulate')}
         control={<Checkbox checked={delay} onChange={(_, v) => setDelay(v)} />}
-        label="Delay CPP/OAS"
+        label={
+          <span>
+            Delay CPP/OAS
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="sim-delay-checkbox-info"
+              data-tooltip-content="Delay start of CPP and OAS benefits"
+            >
+              ℹ️
+            </span>
+            <Tooltip id="sim-delay-checkbox-info" place="top" />
+          </span>
+        }
       />
       {delay && (
         <Box>
@@ -485,6 +620,27 @@ export default function SimulationForm() {
             name="strategy_params.cpp_start_age"
             control={control}
           render={({ field }) => (
+            <TextField
+              {...field}
+              label={
+                <span>
+                  CPP start age
+                  <span
+                    className="ml-1 text-sm text-blue-600 cursor-pointer"
+                    data-tooltip-id="sim-cpp-age-info"
+                    data-tooltip-content="Age to begin CPP payments"
+                  >
+                    ℹ️
+                  </span>
+                  <Tooltip id="sim-cpp-age-info" place="top" />
+                </span>
+              }
+              error={!!errors.strategy_params?.cpp_start_age}
+              helperText={errors.strategy_params?.cpp_start_age?.message}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
@@ -508,6 +664,7 @@ export default function SimulationForm() {
               </span>
               <Tooltip id="cpp-age-tip" place="top" />
             </Box>
+
           )}
           />
           <Controller
@@ -517,7 +674,19 @@ export default function SimulationForm() {
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
-                label="OAS start age"
+                label={
+                  <span>
+                    OAS start age
+                    <span
+                      className="ml-1 text-sm text-blue-600 cursor-pointer"
+                      data-tooltip-id="sim-oas-age-info"
+                      data-tooltip-content="Age to begin OAS payments"
+                    >
+                      ℹ️
+                    </span>
+                    <Tooltip id="sim-oas-age-info" place="top" />
+                  </span>
+                }
                 error={!!errors.strategy_params?.oas_start_age}
                 helperText={errors.strategy_params?.oas_start_age?.message}
                 type="number"
@@ -589,7 +758,19 @@ export default function SimulationForm() {
             label={s.label}
       <FormControlLabel
         control={<Checkbox checked={interest} onChange={(_, v) => setInterest(v)} />}
-        label="Interest Offset"
+        label={
+          <span>
+            Interest Offset
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="sim-interest-checkbox-info"
+              data-tooltip-content="Borrow to offset interest costs"
+            >
+              ℹ️
+            </span>
+            <Tooltip id="sim-interest-checkbox-info" place="top" />
+          </span>
+        }
       />
       {interest && (
         <Box>
@@ -600,7 +781,19 @@ export default function SimulationForm() {
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
-                label="Loan interest rate %"
+                label={
+                  <span>
+                    Loan interest rate %
+                    <span
+                      className="ml-1 text-sm text-blue-600 cursor-pointer"
+                      data-tooltip-id="sim-interest-rate-info"
+                      data-tooltip-content="Interest rate on borrowed amount"
+                    >
+                      ℹ️
+                    </span>
+                    <Tooltip id="sim-interest-rate-info" place="top" />
+                  </span>
+                }
                 error={!!errors.strategy_params?.interest_rate}
                 helperText={errors.strategy_params?.interest_rate?.message}
                 type="number"
@@ -629,7 +822,19 @@ export default function SimulationForm() {
             <Box display="flex" alignItems="center">
               <TextField
                 {...field}
-                label="Loan % of RRIF (0-100)"
+                label={
+                  <span>
+                    Loan % of RRIF (0-100)
+                    <span
+                      className="ml-1 text-sm text-blue-600 cursor-pointer"
+                      data-tooltip-id="sim-loan-pct-info"
+                      data-tooltip-content="Loan size as percentage of RRIF"
+                    >
+                      ℹ️
+                    </span>
+                    <Tooltip id="sim-loan-pct-info" place="top" />
+                  </span>
+                }
                 error={!!errors.strategy_params?.loan_pct_rrif}
                 helperText={errors.strategy_params?.loan_pct_rrif?.message}
                 type="number"

@@ -199,13 +199,25 @@ function App() {
         className="w-full max-w-md mt-6 space-y-4"
       >
         <div>
-          <label className="block text-left">Bracket Fill Ceiling</label>
+          <label className="block text-left">
+            Bracket Fill Ceiling
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-bf-ceiling-info"
+              data-tooltip-content="Income ceiling used for Bracket-Filling strategy"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             step="any"
             className="w-full border p-2 rounded"
             {...register('bracket_fill_ceiling', { min: 0 })}
           />
+
+          <Tooltip id="app-bf-ceiling-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="bf-ceiling-tip-app"
@@ -218,15 +230,28 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="bf-ceiling-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">RRIF Conversion Age</label>
+          <label className="block text-left">
+            RRIF Conversion Age
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-rrif-age-info"
+              data-tooltip-content="Age to convert RRSP to RRIF"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             className="w-full border p-2 rounded"
             {...register('rrif_conversion_age', { min: 55, max: 71 })}
           />
+
+          <Tooltip id="app-rrif-age-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="rrif-age-tip"
@@ -239,15 +264,28 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="rrif-age-tip" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">CPP Start Age</label>
+          <label className="block text-left">
+            CPP Start Age
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-cpp-age-info"
+              data-tooltip-content="Age to begin CPP payments"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             className="w-full border p-2 rounded"
             {...register('cpp_start_age', { min: 60, max: 70 })}
           />
+
+          <Tooltip id="app-cpp-age-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="cpp-age-tip-app"
@@ -260,15 +298,28 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="cpp-age-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">OAS Start Age</label>
+          <label className="block text-left">
+            OAS Start Age
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-oas-age-info"
+              data-tooltip-content="Age to begin OAS payments"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             className="w-full border p-2 rounded"
             {...register('oas_start_age', { min: 65, max: 70 })}
           />
+
+          <Tooltip id="app-oas-age-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="oas-age-tip-app"
@@ -281,15 +332,28 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="oas-age-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">Target Depletion Age</label>
+          <label className="block text-left">
+            Target Depletion Age
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-target-age-info"
+              data-tooltip-content="Age by which RRIF should be depleted"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             className="w-full border p-2 rounded"
             {...register('target_depletion_age', { min: 70, max: 120 })}
           />
+
+          <Tooltip id="app-target-age-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="deplete-age-tip-app"
@@ -302,15 +366,28 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="deplete-age-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">Lump Sum Year Offset</label>
+          <label className="block text-left">
+            Lump Sum Year Offset
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-lump-offset-info"
+              data-tooltip-content="Years from start to withdraw lump sum"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             className="w-full border p-2 rounded"
             {...register('lump_sum_year_offset', { min: 0 })}
           />
+
+          <Tooltip id="app-lump-offset-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="ls-offset-tip-app"
@@ -323,16 +400,29 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="ls-offset-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">Lump Sum Amount</label>
+          <label className="block text-left">
+            Lump Sum Amount
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-lump-amount-info"
+              data-tooltip-content="One-time withdrawal amount"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             step="any"
             className="w-full border p-2 rounded"
             {...register('lump_sum_amount', { min: 0 })}
           />
+
+          <Tooltip id="app-lump-amount-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="ls-amount-tip-app"
@@ -345,16 +435,29 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="ls-amount-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">Loan Interest Rate (%)</label>
+          <label className="block text-left">
+            Loan Interest Rate (%)
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-interest-rate-info"
+              data-tooltip-content="Interest rate on borrowed amount"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             step="any"
             className="w-full border p-2 rounded"
             {...register('loan_interest_rate_pct', { min: 0, max: 100 })}
           />
+
+          <Tooltip id="app-interest-rate-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="loan-rate-tip-app"
@@ -367,16 +470,29 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="loan-rate-tip-app" place="top" />
+
         </div>
 
         <div>
-          <label className="block text-left">Loan Amount as % of RRIF</label>
+          <label className="block text-left">
+            Loan Amount as % of RRIF
+            <span
+              className="ml-1 text-sm text-blue-600 cursor-pointer"
+              data-tooltip-id="app-loan-pct-info"
+              data-tooltip-content="Loan size as percentage of RRIF"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="number"
             step="any"
             className="w-full border p-2 rounded"
             {...register('loan_amount_as_pct_of_rrif', { min: 0, max: 100 })}
           />
+
+          <Tooltip id="app-loan-pct-info" place="top" />
+
           <span
             className="ml-1 text-sm text-blue-600 cursor-pointer"
             data-tooltip-id="loan-pct-tip-app"
@@ -389,6 +505,7 @@ function App() {
             ℹ️
           </span>
           <Tooltip id="loan-pct-tip-app" place="top" />
+
         </div>
 
         <button
