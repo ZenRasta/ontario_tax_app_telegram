@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Individual withdrawal strategies."""

@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Pydantic data models."""

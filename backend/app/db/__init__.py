@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Database session management and schemas."""

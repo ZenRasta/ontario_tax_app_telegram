@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""Version 1 of the API."""

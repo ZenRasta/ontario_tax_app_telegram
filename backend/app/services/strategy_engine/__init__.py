@@ -1,1 +1,1 @@
-# TODO: Implement Python module
+"""RRIF strategy engine."""
