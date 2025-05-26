@@ -1,8 +1,8 @@
 # app/main.py
 """
-FastAPI entry‑point.
+FastAPI entry-point.
 
-Run dev server:
+Dev server:
     poetry run uvicorn app.main:app --reload
 """
 
@@ -12,26 +12,21 @@ import logging
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.data_models.results import (
     CompareResponse as CompareApiResponse,
-)
-from app.data_models.results import (
     ComparisonResponseItem,
     MonteCarloPath,
     SummaryMetrics,
-)
-from app.data_models.results import (
     SimulationResponse as SimulationApiResponse,
 )
 from app.data_models.scenario import (
     CompareRequest,
     GoalEnum,
-
     ScenarioInput,
     SimulateRequest,
     StrategyCodeEnum,
@@ -53,12 +48,12 @@ logging.basicConfig(
 logger = logging.getLogger("rrif_api")
 
 # ------------------------------------------------------------------ #
-# top‑level FastAPI app
+# top-level FastAPI app
 # ------------------------------------------------------------------ #
 app = FastAPI(
     title=settings.APP_NAME,
     version="0.1.0",
-    description="Simulate tax‑efficient RRIF/RRSP withdrawal strategies",
+    description="Simulate tax-efficient RRIF/RRSP withdrawal strategies",
 )
 
 app.add_middleware(
@@ -70,7 +65,14 @@ app.add_middleware(
 )
 
 # ------------------------------------------------------------------ #
-# database init (runs once at start‑up)
+# include v1 simulation router (defined in app/api/v1/simulate.py)
+# ------------------------------------------------------------------ #
+from app.api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
+
+app.include_router(simulate_router)
+
+# ------------------------------------------------------------------ #
+# database init (runs once at start-up)
 # ------------------------------------------------------------------ #
 @app.on_event("startup")
 async def _init_db() -> None:
@@ -83,7 +85,7 @@ async def _init_db() -> None:
 # ------------------------------------------------------------------ #
 engine = StrategyEngine(tax_year_data_loader=load_tax_year_data)
 
-mc_service = MonteCarloService(                       # NEW
+mc_service = MonteCarloService(
     engine_factory=lambda: StrategyEngine(tax_year_data_loader=load_tax_year_data),
     n_trials=1_000,
 )
@@ -97,19 +99,18 @@ def _strategy_display(code: StrategyCodeEnum) -> str:
 
 
 def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
-    """Very simple goal ➜ strategies mapping."""
     if goal == GoalEnum.MINIMIZE_TAX:
         return [StrategyCodeEnum.BF, StrategyCodeEnum.SEQ, StrategyCodeEnum.GM]
-    elif goal == GoalEnum.MAXIMIZE_SPENDING:
+    if goal == GoalEnum.MAXIMIZE_SPENDING:
         return [StrategyCodeEnum.CD, StrategyCodeEnum.GM, StrategyCodeEnum.LS]
-    elif goal == GoalEnum.PRESERVE_ESTATE:
+    if goal == GoalEnum.PRESERVE_ESTATE:
         return [StrategyCodeEnum.EBX, StrategyCodeEnum.LS, StrategyCodeEnum.SEQ]
-    elif goal == GoalEnum.SIMPLIFY:
+    if goal == GoalEnum.SIMPLIFY:
         return [StrategyCodeEnum.MIN, StrategyCodeEnum.GM]
     return [StrategyCodeEnum.GM]
 
 # ------------------------------------------------------------------ #
-# API router (mounted under /api/v1 by default)
+# legacy router (deterministic + MC endpoints) – mounted at /api
 # ------------------------------------------------------------------ #
 router = APIRouter()
 
@@ -145,15 +146,15 @@ async def list_strategies(goal: Optional[GoalEnum] = None) -> StrategiesResponse
     recommended = _auto_strategies(goal) if goal else []
     return StrategiesResponse(strategies=ALL_STRATEGIES, recommended=recommended)
 
+
 # ---------- deterministic simulation --------------------------------
 @router.post("/simulate", response_model=SimulationApiResponse, tags=["Simulation"])
 async def simulate(req: SimulateRequest):
     logger.info("simulate request_id=%s strategy=%s", req.request_id, req.strategy_code)
-
     if req.scenario is None:
-        raise HTTPException(status_code=422, detail="scenario is required")
+        raise HTTPException(422, "scenario is required")
     if req.strategy_code is None:
-        raise HTTPException(status_code=422, detail="strategy_code is required")
+        raise HTTPException(422, "strategy_code is required")
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)
@@ -171,19 +172,19 @@ async def simulate(req: SimulateRequest):
 @router.post("/compare", response_model=CompareApiResponse, tags=["Simulation"])
 async def compare(req: CompareRequest):
     logger.info("compare request_id=%s", req.request_id)
-
     if req.scenario is None:
-        raise HTTPException(status_code=422, detail="scenario is required")
+        raise HTTPException(422, "scenario is required")
     if req.strategies is None:
-        raise HTTPException(status_code=422, detail="strategies list is required")
+        raise HTTPException(422, "strategies list is required")
 
     # decide which strategies to run
-    if req.strategies == ["auto"]:
-        codes = _auto_strategies(req.scenario.goal)
-    elif not req.strategies:
+    codes = (
+        _auto_strategies(req.scenario.goal)
+        if req.strategies == ["auto"]
+        else req.strategies or []
+    )
+    if not codes:
         raise HTTPException(400, "strategies list cannot be empty")
-    else:
-        codes = req.strategies
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     items: List[ComparisonResponseItem] = []
@@ -214,46 +215,25 @@ async def compare(req: CompareRequest):
 
     return CompareApiResponse(request_id=req.request_id, comparisons=items)
 
-# ---------- Monte‑Carlo simulation  ----------------------------------
-@router.post(
-    "/simulate_mc",
-    response_model=dict,
-    tags=["Monte‑Carlo"],
-    summary="Run Monte‑Carlo simulation for a single strategy",
-)
+# ---------- Monte-Carlo simulation  ----------------------------------
+@router.post("/simulate_mc", tags=["Monte-Carlo"], response_model=dict)
 async def simulate_mc(req: SimulateRequest):
-    """
-    Returns
-    --------
-    {
-        "request_id": …,
-        "paths": [ MonteCarloPath, … ],
-        "mc_summary": SummaryMetrics   # risk‑focused fields populated
-    }
-    """
     logger.info("simulate_mc request_id=%s strategy=%s", req.request_id, req.strategy_code)
-
     if req.scenario is None:
-        raise HTTPException(status_code=422, detail="scenario is required")
+        raise HTTPException(422, "scenario is required")
     if req.strategy_code is None:
-        raise HTTPException(status_code=422, detail="strategy_code is required")
+        raise HTTPException(422, "strategy_code is required")
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)
 
-    paths: List[MonteCarloPath]
-    mc_summary: SummaryMetrics
     paths, mc_summary = mc_service.run(
         scenario=req.scenario,
         strategy_code=req.strategy_code,
         params=params,
     )
 
-    return {
-        "request_id": req.request_id,
-        "paths": paths,
-        "mc_summary": mc_summary,
-    }
+    return {"request_id": req.request_id, "paths": paths, "mc_summary": mc_summary}
 
 # ---------- health ---------------------------------------------------
 @router.get("/health", tags=["Health"])
@@ -261,7 +241,7 @@ async def health():
     return {"status": "healthy"}
 
 # ------------------------------------------------------------------ #
-# mount router on app
+# mount legacy router under configurable prefix (default: /api)
 # ------------------------------------------------------------------ #
 app.include_router(router, prefix=settings.API_PREFIX)
 

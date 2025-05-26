@@ -244,6 +244,25 @@ class MonteCarloPath(BaseModel):
             }
         }
 
+# ────────────────────────────────────────────────────────────────────────────
+# LIGHT-WEIGHT SUMMARY FOR THE NEW REACT COMPARISON TABLE
+# ────────────────────────────────────────────────────────────────────────────
+class YearlyBalance(BaseModel):
+    year: int
+    portfolio_end: confloat(ge=0)
+
+class ResultSummary(BaseModel):
+    """
+    Minimal payload sent back when the wizard calls /simulate.
+    """
+    strategy_code: StrategyCodeEnum
+    strategy_name: str
+    total_taxes: confloat(ge=0)
+    total_spending: confloat(ge=0)
+    final_estate: confloat(ge=0)
+    yearly_balances: List[YearlyBalance] = []
+
+
 # --------------------------------------------------------------------------- #
 # API Response Wrappers for Simulation Results
 # --------------------------------------------------------------------------- #
