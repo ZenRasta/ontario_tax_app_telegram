@@ -15,7 +15,7 @@ Rules & simplifications
 * Household has ONE RRIF balance (primary).  We notionally “attribute”
   half the withdrawal to each spouse for tax purposes.
 * Other taxable income:
-    – Primary: non‑reg taxable growth.  
+    – Primary: non‑reg taxable growth.
     – Spouse : `spouse.other_income`.
 * CPP/OAS amounts taken at age 65 (no deferral parameters here).
 * Surplus after‑tax cash is reinvested in the non‑registered account.
@@ -27,18 +27,21 @@ Complexity score = 3 (requires dual tax calculations each year).
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
-from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
+from app.services.strategy_engine.engine import register
 from app.services.strategy_engine.strategies.gradual_meltdown import (
-    TOL,
-    MAX_ITER,
     ASSUMED_INFLATION,
+    MAX_ITER,
     TAXABLE_PORTION_NONREG_GROWTH,
+    TOL,
 )
 
+from .base_strategy import BaseStrategy, EngineState, YearScratch
+
+
+@register(StrategyCodeEnum.SEQ.value)
 class SpousalEqualizationStrategy(BaseStrategy):
     code = StrategyCodeEnum.SEQ
     complexity = 3

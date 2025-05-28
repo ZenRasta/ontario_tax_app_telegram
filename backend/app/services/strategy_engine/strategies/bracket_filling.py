@@ -18,14 +18,17 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
-from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
+from app.services.strategy_engine.engine import register
+
+from .base_strategy import BaseStrategy, EngineState, YearScratch
 
 # behavioural constants
 ASSUMED_INFLATION = Decimal("0.02")
 TAXABLE_PORTION_NONREG_GROWTH = Decimal("0.40")
 
 
+@register(StrategyCodeEnum.BF.value)
 class BracketFillingStrategy(BaseStrategy):
     code = StrategyCodeEnum.BF
     complexity = 2

@@ -12,8 +12,10 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
-from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
+from app.services.strategy_engine.engine import register
+
+from .base_strategy import BaseStrategy, EngineState, YearScratch
 
 ASSUMED_INFLATION = Decimal("0.02")
 TAXABLE_PORTION_NONREG_GROWTH = Decimal("0.40")
@@ -21,6 +23,7 @@ MAX_ITER = 20
 TOL = Decimal("1")            # $1 cash‑flow tolerance
 
 
+@register(StrategyCodeEnum.IO.value)
 class InterestOffsetStrategy(BaseStrategy):
     """Alias kept for backward compatibility."""
     code = StrategyCodeEnum.IO

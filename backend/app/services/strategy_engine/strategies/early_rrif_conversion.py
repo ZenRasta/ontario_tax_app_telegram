@@ -27,6 +27,7 @@ from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
 from app.services.strategy_engine import tax_rules
+from app.services.strategy_engine.engine import register
 
 from .base_strategy import BaseStrategy, EngineState, YearScratch
 
@@ -35,6 +36,7 @@ ASSUMED_INFLATION = Decimal("0.02")
 TAXABLE_PORTION_NONREG_GROWTH = Decimal("0.40")
 
 
+@register(StrategyCodeEnum.E65.value)
 class EarlyRRIFConversionStrategy(BaseStrategy):
     code = StrategyCodeEnum.E65
     display_name = "Early RRIF Conversion @65"
