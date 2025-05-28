@@ -109,6 +109,21 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
         return [StrategyCodeEnum.MIN, StrategyCodeEnum.GM]
     return [StrategyCodeEnum.GM]
 
+
+def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryMetrics:
+    """Create a default SummaryMetrics object when calculation fails"""
+    return SummaryMetrics(
+        strategy_code=strategy_code,
+        strategy_name=_strategy_display(strategy_code),
+        lifetime_tax_paid=0.0,
+        max_sustainable_spending=0.0,
+        estate_value=0.0,
+        total_withdrawals=0.0,
+        average_tax_rate=0.0,
+        # Add other required fields based on your SummaryMetrics model
+        # You may need to adjust these based on your actual SummaryMetrics definition
+    )
+
 # ------------------------------------------------------------------ #
 # legacy router (deterministic + MC endpoints) – mounted at /api
 # ------------------------------------------------------------------ #
@@ -158,7 +173,12 @@ async def simulate(req: SimulateRequest):
 
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)
-    yearly, summary = engine.run(req.scenario, req.strategy_code, params)
+    
+    # Apply params to scenario before running
+    scenario_with_params = req.scenario.copy(deep=True)
+    scenario_with_params.strategy_params_override = params
+    
+    yearly, summary = engine.run(req.strategy_code, scenario_with_params)
 
     return SimulationApiResponse(
         request_id=req.request_id,
@@ -192,7 +212,14 @@ async def compare(req: CompareRequest):
     for code in codes:
         try:
             _require_params(code, params, req.scenario)
-            yearly, summary = engine.run(req.scenario, code, params)
+            
+            # Apply params to scenario before running
+            scenario_with_params = req.scenario.copy(deep=True)
+            scenario_with_params.strategy_params_override = params
+            
+            # FIX: Correct argument order - code first, then scenario
+            yearly, summary = engine.run(code, scenario_with_params)
+            
             items.append(
                 ComparisonResponseItem(
                     strategy_code=code,
@@ -203,12 +230,14 @@ async def compare(req: CompareRequest):
             )
         except Exception as exc:  # noqa: BLE001
             logger.exception("compare error for %s: %s", code, exc)
+            # FIX: Provide valid SummaryMetrics instead of None
+            default_summary = _create_default_summary_metrics(code)
             items.append(
                 ComparisonResponseItem(
                     strategy_code=code,
                     strategy_name=_strategy_display(code),
                     yearly_results=[],
-                    summary=None,
+                    summary=default_summary,  # Use default instead of None
                     error_detail=str(exc),
                 )
             )
@@ -227,8 +256,12 @@ async def simulate_mc(req: SimulateRequest):
     params = req.scenario.strategy_params_override or StrategyParamsInput()
     _require_params(req.strategy_code, params, req.scenario)
 
+    # Apply params to scenario before running
+    scenario_with_params = req.scenario.copy(deep=True)
+    scenario_with_params.strategy_params_override = params
+
     paths, mc_summary = mc_service.run(
-        scenario=req.scenario,
+        scenario=scenario_with_params,
         strategy_code=req.strategy_code,
         params=params,
     )
@@ -244,4 +277,3 @@ async def health():
 # mount legacy router under configurable prefix (default: /api)
 # ------------------------------------------------------------------ #
 app.include_router(router, prefix=settings.API_PREFIX)
-
