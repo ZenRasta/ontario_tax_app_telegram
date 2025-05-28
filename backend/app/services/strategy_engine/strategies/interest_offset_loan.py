@@ -97,12 +97,11 @@ class InterestOffsetStrategy(BaseStrategy):
                 age=age,
             )
             tr = tax_rules.calculate_all_taxes(
-                total_taxable_income=float(taxable),
-                age=age,
-                eligible_pension_income=float(elig),
-                oas_income_included_in_taxable=float(oas_gross),
-                tax_year_data=td,
-                province=self.scenario.province,
+                float(taxable),
+                age,
+                float(elig),
+                td,
+                self.scenario.province,
             )
             tot_tax = Decimal(str(tr["total_income_tax"] + tr["oas_clawback"]))
             # cash in hand = gross incomes – tax – interest
@@ -142,12 +141,11 @@ class InterestOffsetStrategy(BaseStrategy):
             age=age,
         )
         tr = tax_rules.calculate_all_taxes(
-            total_taxable_income=float(taxable_income),
-            age=age,
-            eligible_pension_income=float(elig_pension),
-            oas_income_included_in_taxable=float(oas_gross),
-            tax_year_data=td,
-            province=self.scenario.province,
+            float(taxable_income),
+            age,
+            float(elig_pension),
+            td,
+            self.scenario.province,
         )
         total_tax = Decimal(str(tr["total_income_tax"] + tr["oas_clawback"]))
         after_tax_income = taxable_income - total_tax
