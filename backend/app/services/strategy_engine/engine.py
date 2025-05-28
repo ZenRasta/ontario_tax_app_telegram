@@ -18,16 +18,6 @@ from app.data_models.results import ResultSummary, SummaryMetrics, YearlyResult
 from app.data_models.scenario import ScenarioInput, StrategyParamsInput
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
 
-from .strategies import (  # noqa: F401
-    bracket_filling,
-    delay_cpp_oas,
-    early_rrif_conversion,
-    gradual_meltdown,
-    interest_offset_loan,
-    lump_sum_withdrawal,
-    spousal_equalization,
-)
-
 # ------------------------------------------------------------------
 # Existing registry mapping code -> concrete Strategy class
 # (the individual strategy modules register themselves on import)
@@ -180,3 +170,17 @@ class StrategyEngine:
         code_str = code.value if hasattr(code, 'value') else str(code)
 
         return run_single_strategy(code_str, sc, params)
+
+
+# ------------------------------------------------------------------
+# Load strategy modules (registration happens at import time)
+# ------------------------------------------------------------------
+from .strategies import (  # noqa: F401,E402
+    bracket_filling,
+    delay_cpp_oas,
+    early_rrif_conversion,
+    gradual_meltdown,
+    interest_offset_loan,
+    lump_sum_withdrawal,
+    spousal_equalization,
+)
