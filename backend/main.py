@@ -111,7 +111,21 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
 
 
 def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryMetrics:
-    """Return a fully-populated ``SummaryMetrics`` with zeroed values."""
+    """Return a fully-populated ``SummaryMetrics`` with zeroed values.
+
+    ``strategy_complexity_score`` must be at least ``1``.  We therefore try to
+    look up the complexity for the requested strategy and fall back to ``1`` if
+    the lookup fails.
+    """
+
+    complexity = 1
+    strategy_cls = _STRATEGY_REGISTRY.get(strategy_code.value)
+    if strategy_cls is not None:
+        complexity = max(1, getattr(strategy_cls, "complexity", 1))
+    else:
+        meta = next((m for m in ALL_STRATEGIES if m.code == strategy_code), None)
+        if meta:
+            complexity = max(1, meta.default_complexity)
 
     return SummaryMetrics(
         lifetime_tax_paid_nominal=0.0,
@@ -123,7 +137,7 @@ def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryM
         final_total_portfolio_value_nominal=0.0,
         final_total_portfolio_value_pv=0.0,
         net_value_to_heirs_after_final_taxes_pv=0.0,
-        strategy_complexity_score=0,
+        strategy_complexity_score=complexity,
     )
 
 # ------------------------------------------------------------------ #
