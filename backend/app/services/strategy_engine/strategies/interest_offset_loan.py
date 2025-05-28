@@ -69,7 +69,9 @@ class InterestOffsetStrategy(BaseStrategy):
         rrif_age = min(age, spouse_age_this_year) if spouse_age_this_year else age
         min_rrif = Decimal(
             str(
-                tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), rrif_age)
+                tax_rules.get_rrif_min_withdrawal_amount(
+                    float(begin_rrif), rrif_age, td
+                )
             )
         )
 
