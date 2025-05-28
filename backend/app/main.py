@@ -118,8 +118,19 @@ def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryM
     ``SummaryMetrics`` model no longer exposes attributes like
     ``lifetime_tax_paid`` or ``estate_value``.  Instead it contains a
     smaller set of mandatory fields.  To ensure validation succeeds we
-    initialise each required field with ``0`` (or ``0.0``).
+    initialise each required field with ``0`` (or ``0.0``).  ``strategy_complexity_score``
+    must be at least ``1`` so we attempt to look up the default complexity for the
+    given strategy and fall back to ``1`` if unavailable.
     """
+
+    complexity = 1
+    strategy_cls = _STRATEGY_REGISTRY.get(strategy_code.value)
+    if strategy_cls is not None:
+        complexity = max(1, getattr(strategy_cls, "complexity", 1))
+    else:
+        meta = next((m for m in ALL_STRATEGIES if m.code == strategy_code), None)
+        if meta:
+            complexity = max(1, meta.default_complexity)
 
     return SummaryMetrics(
         lifetime_tax_paid_nominal=0.0,
@@ -131,7 +142,7 @@ def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryM
         final_total_portfolio_value_nominal=0.0,
         final_total_portfolio_value_pv=0.0,
         net_value_to_heirs_after_final_taxes_pv=0.0,
-        strategy_complexity_score=0,
+        strategy_complexity_score=complexity,
     )
 
 # ------------------------------------------------------------------ #
