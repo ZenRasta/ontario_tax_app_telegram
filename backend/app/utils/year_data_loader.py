@@ -108,7 +108,12 @@ def _load_single_year(year: int) -> Dict[str, TaxYearData] | None:
     with path.open(encoding="utf-8") as fh:
         raw: Dict[str, Any] = _parse_stream(fh)
 
-    block = raw[str(year)] if str(year) in raw else raw
+    if str(year) in raw:
+        block = raw[str(year)]
+    elif year in raw:
+        block = raw[year]
+    else:
+        block = raw
     return _normalise_year_block(block)
 
 
