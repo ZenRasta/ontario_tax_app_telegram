@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple, Type
 
+from app.utils.year_data_loader import load_tax_year_data
+
 from app.data_models.results import ResultSummary, SummaryMetrics, YearlyResult
 from app.data_models.scenario import ScenarioInput, StrategyParamsInput
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
@@ -39,7 +41,12 @@ def register(code: str):
 # Existing helper for single-strategy execution (updated to handle params)
 # ------------------------------------------------------------------
 
-def run_single_strategy(code: str, scenario: ScenarioInput, params: StrategyParamsInput = None) -> SummaryMetrics:
+def run_single_strategy(
+    code: str,
+    scenario: ScenarioInput,
+    params: StrategyParamsInput | None = None,
+    tax_loader=load_tax_year_data,
+) -> SummaryMetrics:
     # FIX: Convert enum to string if necessary
     code_str = code.value if hasattr(code, 'value') else str(code)
 
@@ -50,26 +57,32 @@ def run_single_strategy(code: str, scenario: ScenarioInput, params: StrategyPara
             f"Unknown strategy code '{code_str}'. Available strategies: {list(_STRATEGY_REGISTRY.keys())}"
         ) from err
 
-    # Apply parameters to scenario if provided
-    if params:
+    # Determine parameters to use
+    if params is not None:
         scenario = scenario.copy(deep=True)
         scenario.strategy_params_override = params
+        params_obj = params
+    else:
+        params_obj = scenario.strategy_params_override or StrategyParamsInput()
 
-    engine = strategy_cls(scenario)
-    return engine.run()                 # returns SummaryMetrics
+    engine = strategy_cls(scenario, params_obj, tax_loader)
+    return engine.run()  # returns SummaryMetrics
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # ★ NEW batch helper – returns List[ResultSummary] for wizard UI
 # ────────────────────────────────────────────────────────────────────────────
-def run_strategy_batch(scenario: ScenarioInput) -> List[ResultSummary]:
+def run_strategy_batch(
+    scenario: ScenarioInput,
+    tax_loader=load_tax_year_data,
+) -> List[ResultSummary]:
     """
     Loop over the user-selected strategy codes and build a
     ResultSummary for each (thin wrapper around existing logic).
     """
     summaries: List[ResultSummary] = []
     for code in scenario.strategies:
-        metrics: SummaryMetrics = run_single_strategy(code, scenario)
+        metrics: SummaryMetrics = run_single_strategy(code, scenario, tax_loader=tax_loader)
 
         # convert SummaryMetrics into the lightweight ResultSummary
         summaries.append(
@@ -108,7 +121,7 @@ class StrategyEngine:
         **_ignored,                  # swallow any other old kwargs
     ):
         self.scenario = scenario
-        self.tax_year_data_loader = tax_year_data_loader
+        self.tax_year_data_loader = tax_year_data_loader or load_tax_year_data
 
     # ---------- legacy instance methods ---------------------------
     def run(self, code: str, scenario: ScenarioInput | None = None, params: StrategyParamsInput = None) -> Tuple[List[Any], SummaryMetrics]:
@@ -126,10 +139,13 @@ class StrategyEngine:
         # FIX: Convert enum to string if necessary
         code_str = code.value if hasattr(code, 'value') else str(code)
 
-        # Apply parameters to scenario if provided
-        if params:
+        # Determine parameters
+        if params is not None:
             sc = sc.copy(deep=True)
             sc.strategy_params_override = params
+            params_obj = params
+        else:
+            params_obj = sc.strategy_params_override or StrategyParamsInput()
 
         try:
             strategy_cls = _STRATEGY_REGISTRY[code_str]
@@ -139,7 +155,7 @@ class StrategyEngine:
             ) from err
 
         # Create and run the strategy
-        engine = strategy_cls(sc)
+        engine = strategy_cls(sc, params_obj, self.tax_year_data_loader)
         summary_metrics = engine.run()  # This returns SummaryMetrics
 
         # Extract yearly results from summary_metrics if available
@@ -157,7 +173,7 @@ class StrategyEngine:
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        return run_strategy_batch(sc)
+        return run_strategy_batch(sc, self.tax_year_data_loader)
 
     # ---------- Alternative single-result method for backward compatibility -------
     def run_single(self, code: str, scenario: ScenarioInput | None = None, params: StrategyParamsInput = None) -> SummaryMetrics:
@@ -169,7 +185,7 @@ class StrategyEngine:
         # FIX: Convert enum to string if necessary
         code_str = code.value if hasattr(code, 'value') else str(code)
 
-        return run_single_strategy(code_str, sc, params)
+        return run_single_strategy(code_str, sc, params, self.tax_year_data_loader)
 
 
 # ------------------------------------------------------------------
