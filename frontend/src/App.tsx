@@ -55,7 +55,7 @@ const App: React.FC = () => {
     strategies: [],
   });
   const [currentStep, setCurrentStep] = useState(1);
-  const [resultsData, setResultsData] = useState<any>(null);
+  const [resultsData, setResultsData] = useState<any[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /* helpers --------------------------------------------------------- */
@@ -138,7 +138,7 @@ const App: React.FC = () => {
       }
 
       const result = await res.json();
-      setResultsData(result);
+      setResultsData(result.comparisons);
       setCurrentStep(4);
     } catch (err: unknown) {
       console.error("Simulation failed", err);
@@ -200,7 +200,7 @@ const App: React.FC = () => {
         )}
 
         {/* ── Step 4 – results ───────────────────────────────────── */}
-        {currentStep === 4 && resultsData && (
+        {currentStep === 4 && resultsData && resultsData.length > 0 && (
           <ResultsPage
             goal={formData.goal}
             strategies={formData.strategies}

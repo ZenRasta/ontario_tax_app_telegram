@@ -4,7 +4,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, Butt
 interface ResultsPageProps {
   goal: string;
   strategies: string[];
-  results: any;  // assume results is an array of result objects for each strategy
+  results: any[];  // array of result objects for each strategy
   onBack: () => void;
   onStartOver: () => void;
 }
