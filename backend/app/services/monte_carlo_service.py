@@ -30,7 +30,7 @@ class MonteCarloService:
     ) -> Tuple[List[MonteCarloPath], SummaryMetrics]:
         """Run Monte‑Carlo simulation for a given scenario and strategy."""
         engine = self.engine_factory()
-        yearly, summary = engine.run(scenario, strategy_code, params)
+        yearly, summary = engine.run(strategy_code, scenario, params)
 
         mean = scenario.expect_return_pct / 100.0
         sigma = scenario.stddev_return_pct / 100.0
