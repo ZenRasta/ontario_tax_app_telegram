@@ -160,3 +160,25 @@ class BaseStrategy(ABC):
             sequence_risk_score=None,
             strategy_complexity_score=self.complexity,
         )
+
+    # ------------------------------------------------------------------ #
+    def run(self) -> SummaryMetrics:
+        """Execute the strategy for the full projection horizon."""
+        # 1. Create initial state with starting balances
+        state = EngineState.initial(self.scenario, self.start_year)
+
+        # 2. Iterate through each projection year and run strategy logic
+        for idx in range(self.scenario.life_expectancy_years):
+            self.run_year(idx, state)
+
+        # 3. Convert scratch rows to YearlyResult objects
+        yearly_results = self.build_yearly_results(state)
+
+        # 4. Build aggregated summary metrics
+        summary = self.build_summary(yearly_results)
+
+        # 5. Store yearly results for external access
+        self.yearly_results = yearly_results
+
+        # 6. Return summary metrics
+        return summary
