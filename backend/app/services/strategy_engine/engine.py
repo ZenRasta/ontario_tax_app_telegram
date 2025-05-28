@@ -12,12 +12,21 @@ backend/app/services/strategy_engine/strategies/*.py
 
 from __future__ import annotations
 
-from typing import List, Dict, Type, Tuple, Any
+from typing import Any, Dict, List, Tuple, Type
 
-from app.data_models.scenario import ScenarioInput, StrategyParamsInput
 from app.data_models.results import ResultSummary, SummaryMetrics, YearlyResult
+from app.data_models.scenario import ScenarioInput, StrategyParamsInput
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
 
+from .strategies import (  # noqa: F401
+    bracket_filling,
+    delay_cpp_oas,
+    early_rrif_conversion,
+    gradual_meltdown,
+    interest_offset_loan,
+    lump_sum_withdrawal,
+    spousal_equalization,
+)
 
 # ------------------------------------------------------------------
 # Existing registry mapping code -> concrete Strategy class
@@ -43,17 +52,19 @@ def register(code: str):
 def run_single_strategy(code: str, scenario: ScenarioInput, params: StrategyParamsInput = None) -> SummaryMetrics:
     # FIX: Convert enum to string if necessary
     code_str = code.value if hasattr(code, 'value') else str(code)
-    
+
     try:
         strategy_cls = _STRATEGY_REGISTRY[code_str]
-    except KeyError:
-        raise ValueError(f"Unknown strategy code '{code_str}'. Available strategies: {list(_STRATEGY_REGISTRY.keys())}")
-    
+    except KeyError as err:
+        raise ValueError(
+            f"Unknown strategy code '{code_str}'. Available strategies: {list(_STRATEGY_REGISTRY.keys())}"
+        ) from err
+
     # Apply parameters to scenario if provided
     if params:
         scenario = scenario.copy(deep=True)
         scenario.strategy_params_override = params
-    
+
     engine = strategy_cls(scenario)
     return engine.run()                 # returns SummaryMetrics
 
@@ -113,7 +124,7 @@ class StrategyEngine:
     def run(self, code: str, scenario: ScenarioInput | None = None, params: StrategyParamsInput = None) -> Tuple[List[Any], SummaryMetrics]:
         """
         Run a single strategy and return both yearly results and summary.
-        
+
         FIX: Updated to return tuple (yearly_results, summary) as expected by main.py
         FIX: Added params parameter to handle strategy parameters
         FIX: Ensure code is string value for registry lookup
@@ -121,31 +132,33 @@ class StrategyEngine:
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        
+
         # FIX: Convert enum to string if necessary
         code_str = code.value if hasattr(code, 'value') else str(code)
-        
+
         # Apply parameters to scenario if provided
         if params:
             sc = sc.copy(deep=True)
             sc.strategy_params_override = params
-        
+
         try:
             strategy_cls = _STRATEGY_REGISTRY[code_str]
-        except KeyError:
-            raise ValueError(f"Unknown strategy code '{code_str}'. Available strategies: {list(_STRATEGY_REGISTRY.keys())}")
-        
+        except KeyError as err:
+            raise ValueError(
+                f"Unknown strategy code '{code_str}'. Available strategies: {list(_STRATEGY_REGISTRY.keys())}"
+            ) from err
+
         # Create and run the strategy
         engine = strategy_cls(sc)
         summary_metrics = engine.run()  # This returns SummaryMetrics
-        
+
         # Extract yearly results from summary_metrics if available
         yearly_results = []
         if hasattr(summary_metrics, 'yearly_results') and summary_metrics.yearly_results:
             yearly_results = summary_metrics.yearly_results
         elif hasattr(engine, 'yearly_results') and engine.yearly_results:
             yearly_results = engine.yearly_results
-        
+
         # Return tuple as expected by main.py: (yearly_results, summary)
         return yearly_results, summary_metrics
 
@@ -162,8 +175,8 @@ class StrategyEngine:
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        
+
         # FIX: Convert enum to string if necessary
         code_str = code.value if hasattr(code, 'value') else str(code)
-        
+
         return run_single_strategy(code_str, sc, params)

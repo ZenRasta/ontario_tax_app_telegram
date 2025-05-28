@@ -25,9 +25,11 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
 
-from app.data_models.scenario import StrategyCodeEnum, StrategyParamsInput
-from .base_strategy import BaseStrategy, EngineState, YearScratch
+from app.data_models.scenario import StrategyCodeEnum
 from app.services.strategy_engine import tax_rules
+from app.services.strategy_engine.engine import register
+
+from .base_strategy import BaseStrategy, EngineState, YearScratch
 
 ASSUMED_INFLATION = Decimal("0.02")
 TAXABLE_PORTION_NONREG_GROWTH = Decimal("0.40")
@@ -35,6 +37,7 @@ MAX_ITER = 20
 TOL = Decimal("1")  # $1 tolerance for cash shortfall
 
 
+@register(StrategyCodeEnum.GM.value)
 class GradualMeltdownStrategy(BaseStrategy):
     code = StrategyCodeEnum.GM
     complexity = 1
@@ -215,6 +218,7 @@ class GradualMeltdownStrategy(BaseStrategy):
         return high  # fallback
 
 
+@register(StrategyCodeEnum.EBX.value)
 class EmptyByXStrategy(GradualMeltdownStrategy):
     """Variant requiring target_depletion_age parameter."""
 
