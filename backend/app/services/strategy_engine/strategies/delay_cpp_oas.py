@@ -102,7 +102,7 @@ class DelayCppOasStrategy(BaseStrategy):
         min_rrif = Decimal(
             str(
                 tax_rules.get_rrif_min_withdrawal_amount(
-                    float(begin_rrif), rrif_age
+                    float(begin_rrif), rrif_age, td
                 )
             )
         )

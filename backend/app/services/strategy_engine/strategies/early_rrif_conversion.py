@@ -72,7 +72,7 @@ class EarlyRRIFConversionStrategy(BaseStrategy):
             gross_rrif = Decimal(
                 str(
                     tax_rules.get_rrif_min_withdrawal_amount(
-                        float(begin_rrif), age
+                        float(begin_rrif), age, td
                     )
                 )
             )
