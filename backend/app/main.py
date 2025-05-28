@@ -111,17 +111,27 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
 
 
 def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryMetrics:
-    """Create a default SummaryMetrics object when calculation fails"""
+    """Return a fully-populated ``SummaryMetrics`` instance with zeros.
+
+    The helper is used when a strategy fails to run and we still need to
+    provide a ``SummaryMetrics`` object for the API response.  The new
+    ``SummaryMetrics`` model no longer exposes attributes like
+    ``lifetime_tax_paid`` or ``estate_value``.  Instead it contains a
+    smaller set of mandatory fields.  To ensure validation succeeds we
+    initialise each required field with ``0`` (or ``0.0``).
+    """
+
     return SummaryMetrics(
-        strategy_code=strategy_code,
-        strategy_name=_strategy_display(strategy_code),
-        lifetime_tax_paid=0.0,
-        max_sustainable_spending=0.0,
-        estate_value=0.0,
-        total_withdrawals=0.0,
-        average_tax_rate=0.0,
-        # Add other required fields based on your SummaryMetrics model
-        # You may need to adjust these based on your actual SummaryMetrics definition
+        lifetime_tax_paid_nominal=0.0,
+        lifetime_tax_paid_pv=0.0,
+        average_effective_tax_rate=0.0,
+        years_in_oas_clawback=0,
+        total_oas_clawback_paid_nominal=0.0,
+        average_annual_real_spending=0.0,
+        final_total_portfolio_value_nominal=0.0,
+        final_total_portfolio_value_pv=0.0,
+        net_value_to_heirs_after_final_taxes_pv=0.0,
+        strategy_complexity_score=0,
     )
 
 # ------------------------------------------------------------------ #

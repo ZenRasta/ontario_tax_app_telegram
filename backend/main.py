@@ -111,17 +111,9 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
 
 
 def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryMetrics:
-    """Create a default SummaryMetrics object when calculation fails"""
+    """Return a fully-populated ``SummaryMetrics`` with zeroed values."""
+
     return SummaryMetrics(
-        strategy_code=strategy_code,
-        strategy_name=_strategy_display(strategy_code),
-        # Original fields (if they exist)
-        lifetime_tax_paid=0.0,
-        max_sustainable_spending=0.0,
-        estate_value=0.0,
-        total_withdrawals=0.0,
-        average_tax_rate=0.0,
-        # Required fields from the error message
         lifetime_tax_paid_nominal=0.0,
         lifetime_tax_paid_pv=0.0,
         average_effective_tax_rate=0.0,
@@ -132,7 +124,6 @@ def _create_default_summary_metrics(strategy_code: StrategyCodeEnum) -> SummaryM
         final_total_portfolio_value_pv=0.0,
         net_value_to_heirs_after_final_taxes_pv=0.0,
         strategy_complexity_score=0,
-        # Add any other fields that might be required
     )
 
 # ------------------------------------------------------------------ #
