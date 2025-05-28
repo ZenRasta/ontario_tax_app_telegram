@@ -243,7 +243,13 @@ class SimulateRequest(BaseModel):
 
         if code == StrategyCodeEnum.BF:
             if params.bracket_fill_ceiling is None:
-                params.bracket_fill_ceiling = td["oas_clawback_threshold"]
+                if "oas_clawback_threshold" in td:
+                    params.bracket_fill_ceiling = td["oas_clawback_threshold"]
+                else:
+                    raise ValueError(
+                        "Tax data missing 'oas_clawback_threshold'; cannot "
+                        "default bracket_fill_ceiling"
+                    )
 
         if code == StrategyCodeEnum.LS:
             if params.lump_sum_amount is None:
