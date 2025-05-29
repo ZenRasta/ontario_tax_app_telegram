@@ -40,6 +40,7 @@ TOL = Decimal("1")  # $1 tolerance for cash shortfall
 @register(StrategyCodeEnum.GM.value)
 class GradualMeltdownStrategy(BaseStrategy):
     code = StrategyCodeEnum.GM
+    display_name = "Gradual Meltdown"
     complexity = 1
 
     # ------------------------------------------------------------------ #
@@ -223,6 +224,7 @@ class EmptyByXStrategy(GradualMeltdownStrategy):
     """Variant requiring target_depletion_age parameter."""
 
     code = StrategyCodeEnum.EBX
+    display_name = "Empty by Target Age"
     complexity = 2
 
     def validate_params(self) -> None:  # noqa: D401

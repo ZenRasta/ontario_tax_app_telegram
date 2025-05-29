@@ -44,6 +44,7 @@ from .base_strategy import BaseStrategy, EngineState, YearScratch
 @register(StrategyCodeEnum.SEQ.value)
 class SpousalEqualizationStrategy(BaseStrategy):
     code = StrategyCodeEnum.SEQ
+    display_name = "Spousal Equalisation"
     complexity = 3
 
     def validate_params(self) -> None:  # noqa: D401
