@@ -98,12 +98,30 @@ def get_rrif_min_withdrawal_amount(fmv: float, age: int, tax_data: TaxYearData) 
 # --------------------------------------------------------------------------- #
 
 
-def calculate_oas_clawback(income: float, td: TaxYearData) -> float:
+def calculate_oas_clawback(
+    income: float,
+    td: TaxYearData,
+    oas_start_age: int | None = None,
+    oas_benefit: float | None = None,
+) -> float:
+    """Return OAS clawback based on income and start age/benefit."""
+
     thresh = td["oas_clawback_threshold"]
     if income <= thresh:
         return 0.0
+
     claw = (income - thresh) * td["oas_clawback_rate"]
-    return min(claw, td["oas_max_benefit_at_65"])
+
+    # Determine maximum recoverable amount
+    if oas_benefit is not None:
+        max_benefit = oas_benefit
+    else:
+        start_age = oas_start_age or 65
+        max_benefit = get_adjusted_oas_benefit(
+            td["oas_max_benefit_at_65"], start_age, td
+        )
+
+    return min(claw, max_benefit)
 
 
 # --------------------------------------------------------------------------- #
@@ -260,11 +278,19 @@ def calculate_all_taxes(
     pension_inc: float,
     td: TaxYearData,
     province: str = "ON",
+    *,
+    oas_start_age: int | None = None,
+    oas_benefit: float | None = None,
 ) -> TaxCalculationResult:
     if province != "ON":
         raise NotImplementedError("Only Ontario implemented.")
 
-    oas_claw = calculate_oas_clawback(income, td)
+    oas_claw = calculate_oas_clawback(
+        income,
+        td,
+        oas_start_age=oas_start_age,
+        oas_benefit=oas_benefit,
+    )
     fed = calculate_federal_tax(income, age, pension_inc, td)
     prov, surtax = calculate_ontario_tax(income, age, pension_inc, td)
 

@@ -120,7 +120,11 @@ class BracketFillingStrategy(BaseStrategy):
             age, float(gross_rrif), float(db_pension)
         )
         tax = tax_rules.calculate_all_taxes(
-            float(taxable_income), age, float(elig_pension), td
+            float(taxable_income),
+            age,
+            float(elig_pension),
+            td,
+            oas_start_age=oas_start_age,
         )
         total_tax = Decimal(str(tax["total_income_tax"] + tax["oas_clawback"]))
         after_tax_income = taxable_income - total_tax

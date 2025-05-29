@@ -81,3 +81,20 @@ def test_tax_calculations(income):
     expected = CASES[income]
     for key, val in expected.items():
         assert Decimal(str(res[key])).quantize(Decimal('0.01')) == val
+
+
+def test_oas_clawback_deferral():
+    start_age = 70
+    res = tax_rules.calculate_all_taxes(
+        280000,
+        age=start_age,
+        pension_inc=0,
+        td=TD_2025,
+        oas_start_age=start_age,
+    )
+    expected = tax_rules.get_adjusted_oas_benefit(
+        TD_2025['oas_max_benefit_at_65'], start_age, TD_2025
+    )
+    assert Decimal(str(res['oas_clawback'])).quantize(Decimal('0.01')) == Decimal(
+        str(expected)
+    ).quantize(Decimal('0.01'))
