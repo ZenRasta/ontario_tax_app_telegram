@@ -1,5 +1,15 @@
 import React, { useMemo } from 'react';
-import { Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+} from '@mui/material';
+import StrategyChart from './StrategyChart';
 
 import type { ComparisonResponseItem } from '../types/api';
 
@@ -139,13 +149,17 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
         </TableBody>
       </Table>
 
-      {/* Placeholder for visuals (charts) */}
       <Box my={3}>
-        <Typography variant="subtitle1">Strategy Outcomes Visualized:</Typography>
-        {/* For each strategy, we could include a chart (e.g., portfolio value over time, spending over time, etc.) */}
-        {/* For brevity, actual chart implementation is omitted. In practice, use a chart library (like recharts or Chart.js) to plot results. */}
-        {/* Example placeholder: */}
-        {/* results.map(res => <StrategyChart key={res.strategy_code} data={res.yearly_balances} title={res.strategy_name} />) */}
+        <Typography variant="subtitle1" gutterBottom>
+          Strategy Outcomes Visualized:
+        </Typography>
+        {processedResults.map((res: ComparisonResponseItem) => (
+          <StrategyChart
+            key={res.strategy_code}
+            title={res.strategy_name}
+            data={res.yearly_balances || []}
+          />
+        ))}
       </Box>
 
       {/* Navigation Buttons */}

@@ -63,7 +63,11 @@ export interface SummaryMetrics {
 export interface ComparisonResponseItem {
   strategy_code: string;
   strategy_name: string;
-  yearly_results: unknown[]; // YearlyResult not yet typed
+  yearly_results?: unknown[]; // YearlyResult not yet typed
+  yearly_balances?: { year: number; portfolio_end: number }[];
   summary: SummaryMetrics;
+  total_taxes?: number;
+  total_spending?: number;
+  final_estate?: number;
 }
 
