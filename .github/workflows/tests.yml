@@ -15,5 +15,7 @@ jobs:
       - uses: abatilo/actions-poetry@v2
       - name: Install dependencies
         run: cd backend && poetry install --no-interaction
+      - name: Check PyYAML availability
+        run: python -c "import yaml, sys; print('PyYAML:', yaml.__version__)"
       - name: Run tests
         run: cd backend && poetry run pytest

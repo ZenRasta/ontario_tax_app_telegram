@@ -20,6 +20,8 @@ jobs:
         run: pip install poetry
       - name: Install dependencies
         run: poetry install
+      - name: Check PyYAML availability
+        run: python -c "import yaml, sys; print('PyYAML:', yaml.__version__)"
       - name: Run lint
         run: poetry run ruff check .
       - name: Run tests

@@ -55,7 +55,7 @@ def _normalise_year_block(block: dict) -> Dict[str, TaxYearData]:
     return {"ON": block}  # treat flat mapping as Ontario
 
 
-def _parse_stream(fh) -> Dict[str, Any]:
+def _parse_stream(fh, source: str | Path | None = None) -> Dict[str, Any]:
     """
     Parse a file-handle:
 
@@ -78,9 +78,10 @@ def _parse_stream(fh) -> Dict[str, Any]:
     try:
         return json.loads(text) or {}
     except json.JSONDecodeError as exc:  # neither YAML nor JSON worked
+        loc = f" at {source}" if source else ""
         raise ValueError(
-            "Unable to parse tax tables: PyYAML missing / stubbed and "
-            "file is not valid JSON.  Install `pyyaml` or convert the "
+            "Unable to parse tax tables" + loc + ": PyYAML missing / stubbed "
+            "and file is not valid JSON. Install `pyyaml` or convert the "
             "YAML file to JSON syntax."
         ) from exc
 
@@ -91,7 +92,7 @@ def _load_yaml() -> Dict[int, Dict[str, TaxYearData]]:
         raise FileNotFoundError(f"tax_years.yml not found at {DATA_PATH}")
 
     with DATA_PATH.open(encoding="utf-8") as fh:
-        raw: Dict[str, Any] = _parse_stream(fh)
+        raw: Dict[str, Any] = _parse_stream(fh, DATA_PATH)
 
     out: Dict[int, Dict[str, TaxYearData]] = {}
     for yr_str, block in raw.items():
@@ -106,7 +107,7 @@ def _load_single_year(year: int) -> Dict[str, TaxYearData] | None:
         return None
 
     with path.open(encoding="utf-8") as fh:
-        raw: Dict[str, Any] = _parse_stream(fh)
+        raw: Dict[str, Any] = _parse_stream(fh, path)
 
     if str(year) in raw:
         block = raw[str(year)]
