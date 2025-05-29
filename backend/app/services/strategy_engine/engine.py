@@ -16,8 +16,13 @@ from typing import Any, Dict, List, Tuple, Type
 
 from app.utils.year_data_loader import load_tax_year_data
 
-from app.data_models.results import ResultSummary, SummaryMetrics, YearlyResult
+from app.data_models.results import (
+    ResultSummary,
+    SummaryMetrics,
+    YearlyBalance,
+)
 from app.data_models.scenario import ScenarioInput, StrategyParamsInput
+from app.data_models.strategy import get_strategy_meta
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
 
 # ------------------------------------------------------------------
@@ -84,20 +89,34 @@ def run_strategy_batch(
     for code in scenario.strategies:
         metrics: SummaryMetrics = run_single_strategy(code, scenario, tax_loader=tax_loader)
 
+        # Determine strategy display name via metadata helper
+        meta = get_strategy_meta(code)
+        strategy_name = meta.label if meta else (code.value if hasattr(code, "value") else str(code))
+
         # convert SummaryMetrics into the lightweight ResultSummary
         summaries.append(
             ResultSummary(
                 strategy_code=code,
-                strategy_name=metrics.strategy_code.replace('_', ' ').title(),
-                total_taxes=metrics.lifetime_tax_paid,
-                total_spending=metrics.max_sustainable_spending,
-                final_estate=metrics.estate_value,
+                strategy_name=strategy_name,
+                total_taxes=metrics.lifetime_tax_paid_nominal,
+                total_spending=metrics.average_annual_real_spending,
+                final_estate=getattr(
+                    metrics,
+                    "net_value_to_heirs_after_final_taxes_pv",
+                    metrics.final_total_portfolio_value_nominal,
+                ),
                 yearly_balances=[
                     # Only send (year, portfolio_end) – small & chart-friendly
-                    YearlyResult(year=r.year, portfolio_end=r.end_rrif_balance
-                                 + r.end_tfsa_balance + r.end_non_reg_balance)
-                    for r in metrics.yearly_results  # if you store them
-                ] if hasattr(metrics, "yearly_results") else []
+                    YearlyBalance(
+                        year=r.year,
+                        portfolio_end=(
+                            r.end_rrif_balance + r.end_tfsa_balance + r.end_non_reg_balance
+                        ),
+                    )
+                    for r in metrics.yearly_results
+                ]
+                if hasattr(metrics, "yearly_results")
+                else []
             )
         )
     return summaries

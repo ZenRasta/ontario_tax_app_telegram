@@ -262,6 +262,9 @@ class ResultSummary(BaseModel):
     final_estate: confloat(ge=0)
     yearly_balances: List[YearlyBalance] = []
 
+    class Config:
+        use_enum_values = True
+
 
 # --------------------------------------------------------------------------- #
 # API Response Wrappers for Simulation Results
