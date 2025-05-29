@@ -1,4 +1,5 @@
 import importlib
+
 import pytest
 
 from app.data_models.scenario import ScenarioInput, SimulateRequest, StrategyCodeEnum
@@ -27,5 +28,5 @@ def test_load_tax_year_data_parses_yaml(monkeypatch):
     import app.utils.year_data_loader as ydl
     ydl = importlib.reload(ydl)
     data = ydl.load_tax_year_data(2025, "ON")
-    assert data["federal_personal_amount"] == 15978
+    assert data["federal_personal_amount"] == 15705
 

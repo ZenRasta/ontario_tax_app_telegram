@@ -12,6 +12,9 @@ from app.utils import year_data_loader
 
 YEAR_2025 = {
     'federal_personal_amount': 15705,
+    'federal_personal_amount_min': 14156,
+    'federal_personal_amount_phaseout_start': 173205,
+    'federal_personal_amount_phaseout_end': 246752,
     'federal_age_amount': 8396,
     'federal_age_amount_threshold': 43179,
     'federal_pension_income_credit_max': 2000,
