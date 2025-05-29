@@ -10,33 +10,66 @@ interface ResultsPageProps {
 }
 
 const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, onBack, onStartOver }) => {
+  // Normalize result metrics so the rest of the component can rely on them
+  const processedResults = useMemo(() =>
+    results.map((res) => {
+      const totalTaxes =
+        res.total_taxes ?? res.summary?.lifetime_tax_paid_nominal ?? null;
+      const totalSpending =
+        res.total_spending ?? res.summary?.average_annual_real_spending ?? null;
+      const finalEstate =
+        res.final_estate ??
+        res.summary?.net_value_to_heirs_after_final_taxes_pv ??
+        res.summary?.final_total_portfolio_value_nominal ??
+        null;
+
+      return { ...res, totalTaxes, totalSpending, finalEstate };
+    }),
+  [results]);
+
   // Determine recommended best strategy based on goal
   const recommended = useMemo(() => {
-    if (!results || results.length === 0) return null;
-    let bestStrategy = results[0];
+    if (!processedResults || processedResults.length === 0) return null;
+    let bestStrategy = processedResults[0];
     if (goal === 'Minimize Tax') {
-      results.forEach(res => {
-        if (res.total_taxes < bestStrategy.total_taxes) bestStrategy = res;
+      processedResults.forEach((res) => {
+        if (
+          res.totalTaxes !== null &&
+          (bestStrategy.totalTaxes === null || res.totalTaxes < bestStrategy.totalTaxes)
+        ) {
+          bestStrategy = res;
+        }
       });
     } else if (goal === 'Maximize Spending') {
-      results.forEach(res => {
-        if (res.total_spending > bestStrategy.total_spending) bestStrategy = res;
+      processedResults.forEach((res) => {
+        if (
+          res.totalSpending !== null &&
+          (bestStrategy.totalSpending === null ||
+            res.totalSpending > bestStrategy.totalSpending)
+        ) {
+          bestStrategy = res;
+        }
       });
     } else if (goal === 'Preserve Estate') {
-      results.forEach(res => {
-        if (res.final_estate > bestStrategy.final_estate) bestStrategy = res;
+      processedResults.forEach((res) => {
+        if (
+          res.finalEstate !== null &&
+          (bestStrategy.finalEstate === null || res.finalEstate > bestStrategy.finalEstate)
+        ) {
+          bestStrategy = res;
+        }
       });
     } else if (goal === 'Simplify') {
       // For "Simplify", choose the strategy with the fewest interventions (we assume that's the one with minimal strategies or baseline)
-      // Here, as a proxy, pick the one with the lowest totalTaxes (or we could choose a specific baseline strategy if present).
-      results.forEach(res => {
+      // Here, as a proxy, pick the one with the strategy name "RRIF Minimums Only" if present.
+      processedResults.forEach((res) => {
         if (res.strategy_name === 'RRIF Minimums Only') {
           bestStrategy = res;
         }
       });
     }
     return bestStrategy;
-  }, [goal, results]);
+  }, [goal, processedResults]);
 
   return (
     <Box>
@@ -63,15 +96,29 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
           </TableRow>
         </TableHead>
         <TableBody>
-          {results.map((res: any) => (
-            <TableRow key={res.strategy_code}
-              selected={recommended && res.strategy_name === recommended.strategy_name}
-              sx={{ bgcolor: recommended && res.strategy_name === recommended.strategy_name ? 'action.hover' : 'inherit' }}
+          {processedResults.map((res: any) => (
+            <TableRow
+              key={res.strategy_code}
+              selected={
+                recommended && res.strategy_name === recommended.strategy_name
+              }
+              sx={{
+                bgcolor:
+                  recommended && res.strategy_name === recommended.strategy_name
+                    ? 'action.hover'
+                    : 'inherit',
+              }}
             >
               <TableCell>{res.strategy_name}</TableCell>
-              <TableCell align="right">${res.total_taxes.toLocaleString()}</TableCell>
-              <TableCell align="right">${res.total_spending.toLocaleString()}</TableCell>
-              <TableCell align="right">${res.final_estate.toLocaleString()}</TableCell>
+              <TableCell align="right">
+                {res.totalTaxes !== null ? `$${res.totalTaxes.toLocaleString()}` : '—'}
+              </TableCell>
+              <TableCell align="right">
+                {res.totalSpending !== null ? `$${res.totalSpending.toLocaleString()}` : '—'}
+              </TableCell>
+              <TableCell align="right">
+                {res.finalEstate !== null ? `$${res.finalEstate.toLocaleString()}` : '—'}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
