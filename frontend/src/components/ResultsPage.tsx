@@ -6,12 +6,20 @@ import type { ComparisonResponseItem } from '../types/api';
 interface ResultsPageProps {
   goal: string;
   strategies: string[];
+  horizon: number;
   results: ComparisonResponseItem[]; // array of result objects for each strategy
   onBack: () => void;
   onStartOver: () => void;
 }
 
-const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, onBack, onStartOver }) => {
+const ResultsPage: React.FC<ResultsPageProps> = ({
+  goal,
+  strategies,
+  horizon,
+  results,
+  onBack,
+  onStartOver,
+}) => {
   // Normalize result metrics so the rest of the component can rely on them
   const processedResults = useMemo(
     () =>
@@ -87,6 +95,9 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
         )}
       <Typography variant="body1" gutterBottom>
         Based on your goal (<em>{goal}</em>), the strategy above is projected to perform the best among those selected.
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        Projection Horizon: {horizon} years
       </Typography>
 
       {/* Comparison Table for selected strategies */}

@@ -177,6 +177,7 @@ const App: React.FC = () => {
           <ResultsPage
             goal={formData.goal}
             strategies={formData.strategies}
+            horizon={formData.horizon}
             results={resultsData}
             onBack={() => {
               setResultsData(null);
