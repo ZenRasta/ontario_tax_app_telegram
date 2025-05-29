@@ -16,21 +16,21 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
     let bestStrategy = results[0];
     if (goal === 'Minimize Tax') {
       results.forEach(res => {
-        if (res.totalTaxes < bestStrategy.totalTaxes) bestStrategy = res;
+        if (res.total_taxes < bestStrategy.total_taxes) bestStrategy = res;
       });
     } else if (goal === 'Maximize Spending') {
       results.forEach(res => {
-        if (res.totalSpending > bestStrategy.totalSpending) bestStrategy = res;
+        if (res.total_spending > bestStrategy.total_spending) bestStrategy = res;
       });
     } else if (goal === 'Preserve Estate') {
       results.forEach(res => {
-        if (res.finalEstate > bestStrategy.finalEstate) bestStrategy = res;
+        if (res.final_estate > bestStrategy.final_estate) bestStrategy = res;
       });
     } else if (goal === 'Simplify') {
       // For "Simplify", choose the strategy with the fewest interventions (we assume that's the one with minimal strategies or baseline)
       // Here, as a proxy, pick the one with the lowest totalTaxes (or we could choose a specific baseline strategy if present).
       results.forEach(res => {
-        if (res.strategyName === 'RRIF Minimums Only') {
+        if (res.strategy_name === 'RRIF Minimums Only') {
           bestStrategy = res;
         }
       });
@@ -43,11 +43,11 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
       <Typography variant="h6" gutterBottom>
         4. Results & Recommendation
       </Typography>
-      {recommended && (
-        <Typography variant="h5" color="primary" gutterBottom>
-          Recommended Strategy: <strong>{recommended.strategyName}</strong>
-        </Typography>
-      )}
+        {recommended && (
+          <Typography variant="h5" color="primary" gutterBottom>
+            Recommended Strategy: <strong>{recommended.strategy_name}</strong>
+          </Typography>
+        )}
       <Typography variant="body1" gutterBottom>
         Based on your goal (<em>{goal}</em>), the strategy above is projected to perform the best among those selected.
       </Typography>
@@ -64,14 +64,14 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
         </TableHead>
         <TableBody>
           {results.map((res: any) => (
-            <TableRow key={res.strategyCode} 
-              selected={recommended && res.strategyName === recommended.strategyName}
-              sx={{ bgcolor: recommended && res.strategyName === recommended.strategyName ? 'action.hover' : 'inherit' }}
+            <TableRow key={res.strategy_code}
+              selected={recommended && res.strategy_name === recommended.strategy_name}
+              sx={{ bgcolor: recommended && res.strategy_name === recommended.strategy_name ? 'action.hover' : 'inherit' }}
             >
-              <TableCell>{res.strategyName}</TableCell>
-              <TableCell align="right">${res.totalTaxes.toLocaleString()}</TableCell>
-              <TableCell align="right">${res.totalSpending.toLocaleString()}</TableCell>
-              <TableCell align="right">${res.finalEstate.toLocaleString()}</TableCell>
+              <TableCell>{res.strategy_name}</TableCell>
+              <TableCell align="right">${res.total_taxes.toLocaleString()}</TableCell>
+              <TableCell align="right">${res.total_spending.toLocaleString()}</TableCell>
+              <TableCell align="right">${res.final_estate.toLocaleString()}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -83,7 +83,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
         {/* For each strategy, we could include a chart (e.g., portfolio value over time, spending over time, etc.) */}
         {/* For brevity, actual chart implementation is omitted. In practice, use a chart library (like recharts or Chart.js) to plot results. */}
         {/* Example placeholder: */}
-        {/* results.map(res => <StrategyChart key={res.strategyCode} data={res.yearlyBalances} title={res.strategyName} />) */}
+        {/* results.map(res => <StrategyChart key={res.strategy_code} data={res.yearly_balances} title={res.strategy_name} />) */}
       </Box>
 
       {/* Navigation Buttons */}
