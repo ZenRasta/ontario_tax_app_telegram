@@ -292,7 +292,20 @@ async def simulate_mc(req: SimulateRequest):
 async def health():
     return {"status": "healthy"}
 
+
+# ------------------------------------------------------------------ #
+# debug router                                                       #
+# ------------------------------------------------------------------ #
+debug_router = APIRouter(prefix="/debug", tags=["Debug"])
+
+
+@debug_router.get("/strategies")
+async def debug_strategies() -> List[str]:
+    """Return list of registered strategy codes for debugging."""
+    return list(_STRATEGY_REGISTRY.keys())
+
 # ------------------------------------------------------------------ #
 # mount legacy router under configurable prefix (default: /api)
 # ------------------------------------------------------------------ #
 app.include_router(router, prefix=settings.API_PREFIX)
+app.include_router(debug_router, prefix=settings.API_PREFIX)
