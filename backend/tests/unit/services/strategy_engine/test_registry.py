@@ -7,7 +7,8 @@ from app.services.strategy_engine.engine import _STRATEGY_REGISTRY
 class StrategyRegistryTests(unittest.TestCase):
     def test_all_expected_strategies_registered(self) -> None:
         expected = {c.value for c in StrategyCodeEnum if c != StrategyCodeEnum.MIN}
-        self.assertTrue(expected.issubset(set(_STRATEGY_REGISTRY.keys())))
+        registered = set(_STRATEGY_REGISTRY.keys())
+        self.assertEqual(expected, registered)
 
 
 if __name__ == "__main__":
