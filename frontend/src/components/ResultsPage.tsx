@@ -1,38 +1,42 @@
 import React, { useMemo } from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
 
+import type { ComparisonResponseItem } from '../types/api';
+
 interface ResultsPageProps {
   goal: string;
   strategies: string[];
-  results: any[];  // array of result objects for each strategy
+  results: ComparisonResponseItem[]; // array of result objects for each strategy
   onBack: () => void;
   onStartOver: () => void;
 }
 
 const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, onBack, onStartOver }) => {
   // Normalize result metrics so the rest of the component can rely on them
-  const processedResults = useMemo(() =>
-    results.map((res) => {
-      const totalTaxes =
-        res.total_taxes ?? res.summary?.lifetime_tax_paid_nominal ?? null;
-      const totalSpending =
-        res.total_spending ?? res.summary?.average_annual_real_spending ?? null;
+  const processedResults = useMemo(
+    () =>
+      results.map((res: ComparisonResponseItem) => {
+        const totalTaxes =
+          res.total_taxes ?? res.summary?.lifetime_tax_paid_nominal ?? null;
+        const totalSpending =
+          res.total_spending ?? res.summary?.average_annual_real_spending ?? null;
       const finalEstate =
         res.final_estate ??
         res.summary?.net_value_to_heirs_after_final_taxes_pv ??
         res.summary?.final_total_portfolio_value_nominal ??
         null;
 
-      return { ...res, totalTaxes, totalSpending, finalEstate };
-    }),
-  [results]);
+        return { ...res, totalTaxes, totalSpending, finalEstate };
+      }),
+    [results],
+  );
 
   // Determine recommended best strategy based on goal
   const recommended = useMemo(() => {
     if (!processedResults || processedResults.length === 0) return null;
     let bestStrategy = processedResults[0];
     if (goal === 'Minimize Tax') {
-      processedResults.forEach((res) => {
+      processedResults.forEach((res: ComparisonResponseItem) => {
         if (
           res.totalTaxes !== null &&
           (bestStrategy.totalTaxes === null || res.totalTaxes < bestStrategy.totalTaxes)
@@ -41,7 +45,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
         }
       });
     } else if (goal === 'Maximize Spending') {
-      processedResults.forEach((res) => {
+      processedResults.forEach((res: ComparisonResponseItem) => {
         if (
           res.totalSpending !== null &&
           (bestStrategy.totalSpending === null ||
@@ -51,7 +55,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
         }
       });
     } else if (goal === 'Preserve Estate') {
-      processedResults.forEach((res) => {
+      processedResults.forEach((res: ComparisonResponseItem) => {
         if (
           res.finalEstate !== null &&
           (bestStrategy.finalEstate === null || res.finalEstate > bestStrategy.finalEstate)
@@ -62,7 +66,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
     } else if (goal === 'Simplify') {
       // For "Simplify", choose the strategy with the fewest interventions (we assume that's the one with minimal strategies or baseline)
       // Here, as a proxy, pick the one with the strategy name "RRIF Minimums Only" if present.
-      processedResults.forEach((res) => {
+      processedResults.forEach((res: ComparisonResponseItem) => {
         if (res.strategy_name === 'RRIF Minimums Only') {
           bestStrategy = res;
         }
@@ -96,7 +100,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ goal, strategies, results, on
           </TableRow>
         </TableHead>
         <TableBody>
-          {processedResults.map((res: any) => (
+          {processedResults.map((res: ComparisonResponseItem) => (
             <TableRow
               key={res.strategy_code}
               selected={
