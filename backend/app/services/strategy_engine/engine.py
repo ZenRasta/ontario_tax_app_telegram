@@ -14,6 +14,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple, Type
 
+import importlib
+import pkgutil
+
 from app.utils.year_data_loader import load_tax_year_data
 
 from app.data_models.results import (
@@ -24,6 +27,19 @@ from app.data_models.results import (
 from app.data_models.scenario import ScenarioInput, StrategyParamsInput
 from app.data_models.strategy import get_strategy_meta
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
+from . import strategies as _strategies_pkg
+
+
+def _load_strategy_modules() -> None:
+    """Import all modules in the strategies package to trigger registration."""
+    for module_info in pkgutil.iter_modules(
+        _strategies_pkg.__path__, _strategies_pkg.__name__ + "."
+    ):
+        name = module_info.name
+        short_name = name.rsplit(".", 1)[-1]
+        if short_name.startswith("_"):
+            continue
+        importlib.import_module(name)
 
 # ------------------------------------------------------------------
 # Existing registry mapping code -> concrete Strategy class
@@ -40,6 +56,10 @@ def register(code: str):
         cls.code = code
         return cls
     return inner
+
+
+# Load all strategy modules so decorators run and populate the registry
+_load_strategy_modules()
 
 
 # ------------------------------------------------------------------
@@ -207,15 +227,3 @@ class StrategyEngine:
         return run_single_strategy(code_str, sc, params, self.tax_year_data_loader)
 
 
-# ------------------------------------------------------------------
-# Load strategy modules (registration happens at import time)
-# ------------------------------------------------------------------
-from .strategies import (  # noqa: F401,E402
-    bracket_filling,
-    delay_cpp_oas,
-    early_rrif_conversion,
-    gradual_meltdown,
-    interest_offset_loan,
-    lump_sum_withdrawal,
-    spousal_equalization,
-)
