@@ -2,6 +2,12 @@
 
 Project description here.
 
+## Dependencies
+
+The backend reads tax tables from YAML files. A real installation of
+**PyYAML** is therefore required. Continuous integration checks that
+`import yaml` succeeds, and `poetry install` will provide the package.
+
 ## Debug API
 
 For troubleshooting, the backend exposes a debug route listing registered
