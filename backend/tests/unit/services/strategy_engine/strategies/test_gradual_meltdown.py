@@ -1,8 +1,15 @@
+from app.data_models.scenario import (
+    ScenarioInput,
+    StrategyCodeEnum,
+    StrategyParamsInput,
+)
 from app.services.strategy_engine.engine import StrategyEngine
-from app.data_models.scenario import ScenarioInput, StrategyParamsInput, StrategyCodeEnum
 
 YEAR_2025 = {
     'federal_personal_amount': 15705,
+    'federal_personal_amount_min': 14156,
+    'federal_personal_amount_phaseout_start': 173205,
+    'federal_personal_amount_phaseout_end': 246752,
     'federal_age_amount': 8396,
     'federal_age_amount_threshold': 43179,
     'federal_pension_income_credit_max': 2000,
