@@ -40,3 +40,30 @@ export interface StrategiesResponse {
   recommended: string[];
 }
 
+export interface SummaryMetrics {
+  lifetime_tax_paid_nominal: number;
+  lifetime_tax_paid_pv: number;
+  average_effective_tax_rate: number;
+  average_marginal_tax_rate_on_rrif?: number | null;
+  years_in_oas_clawback: number;
+  total_oas_clawback_paid_nominal: number;
+  tax_volatility_score?: number | null;
+  max_sustainable_spending_pv?: number | null;
+  average_annual_real_spending: number;
+  cashflow_coverage_ratio?: number | null;
+  ruin_probability_pct?: number | null;
+  years_to_ruin_percentile_10?: number | null;
+  final_total_portfolio_value_nominal: number;
+  final_total_portfolio_value_pv: number;
+  net_value_to_heirs_after_final_taxes_pv: number;
+  sequence_risk_score?: number | null;
+  strategy_complexity_score: number;
+}
+
+export interface ComparisonResponseItem {
+  strategy_code: string;
+  strategy_name: string;
+  yearly_results: unknown[]; // YearlyResult not yet typed
+  summary: SummaryMetrics;
+}
+

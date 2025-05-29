@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import type { FormData } from "../App";
+import type { FormData } from "../types/formData";
 
 interface InputFormStepProps {
   data: FormData;

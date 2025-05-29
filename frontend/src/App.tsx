@@ -5,37 +5,8 @@ import GoalStep from "./components/GoalStep";
 import StrategyStep from "./components/StrategyStep";
 import InputFormStep from "./components/InputFormStep";
 import ResultsPage from "./components/ResultsPage";
-
-/* ------------------------------------------------------------------ *
- * Shared wizard data contract
- * ------------------------------------------------------------------ */
-export interface FormData {
-  /* personal */
-  age: number;
-  rrspBalance: number;
-  tfsaBalance: number;
-  cppAmount: number;
-  oasAmount: number;
-  desiredSpending: number;
-  expectedReturn: number;
-  stdDevReturn: number;
-  horizon: number;
-  /* marital */
-  married: boolean;
-  spouseAge?: number;
-  spouseRrspBalance?: number;
-  spouseTfsaBalance?: number;
-  spouseCppAmount?: number;
-  spouseOasAmount?: number;
-  /* advanced */
-  bracketFillCeiling?: number;
-  cppStartAge?: number;
-  lumpSumYear?: number;
-  emptyByAge?: number;
-  /* wizard meta */
-  goal: string;          // UI label (“Maximize Spending”…)
-  strategies: string[];  // array of codes ["BF","GM",…]
-}
+import type { FormData } from "./types/formData";
+import type { ComparisonResponseItem } from "./types/api";
 
 /* ------------------------------------------------------------------ */
 const App: React.FC = () => {
@@ -55,7 +26,9 @@ const App: React.FC = () => {
     strategies: [],
   });
   const [currentStep, setCurrentStep] = useState(1);
-  const [resultsData, setResultsData] = useState<any[] | null>(null);
+  const [resultsData, setResultsData] = useState<ComparisonResponseItem[] | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   /* helpers --------------------------------------------------------- */
@@ -137,7 +110,7 @@ const App: React.FC = () => {
         throw new Error(`HTTP ${res.status}: ${msg}`);
       }
 
-      const result = await res.json();
+      const result: { comparisons: ComparisonResponseItem[] } = await res.json();
       setResultsData(result.comparisons);
       setCurrentStep(4);
     } catch (err: unknown) {
