@@ -124,6 +124,7 @@ class DelayCppOasStrategy(BaseStrategy):
                 float(elig),
                 td,
                 self.scenario.province,
+                oas_start_age=oas_start,
             )
             tot_tax = Decimal(str(tr["total_income_tax"] + tr["oas_clawback"]))
             return taxable - tot_tax
@@ -154,6 +155,7 @@ class DelayCppOasStrategy(BaseStrategy):
             float(elig_pension),
             td,
             self.scenario.province,
+            oas_start_age=oas_start,
         )
 
         total_tax = Decimal(str(tax["total_income_tax"] + tax["oas_clawback"]))
