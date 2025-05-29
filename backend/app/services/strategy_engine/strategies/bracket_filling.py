@@ -31,6 +31,7 @@ TAXABLE_PORTION_NONREG_GROWTH = Decimal("0.40")
 @register(StrategyCodeEnum.BF.value)
 class BracketFillingStrategy(BaseStrategy):
     code = StrategyCodeEnum.BF
+    display_name = "Bracket Filling"
     complexity = 2
 
     def validate_params(self) -> None:  # noqa: D401
