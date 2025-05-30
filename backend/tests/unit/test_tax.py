@@ -98,3 +98,26 @@ def test_oas_clawback_deferral():
     assert Decimal(str(res['oas_clawback'])).quantize(Decimal('0.01')) == Decimal(
         str(expected)
     ).quantize(Decimal('0.01'))
+
+@pytest.mark.parametrize('start_age', [66, 68, 70])
+def test_oas_clawback_deferral_various(start_age):
+    """OAS clawback should equal the deferred benefit within 5% tolerance."""
+    res = tax_rules.calculate_all_taxes(
+        280000,
+        age=start_age,
+        pension_inc=0,
+        td=TD_2025,
+        oas_start_age=start_age,
+    )
+    expected = tax_rules.get_adjusted_oas_benefit(
+        TD_2025['oas_max_benefit_at_65'], start_age, TD_2025
+    )
+    assert res['oas_clawback'] == pytest.approx(expected, rel=0.05)
+
+
+@pytest.mark.parametrize('income', [0, -10000])
+def test_zero_and_negative_income(income):
+    """All taxes should be zero for non‑positive income."""
+    res = tax_rules.calculate_all_taxes(income, age=30, pension_inc=0, td=TD_2025)
+    for key in ['federal_tax', 'provincial_tax', 'provincial_surtax', 'total_income_tax', 'oas_clawback']:
+        assert res[key] == 0
