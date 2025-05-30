@@ -248,12 +248,23 @@ async def compare(req: CompareRequest):
             
             # FIX: Correct argument order - code first, then scenario
             yearly, summary = engine.run(code, scenario_with_params)
-            
+
+            balances = [
+                YearlyBalance(
+                    year=r.year,
+                    portfolio_end=(
+                        r.end_rrif_balance + r.end_tfsa_balance + r.end_non_reg_balance
+                    ),
+                )
+                for r in yearly
+            ] if yearly else []
+
             items.append(
                 ComparisonResponseItem(
                     strategy_code=code,
                     strategy_name=_strategy_display(code),
                     yearly_results=yearly,
+                    yearly_balances=balances,
                     summary=summary,
                 )
             )
@@ -266,6 +277,7 @@ async def compare(req: CompareRequest):
                     strategy_code=code,
                     strategy_name=_strategy_display(code),
                     yearly_results=[],
+                    yearly_balances=[],
                     summary=default_summary,  # Use default instead of None
                     error_detail=str(exc),
                 )

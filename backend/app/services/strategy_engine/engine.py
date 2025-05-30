@@ -114,6 +114,22 @@ def run_strategy_batch(
         strategy_name = meta.label if meta else (code.value if hasattr(code, "value") else str(code))
 
         # convert SummaryMetrics into the lightweight ResultSummary
+        yearly_results = getattr(metrics, "yearly_results", None)
+        if yearly_results:
+            balances = [
+                YearlyBalance(
+                    year=r.year,
+                    portfolio_end=(
+                        r.end_rrif_balance
+                        + r.end_tfsa_balance
+                        + r.end_non_reg_balance
+                    ),
+                )
+                for r in yearly_results
+            ]
+        else:
+            balances = []
+
         summaries.append(
             ResultSummary(
                 strategy_code=code,
@@ -125,18 +141,7 @@ def run_strategy_batch(
                     "net_value_to_heirs_after_final_taxes_pv",
                     metrics.final_total_portfolio_value_nominal,
                 ),
-                yearly_balances=[
-                    # Only send (year, portfolio_end) – small & chart-friendly
-                    YearlyBalance(
-                        year=r.year,
-                        portfolio_end=(
-                            r.end_rrif_balance + r.end_tfsa_balance + r.end_non_reg_balance
-                        ),
-                    )
-                    for r in metrics.yearly_results
-                ]
-                if hasattr(metrics, "yearly_results")
-                else []
+                yearly_balances=balances,
             )
         )
     return summaries
