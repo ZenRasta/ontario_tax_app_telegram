@@ -24,7 +24,11 @@ from app.data_models.results import (
     SummaryMetrics,
     YearlyBalance,
 )
-from app.data_models.scenario import ScenarioInput, StrategyParamsInput
+from app.data_models.scenario import (
+    ScenarioInput,
+    StrategyParamsInput,
+    StrategyCodeEnum,
+)
 from app.data_models.strategy import get_strategy_meta
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
 from . import strategies as _strategies_pkg
@@ -99,14 +103,15 @@ def run_single_strategy(
 # ────────────────────────────────────────────────────────────────────────────
 def run_strategy_batch(
     scenario: ScenarioInput,
+    codes: List[StrategyCodeEnum],
     tax_loader=load_tax_year_data,
 ) -> List[ResultSummary]:
     """
-    Loop over the user-selected strategy codes and build a
-    ResultSummary for each (thin wrapper around existing logic).
+    Loop over the supplied strategy codes and build a ``ResultSummary``
+    for each (thin wrapper around existing logic).
     """
     summaries: List[ResultSummary] = []
-    for code in scenario.strategies:
+    for code in codes:
         metrics: SummaryMetrics = run_single_strategy(code, scenario, tax_loader=tax_loader)
 
         # Determine strategy display name via metadata helper
@@ -212,12 +217,16 @@ class StrategyEngine:
         # Return tuple as expected by main.py: (yearly_results, summary)
         return yearly_results, summary_metrics
 
-    def run_batch(self, scenario: ScenarioInput | None = None) -> List[ResultSummary]:
-        """Run all codes in the scenario for the wizard UI."""
+    def run_batch(
+        self,
+        codes: List[StrategyCodeEnum],
+        scenario: ScenarioInput | None = None,
+    ) -> List[ResultSummary]:
+        """Run the supplied strategy codes for the wizard UI."""
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        return run_strategy_batch(sc, self.tax_year_data_loader)
+        return run_strategy_batch(sc, codes, self.tax_year_data_loader)
 
     # ---------- Alternative single-result method for backward compatibility -------
     def run_single(self, code: str, scenario: ScenarioInput | None = None, params: StrategyParamsInput = None) -> SummaryMetrics:

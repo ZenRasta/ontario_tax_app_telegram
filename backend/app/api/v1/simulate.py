@@ -9,11 +9,11 @@ router = APIRouter(prefix="/api/v1", tags=["simulation"])
 @router.post("/simulate")
 def simulate(req: CompareRequest):
     """
-    Run every strategy listed in req.scenario.strategies and
-    return their summary metrics for the front-end wizard.
+    Run every strategy listed in ``req.strategies`` and return their
+    summary metrics for the front-end wizard.
     """
     try:
-        summaries = run_strategy_batch(req.scenario)
+        summaries = run_strategy_batch(req.scenario, req.strategies)
         # run_strategy_batch returns a list of Pydantic models; convert to dicts
         return {"comparisons": [s.dict() for s in summaries]}
     except Exception as exc:

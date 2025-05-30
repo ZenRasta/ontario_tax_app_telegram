@@ -6,7 +6,7 @@ EXAMPLE_SCENARIO = ScenarioInput.Config.json_schema_extra["example"]
 
 @pytest.mark.asyncio
 async def test_simulate_missing_scenario(client):
-    resp = await client.post("/api/v1/simulate", json={"strategy_code": "GM"})
+    resp = await client.post("/api/v1/simulate", json={"strategies": ["GM"]})
     assert resp.status_code == 422
     assert resp.json()["detail"] == "scenario is required"
 
@@ -39,19 +39,19 @@ async def test_simulate_mc_missing_scenario(client):
 
 @pytest.mark.parametrize("code", [c for c in StrategyCodeEnum])
 async def test_simulate_success(client, code):
-    payload = {"scenario": EXAMPLE_SCENARIO, "strategy_code": code.value}
+    payload = {"scenario": EXAMPLE_SCENARIO, "strategies": [code.value]}
     resp = await client.post("/api/v1/simulate", json=payload)
     assert resp.status_code == 200
     body = resp.json()
-    assert body["strategy_code"] == code.value
-    assert body["yearly_results"]
+    assert isinstance(body, list)
+    assert body[0]["strategy_code"] == code.value
 
 
 @pytest.mark.parametrize("code", [c for c in StrategyCodeEnum])
 async def test_simulate_missing_param_422(client, code):
     bad = EXAMPLE_SCENARIO.copy()
     bad.pop("age")
-    payload = {"scenario": bad, "strategy_code": code.value}
+    payload = {"scenario": bad, "strategies": [code.value]}
     resp = await client.post("/api/v1/simulate", json=payload)
     assert resp.status_code == 422
 
@@ -61,9 +61,11 @@ async def test_simulate_engine_error_propagates(client, monkeypatch):
     def boom(*args, **kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(main_app.engine, "run", boom)
+    monkeypatch.setattr(
+        "app.api.v1.endpoint_simulate.run_strategy_batch", boom
+    )
 
-    payload = {"scenario": EXAMPLE_SCENARIO, "strategy_code": "GM"}
+    payload = {"scenario": EXAMPLE_SCENARIO, "strategies": ["GM"]}
     resp = await client.post("/api/v1/simulate", json=payload)
     assert resp.status_code == 500
 
