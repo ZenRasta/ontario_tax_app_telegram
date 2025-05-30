@@ -6,6 +6,11 @@ authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
     { include = "app" },
+    { include = "tax" },
+]
+include = [
+    { path = "data/tax_years.yml", format = "wheel" },
+    { path = "tax/**" },
 ]
 
 [tool.poetry.dependencies]
