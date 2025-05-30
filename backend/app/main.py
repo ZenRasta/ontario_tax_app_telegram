@@ -199,14 +199,9 @@ async def simulate(req: SimulateRequest):
     scenario_with_params = req.scenario.copy(deep=True)
     scenario_with_params.strategy_params_override = params
 
-    try:
-        yearly, summary = engine.run(req.strategy_code, scenario_with_params)
-        error_detail = None
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("simulate error for %s: %s", req.strategy_code, exc)
-        yearly = []
-        summary = _create_default_summary_metrics(req.strategy_code)
-        error_detail = str(exc)
+    yearly, summary = engine.run(req.strategy_code, scenario_with_params)
+
+    error_detail = None
 
     return SimulationApiResponse(
         request_id=req.request_id,
@@ -239,17 +234,16 @@ async def compare(req: CompareRequest):
     items: List[ComparisonResponseItem] = []
 
     for code in codes:
-        try:
-            _require_params(code, params, req.scenario)
-            
-            # Apply params to scenario before running
-            scenario_with_params = req.scenario.copy(deep=True)
-            scenario_with_params.strategy_params_override = params
-            
-            # FIX: Correct argument order - code first, then scenario
-            yearly, summary = engine.run(code, scenario_with_params)
+        _require_params(code, params, req.scenario)
 
-            balances = [
+        # Apply params to scenario before running
+        scenario_with_params = req.scenario.copy(deep=True)
+        scenario_with_params.strategy_params_override = params
+
+        # FIX: Correct argument order - code first, then scenario
+        yearly, summary = engine.run(code, scenario_with_params)
+
+        balances = [
                 YearlyBalance(
                     year=r.year,
                     portfolio_end=(
@@ -259,29 +253,15 @@ async def compare(req: CompareRequest):
                 for r in yearly
             ] if yearly else []
 
-            items.append(
-                ComparisonResponseItem(
-                    strategy_code=code,
-                    strategy_name=_strategy_display(code),
-                    yearly_results=yearly,
-                    yearly_balances=balances,
-                    summary=summary,
-                )
+        items.append(
+            ComparisonResponseItem(
+                strategy_code=code,
+                strategy_name=_strategy_display(code),
+                yearly_results=yearly,
+                yearly_balances=balances,
+                summary=summary,
             )
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("compare error for %s: %s", code, exc)
-            # FIX: Provide valid SummaryMetrics instead of None
-            default_summary = _create_default_summary_metrics(code)
-            items.append(
-                ComparisonResponseItem(
-                    strategy_code=code,
-                    strategy_name=_strategy_display(code),
-                    yearly_results=[],
-                    yearly_balances=[],
-                    summary=default_summary,  # Use default instead of None
-                    error_detail=str(exc),
-                )
-            )
+        )
 
     return CompareApiResponse(request_id=req.request_id, comparisons=items)
 
