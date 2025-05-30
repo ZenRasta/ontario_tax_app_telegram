@@ -121,6 +121,7 @@ def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> 
         and idx == self.params.lump_sum_year_offset
     ):
         gross_rrif += Decimal(str(self.params.lump_sum_amount))
+        gross_rrif = min(begin_rrif, max(gross_rrif, min_rrif))
 
     # -------------- final tax calculation ------------------------- #
     taxable_income = gross_rrif + cpp + oas_gross + db_pension + taxable_nonreg_income
