@@ -68,6 +68,23 @@ class SpouseInput(BaseModel):
     tfsa_balance: confloat(ge=0) = 0.0
     defined_benefit_pension: confloat(ge=0) = 0.0
 
+    # ----------------------- validators ------------------------------- #
+
+    @root_validator(skip_on_failure=True)
+    def _check_pension_max(cls, v):
+        td = load_tax_year_data(_dt.datetime.now().year)
+        max_cpp = td.get("cpp_max_benefit_at_65")
+        max_oas = td.get("oas_max_benefit_at_65")
+        if max_cpp is not None and v.get("cpp_at_65", 0) > max_cpp:
+            raise ValueError(
+                f"cpp_at_65 exceeds maximum allowed benefit of {max_cpp}"
+            )
+        if max_oas is not None and v.get("oas_at_65", 0) > max_oas:
+            raise ValueError(
+                f"oas_at_65 exceeds maximum allowed benefit of {max_oas}"
+            )
+        return v
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -170,6 +187,21 @@ class ScenarioInput(BaseModel):
     )
 
     # ----------------------- validators ------------------------------- #
+
+    @root_validator(skip_on_failure=True)
+    def _check_pension_max(cls, v):
+        td = load_tax_year_data(_dt.datetime.now().year, v.get("province", "ON"))
+        max_cpp = td.get("cpp_max_benefit_at_65")
+        max_oas = td.get("oas_max_benefit_at_65")
+        if max_cpp is not None and v.get("cpp_at_65", 0) > max_cpp:
+            raise ValueError(
+                f"cpp_at_65 exceeds maximum allowed benefit of {max_cpp}"
+            )
+        if max_oas is not None and v.get("oas_at_65", 0) > max_oas:
+            raise ValueError(
+                f"oas_at_65 exceeds maximum allowed benefit of {max_oas}"
+            )
+        return v
 
     @root_validator(skip_on_failure=True)
     def _check_horizon_and_lump(cls, v):
