@@ -51,3 +51,18 @@ def test_golden_first_year_tax_within_tolerance():
     params = scenario.strategy_params_override or StrategyParamsInput()
     yearly, _ = engine.run(scenario, StrategyCodeEnum.GM, params)
     assert abs(yearly[0].total_tax_paid - 11790) <= 5
+
+
+def test_minimum_strategy_first_year_withdrawal():
+    scenario = ScenarioInput(**ScenarioInput.Config.json_schema_extra["example"])
+    engine = StrategyEngine(tax_year_data_loader=lambda y, p="ON": YEAR_2025)
+    params = scenario.strategy_params_override or StrategyParamsInput()
+    yearly, _ = engine.run(StrategyCodeEnum.MIN, scenario, params)
+
+    from app.services.strategy_engine import tax_rules
+
+    expected_min = tax_rules.get_rrif_min_withdrawal_amount(
+        float(scenario.rrsp_balance), scenario.age, YEAR_2025
+    )
+    assert yearly[0].income_sources.rrif_withdrawal == expected_min
+

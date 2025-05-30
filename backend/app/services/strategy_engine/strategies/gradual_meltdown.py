@@ -219,6 +219,18 @@ class GradualMeltdownStrategy(BaseStrategy):
         return high  # fallback
 
 
+@register(StrategyCodeEnum.MIN.value)
+class MinimumOnlyStrategy(GradualMeltdownStrategy):
+    """Withdraw exactly the CRA minimum each year."""
+
+    code = StrategyCodeEnum.MIN
+    display_name = "RRIF Minimums Only"
+    complexity = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, min_only=True, **kwargs)
+
+
 @register(StrategyCodeEnum.EBX.value)
 class EmptyByXStrategy(GradualMeltdownStrategy):
     """Variant requiring target_depletion_age parameter."""
