@@ -51,6 +51,15 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
   const hasLS = strategies.includes("LS");
   const hasEBX = strategies.includes("EBX");
 
+  const CPP_MAX = 17060;
+  const OAS_MAX = 8250;
+  const cppAmountError = data.cppAmount > CPP_MAX;
+  const oasAmountError = data.oasAmount > OAS_MAX;
+  const spouseCppAmountError =
+    data.spouseCppAmount !== undefined && data.spouseCppAmount > CPP_MAX;
+  const spouseOasAmountError =
+    data.spouseOasAmount !== undefined && data.spouseOasAmount > OAS_MAX;
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -97,6 +106,9 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             value={data.cppAmount}
             onChange={handleInputChange("cppAmount")}
             margin="normal"
+            inputProps={{ min: 0, max: CPP_MAX }}
+            error={cppAmountError}
+            helperText={cppAmountError ? `Maximum CPP amount is $${CPP_MAX}` : undefined}
           />
 
           {/* TFSA */}
@@ -195,6 +207,9 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             value={data.oasAmount}
             onChange={handleInputChange("oasAmount")}
             margin="normal"
+            inputProps={{ min: 0, max: OAS_MAX }}
+            error={oasAmountError}
+            helperText={oasAmountError ? `Maximum OAS amount is $${OAS_MAX}` : undefined}
           />
 
           {/* Desired spending */}
@@ -280,6 +295,11 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 value={data.spouseCppAmount ?? ""}
                 onChange={handleInputChange("spouseCppAmount")}
                 margin="normal"
+                inputProps={{ min: 0, max: CPP_MAX }}
+                error={spouseCppAmountError}
+                helperText={
+                  spouseCppAmountError ? `Maximum CPP amount is $${CPP_MAX}` : undefined
+                }
               />
               {/* Spouse TFSA */}
               <TextField
@@ -310,6 +330,11 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 value={data.spouseOasAmount ?? ""}
                 onChange={handleInputChange("spouseOasAmount")}
                 margin="normal"
+                inputProps={{ min: 0, max: OAS_MAX }}
+                error={spouseOasAmountError}
+                helperText={
+                  spouseOasAmountError ? `Maximum OAS amount is $${OAS_MAX}` : undefined
+                }
               />
             </Grid>
           </Grid>
