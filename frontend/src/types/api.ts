@@ -15,8 +15,8 @@ export interface StrategyParamsInput {
   target_depletion_age?: number;
   cpp_start_age?: number;
   oas_start_age?: number;
-  interest_rate?: number;
-  loan_pct_rrif?: number;
+  loan_interest_rate_pct?: number;
+  loan_amount_as_pct_of_rrif?: number;
   spouse?: SpouseInfo;
 }
 
