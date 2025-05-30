@@ -57,7 +57,7 @@ async def test_simulate_missing_param_422(client, code):
 
 
 @pytest.mark.asyncio
-async def test_simulate_engine_error_returns_defaults(client, monkeypatch):
+async def test_simulate_engine_error_propagates(client, monkeypatch):
     def boom(*args, **kwargs):
         raise RuntimeError("boom")
 
@@ -65,11 +65,7 @@ async def test_simulate_engine_error_returns_defaults(client, monkeypatch):
 
     payload = {"scenario": EXAMPLE_SCENARIO, "strategy_code": "GM"}
     resp = await client.post("/api/v1/simulate", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["yearly_results"] == []
-    assert data["error_detail"] == "boom"
-    assert data["summary"]["lifetime_tax_paid_nominal"] == 0.0
+    assert resp.status_code == 500
 
 
 @pytest.mark.asyncio
