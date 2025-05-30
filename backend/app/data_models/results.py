@@ -311,6 +311,7 @@ class ComparisonResponseItem(BaseModel):
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )
+    yearly_balances: List[YearlyBalance] = []
     summary: SummaryMetrics = Field(
         ..., description="Aggregated summary metrics for the entire strategy."
     )
@@ -326,6 +327,7 @@ class ComparisonResponseItem(BaseModel):
                 "strategy_code": "GM",
                 "strategy_name": "Gradual Meltdown",
                 "yearly_results": [YearlyResult.Config.json_schema_extra["example"]],
+                "yearly_balances": [{"year": 2025, "portfolio_end": 500000.0}],
                 "summary": SummaryMetrics.Config.json_schema_extra["example"],
                 "error_detail": None
             }

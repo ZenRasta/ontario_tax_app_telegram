@@ -70,3 +70,16 @@ async def test_simulate_engine_error_returns_defaults(client, monkeypatch):
     assert data["yearly_results"] == []
     assert data["error_detail"] == "boom"
     assert data["summary"]["lifetime_tax_paid_nominal"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_compare_yearly_balances_list(client):
+    payload = {
+        "scenario": EXAMPLE_SCENARIO,
+        "strategies": ["GM", "MIN"],
+    }
+    resp = await client.post("/api/v1/compare", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    for item in data["comparisons"]:
+        assert isinstance(item["yearly_balances"], list)
