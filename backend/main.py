@@ -193,10 +193,17 @@ async def simulate(req: SimulateRequest):
     # Apply params to scenario before running
     scenario_with_params = req.scenario.copy(deep=True)
     scenario_with_params.strategy_params_override = params
-    
+
     # FIX: Convert enum to string value for strategy registry lookup
     code_str = req.strategy_code.value if hasattr(req.strategy_code, 'value') else str(req.strategy_code)
-    yearly, summary = engine.run(code_str, scenario_with_params)
+    try:
+        yearly, summary = engine.run(code_str, scenario_with_params)
+        error_detail = None
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("simulate error for %s: %s", req.strategy_code, exc)
+        yearly = []
+        summary = _create_default_summary_metrics(req.strategy_code)
+        error_detail = str(exc)
 
     return SimulationApiResponse(
         request_id=req.request_id,
@@ -204,6 +211,7 @@ async def simulate(req: SimulateRequest):
         strategy_name=_strategy_display(req.strategy_code),
         yearly_results=yearly,
         summary=summary,
+        error_detail=error_detail,
     )
 
 # ---------- deterministic compare -----------------------------------

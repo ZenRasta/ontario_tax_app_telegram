@@ -278,8 +278,16 @@ class SimulationResponse(BaseModel):
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )
-    summary: SummaryMetrics = Field(..., description="Aggregated summary metrics for the entire strategy.")
-    request_id: UUID = Field(..., description="Unique ID for the simulation request, for tracing.")
+    summary: SummaryMetrics = Field(
+        ..., description="Aggregated summary metrics for the entire strategy."
+    )
+    request_id: UUID = Field(
+        ..., description="Unique ID for the simulation request, for tracing."
+    )
+    error_detail: str | None = Field(
+        default=None,
+        description="Error message if the strategy failed to run.",
+    )
 
     class Config:
         use_enum_values = True # Ensures enum values are used in serialization
@@ -289,7 +297,8 @@ class SimulationResponse(BaseModel):
                 "strategy_name": "Gradual Meltdown",
                 "yearly_results": [YearlyResult.Config.json_schema_extra["example"]],
                 "summary": SummaryMetrics.Config.json_schema_extra["example"],
-                "request_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                "request_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                "error_detail": None
             }
         }
 
