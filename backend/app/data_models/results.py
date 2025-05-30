@@ -296,13 +296,19 @@ class SimulationResponse(BaseModel):
 
 class ComparisonResponseItem(BaseModel):
     """Represents the results for a single strategy within a /compare response."""
-    strategy_code: StrategyCodeEnum # Typed with imported enum
+    strategy_code: StrategyCodeEnum  # Typed with imported enum
     strategy_name: str = Field(..., description="Full human-readable name of the strategy.")
 
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )
-    summary: SummaryMetrics = Field(..., description="Aggregated summary metrics for the entire strategy.")
+    summary: SummaryMetrics = Field(
+        ..., description="Aggregated summary metrics for the entire strategy."
+    )
+    error_detail: str | None = Field(
+        default=None,
+        description="Error message if the strategy failed to run."
+    )
 
     class Config:
         use_enum_values = True # Ensures enum values are used in serialization
@@ -311,7 +317,8 @@ class ComparisonResponseItem(BaseModel):
                 "strategy_code": "GM",
                 "strategy_name": "Gradual Meltdown",
                 "yearly_results": [YearlyResult.Config.json_schema_extra["example"]],
-                "summary": SummaryMetrics.Config.json_schema_extra["example"]
+                "summary": SummaryMetrics.Config.json_schema_extra["example"],
+                "error_detail": None
             }
         }
 
