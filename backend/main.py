@@ -21,6 +21,7 @@ from app.data_models.results import (
     CompareResponse as CompareApiResponse,
     ComparisonResponseItem,
     MonteCarloPath,
+    YearlyBalance,
     SummaryMetrics,
     SimulationResponse as SimulationApiResponse,
 )
