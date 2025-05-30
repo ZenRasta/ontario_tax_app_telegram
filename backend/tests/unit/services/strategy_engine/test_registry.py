@@ -6,7 +6,7 @@ from app.services.strategy_engine.engine import _STRATEGY_REGISTRY
 
 class StrategyRegistryTests(unittest.TestCase):
     def test_all_expected_strategies_registered(self) -> None:
-        expected = {c.value for c in StrategyCodeEnum if c != StrategyCodeEnum.MIN}
+        expected = {c.value for c in StrategyCodeEnum}
         registered = set(_STRATEGY_REGISTRY.keys())
         self.assertEqual(expected, registered)
 
