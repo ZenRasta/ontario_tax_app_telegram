@@ -23,6 +23,7 @@ export interface FormData {
   /* advanced */
   bracketFillCeiling?: number;
   cppStartAge?: number;
+  lumpSumAmount?: number;
   lumpSumYear?: number;
   emptyByAge?: number;
 
