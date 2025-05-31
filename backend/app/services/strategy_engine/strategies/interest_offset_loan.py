@@ -176,7 +176,9 @@ class InterestOffsetStrategy(BaseStrategy):
                 cpp=cpp,
                 oas_gross=oas_gross,
                 db_pension=db_pension,
-                other_taxable_income=taxable_nonreg_income - interest_exp,
+                other_taxable_income=max(
+                    Decimal("0"), taxable_nonreg_income - interest_exp
+                ),
                 taxable_income=taxable_income,
                 fed_tax=tr["federal_tax"],
                 prov_tax=tr["provincial_tax"],
