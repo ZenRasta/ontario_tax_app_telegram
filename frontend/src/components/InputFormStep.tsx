@@ -14,16 +14,16 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import type { FormData } from "../types/formData";
 
 const fieldLimits = {
-  age: { min: 55, max: 95, step: 1 },
-  rrspBalance: { min: 1000, max: 50000000, step: 1000 },
-  tfsaBalance: { min: 0, max: 500000, step: 1000 },
-  cppAmount: { min: 0, max: 25000, step: 100 },
+  age: { min: 50, max: 100, step: 1 },
+  rrspBalance: { min: 100, max: 50000000, step: 1000 },
+  tfsaBalance: { min: 0, max: 200000, step: 1000 },
+  cppAmount: { min: 0, max: 18000, step: 100 },
   oasAmount: { min: 0, max: 10000, step: 100 },
-  desiredSpending: { min: 10000, max: 500000, step: 1000 },
-  expectedReturn: { min: 1, max: 15, step: 0.1 },
-  stdDevReturn: { min: 1, max: 40, step: 0.1 },
-  horizonYears: { min: 5, max: 50, step: 1 },
-  bracketFillCeiling: { min: 20000, max: 200000, step: 1000 },
+  desiredSpending: { min: 20000, max: 300000, step: 1000 },
+  expectedReturn: { min: 0.5, max: 12, step: 0.1 },
+  stdDevReturn: { min: 0.5, max: 25, step: 0.1 },
+  horizonYears: { min: 5, max: 40, step: 1 },
+  bracketFillCeiling: { min: 30000, max: 250000, step: 1000 },
   cppStartAge: { min: 60, max: 70, step: 1 },
   lumpSumYearOffset: { min: 1, max: null, step: 1 }, // max = horizonYears
   emptyByAge: { min: null, max: 100, step: 1 }, // min = currentAge + 5
@@ -93,7 +93,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             label={
               <Box display="flex" alignItems="center">
                 Age
-                <Tooltip title="Your current age. RRIF withdrawals typically begin at age 65, but planning can start earlier.">
+                <Tooltip title="Your current age (50-100). RRIF withdrawals typically begin at age 65, but planning can start earlier.">
                   <IconButton size="small" sx={{ ml: 0.5 }}>
                     <InfoOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -155,7 +155,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             label={
               <Box display="flex" alignItems="center">
                 Expected Return %
-                <Tooltip title="Expected annual investment return before inflation. Conservative: 3-5%, Moderate: 5-7%, Aggressive: 7-10%. Higher returns increase portfolio longevity but add volatility risk.">
+                <Tooltip title="Expected annual investment return before inflation. Typical ranges: 3-5% conservative to 8-10% aggressive. Allowed range 0.5%-12%. Higher returns increase portfolio longevity but add volatility risk.">
                   <IconButton size="small" sx={{ ml: 0.5 }}>
                     <InfoOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -175,7 +175,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             label={
               <Box display="flex" alignItems="center">
                 Horizon (years)
-                <Tooltip title="Planning time horizon. Typical retirement planning uses 25-30 years. Longer horizons show the impact of sustained withdrawals and investment growth.">
+                <Tooltip title="Planning time horizon. Typical retirement planning uses 25-30 years. Up to 40 years supported to show the impact of sustained withdrawals and investment growth.">
                   <IconButton size="small" sx={{ ml: 0.5 }}>
                     <InfoOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -260,7 +260,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             label={
               <Box display="flex" alignItems="center">
                 Std Dev Return %
-                <Tooltip title="Investment volatility measure. Conservative portfolios: 5-10%, Balanced: 8-15%, Aggressive: 15-25%. Higher volatility can improve long-term returns but increases year-to-year variation.">
+                <Tooltip title="Investment volatility measure. Conservative portfolios: 5-10%, Balanced: 8-15%, Aggressive: 15-25%. Allowed range 0.5%-25%. Higher volatility can improve long-term returns but increases year-to-year variation.">
                   <IconButton size="small" sx={{ ml: 0.5 }}>
                     <InfoOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -308,7 +308,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 label={
                   <Box display="flex" alignItems="center">
                     Spouse Age
-                    <Tooltip title="Spouse's current age. Age differences affect optimal withdrawal sequencing and government benefit timing.">
+                    <Tooltip title="Spouse's current age (50-100). Age differences affect optimal withdrawal sequencing and government benefit timing.">
                       <IconButton size="small" sx={{ ml: 0.5 }}>
                         <InfoOutlinedIcon fontSize="small" />
                       </IconButton>
@@ -425,7 +425,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   label={
                     <Box display="flex" alignItems="center">
                       Bracket-Fill Ceiling ($)
-                      <Tooltip title="Maximum income target for bracket-filling strategy. Common targets: $55,867 (top of 15% federal bracket), $90,997 (OAS clawback threshold). Higher ceilings mean more current taxes but potentially lower lifetime taxes.">
+                      <Tooltip title="Maximum income target for bracket-filling strategy. Common targets: $55,867 (top of 15% federal bracket), $90,997 (OAS clawback threshold). Allowed range $30k-$250k. Higher ceilings mean more current taxes but potentially lower lifetime taxes.">
                         <IconButton size="small" sx={{ ml: 0.5 }}>
                           <InfoOutlinedIcon fontSize="small" />
                         </IconButton>
