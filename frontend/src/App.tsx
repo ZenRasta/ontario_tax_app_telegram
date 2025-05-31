@@ -22,6 +22,7 @@ const App: React.FC = () => {
     stdDevReturn: 8,
     horizon: 30,
     married: false,
+    lumpSumAmount: undefined,
     goal: "",
     strategies: [],
   });
@@ -81,6 +82,7 @@ const App: React.FC = () => {
       strategy_params_override: {
         bracket_fill_ceiling: formData.bracketFillCeiling,
         cpp_start_age: formData.cppStartAge,
+        lump_sum_amount: formData.lumpSumAmount,
         lump_sum_year_offset: formData.lumpSumYear,
         target_depletion_age: formData.emptyByAge,
       },

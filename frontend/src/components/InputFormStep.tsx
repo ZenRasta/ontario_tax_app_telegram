@@ -26,6 +26,7 @@ const fieldLimits = {
   bracketFillCeiling: { min: 30000, max: 250000, step: 1000 },
   cppStartAge: { min: 60, max: 70, step: 1 },
   lumpSumYearOffset: { min: 1, max: null, step: 1 }, // max = horizonYears
+  lumpSumAmount: { min: 1000, max: 500000, step: 1000 },
   emptyByAge: { min: null, max: 100, step: 1 }, // min = currentAge + 5
 };
 
@@ -130,6 +131,10 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
     data.cppStartAge !== undefined &&
     (data.cppStartAge < fieldLimits.cppStartAge.min ||
       data.cppStartAge > fieldLimits.cppStartAge.max);
+  const isLumpSumAmountError =
+    data.lumpSumAmount !== undefined &&
+    (data.lumpSumAmount < fieldLimits.lumpSumAmount.min ||
+      data.lumpSumAmount > fieldLimits.lumpSumAmount.max);
   const isLumpSumYearError =
     data.lumpSumYear !== undefined &&
     (data.lumpSumYear < fieldLimits.lumpSumYearOffset.min ||
@@ -618,32 +623,60 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             )}
 
             {hasLS && (
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label={
-                    <Box display="flex" alignItems="center">
-                      Lump-Sum Year Offset
-                      <Tooltip title="Year to take a large withdrawal (relative to start of plan). Useful for major expenses like home renovations, travel, or gifts to children. Strategy will optimize when this withdrawal has the least tax impact.">
-                        <IconButton size="small" sx={{ ml: 0.5 }}>
-                          <InfoOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  }
-                  value={data.lumpSumYear ?? ""}
-                  onChange={handleInputChange("lumpSumYear")}
-                  margin="normal"
-                  inputProps={{ ...fieldLimits.lumpSumYearOffset, max: data.horizon }}
-                  error={isLumpSumYearError}
-                  helperText={
-                    isLumpSumYearError
-                      ? `Enter between ${fieldLimits.lumpSumYearOffset.min} and ${data.horizon}`
-                      : undefined
-                  }
-                />
-              </Grid>
+              <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label={
+                      <Box display="flex" alignItems="center">
+                        Lump-Sum Amount ($)
+                        <Tooltip title="Amount to withdraw as a lump sum in the specified year. Range: $1,000 - $500,000. Used for major expenses like home renovation, travel, or gifts to children.">
+                          <IconButton size="small" sx={{ ml: 0.5 }}>
+                            <InfoOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    }
+                    value={data.lumpSumAmount ?? ""}
+                    onChange={handleInputChange("lumpSumAmount")}
+                    margin="normal"
+                    inputProps={fieldLimits.lumpSumAmount}
+                    error={isLumpSumAmountError}
+                    helperText={
+                      isLumpSumAmountError
+                        ? `Enter between ${fieldLimits.lumpSumAmount.min} and ${fieldLimits.lumpSumAmount.max}`
+                        : undefined
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label={
+                      <Box display="flex" alignItems="center">
+                        Lump-Sum Year Offset
+                        <Tooltip title="Year to take a large withdrawal (relative to start of plan). Useful for major expenses like home renovations, travel, or gifts to children. Strategy will optimize when this withdrawal has the least tax impact.">
+                          <IconButton size="small" sx={{ ml: 0.5 }}>
+                            <InfoOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    }
+                    value={data.lumpSumYear ?? ""}
+                    onChange={handleInputChange("lumpSumYear")}
+                    margin="normal"
+                    inputProps={{ ...fieldLimits.lumpSumYearOffset, max: data.horizon }}
+                    error={isLumpSumYearError}
+                    helperText={
+                      isLumpSumYearError
+                        ? `Enter between ${fieldLimits.lumpSumYearOffset.min} and ${data.horizon}`
+                        : undefined
+                    }
+                  />
+                </Grid>
+              </>
             )}
 
             {hasEBX && (
