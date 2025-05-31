@@ -69,12 +69,74 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
 
   const CPP_MAX = 17060;
   const OAS_MAX = 8250;
-  const cppAmountError = data.cppAmount > CPP_MAX;
-  const oasAmountError = data.oasAmount > OAS_MAX;
-  const spouseCppAmountError =
+  const cppGovError = data.cppAmount > CPP_MAX;
+  const oasGovError = data.oasAmount > OAS_MAX;
+  const spouseCppGovError =
     data.spouseCppAmount !== undefined && data.spouseCppAmount > CPP_MAX;
-  const spouseOasAmountError =
+  const spouseOasGovError =
     data.spouseOasAmount !== undefined && data.spouseOasAmount > OAS_MAX;
+
+  const isAgeError = data.age < fieldLimits.age.min || data.age > fieldLimits.age.max;
+  const isRrspBalanceError =
+    data.rrspBalance < fieldLimits.rrspBalance.min ||
+    data.rrspBalance > fieldLimits.rrspBalance.max;
+  const isTfsaBalanceError =
+    data.tfsaBalance < fieldLimits.tfsaBalance.min ||
+    data.tfsaBalance > fieldLimits.tfsaBalance.max;
+  const isCppAmountError =
+    data.cppAmount < fieldLimits.cppAmount.min ||
+    data.cppAmount > fieldLimits.cppAmount.max;
+  const isOasAmountError =
+    data.oasAmount < fieldLimits.oasAmount.min ||
+    data.oasAmount > fieldLimits.oasAmount.max;
+  const isDesiredSpendingError =
+    data.desiredSpending < fieldLimits.desiredSpending.min ||
+    data.desiredSpending > fieldLimits.desiredSpending.max;
+  const isExpectedReturnError =
+    data.expectedReturn < fieldLimits.expectedReturn.min ||
+    data.expectedReturn > fieldLimits.expectedReturn.max;
+  const isStdDevReturnError =
+    data.stdDevReturn < fieldLimits.stdDevReturn.min ||
+    data.stdDevReturn > fieldLimits.stdDevReturn.max;
+  const isHorizonError =
+    data.horizon < fieldLimits.horizonYears.min ||
+    data.horizon > fieldLimits.horizonYears.max;
+
+  const isSpouseAgeError =
+    data.spouseAge !== undefined &&
+    (data.spouseAge < fieldLimits.age.min || data.spouseAge > fieldLimits.age.max);
+  const isSpouseRrspBalanceError =
+    data.spouseRrspBalance !== undefined &&
+    (data.spouseRrspBalance < fieldLimits.rrspBalance.min ||
+      data.spouseRrspBalance > fieldLimits.rrspBalance.max);
+  const isSpouseTfsaBalanceError =
+    data.spouseTfsaBalance !== undefined &&
+    (data.spouseTfsaBalance < fieldLimits.tfsaBalance.min ||
+      data.spouseTfsaBalance > fieldLimits.tfsaBalance.max);
+  const isSpouseCppAmountError =
+    data.spouseCppAmount !== undefined &&
+    (data.spouseCppAmount < fieldLimits.cppAmount.min ||
+      data.spouseCppAmount > fieldLimits.cppAmount.max);
+  const isSpouseOasAmountError =
+    data.spouseOasAmount !== undefined &&
+    (data.spouseOasAmount < fieldLimits.oasAmount.min ||
+      data.spouseOasAmount > fieldLimits.oasAmount.max);
+
+  const isBracketFillCeilingError =
+    data.bracketFillCeiling !== undefined &&
+    (data.bracketFillCeiling < fieldLimits.bracketFillCeiling.min ||
+      data.bracketFillCeiling > fieldLimits.bracketFillCeiling.max);
+  const isCppStartAgeError =
+    data.cppStartAge !== undefined &&
+    (data.cppStartAge < fieldLimits.cppStartAge.min ||
+      data.cppStartAge > fieldLimits.cppStartAge.max);
+  const isLumpSumYearError =
+    data.lumpSumYear !== undefined &&
+    (data.lumpSumYear < fieldLimits.lumpSumYearOffset.min ||
+      data.lumpSumYear > data.horizon);
+  const isEmptyByAgeError =
+    data.emptyByAge !== undefined &&
+    (data.emptyByAge < data.age + 5 || data.emptyByAge > fieldLimits.emptyByAge.max);
 
   return (
     <Box>
@@ -104,6 +166,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("age")}
             margin="normal"
             inputProps={fieldLimits.age}
+            error={isAgeError}
+            helperText={
+              isAgeError
+                ? `Enter between ${fieldLimits.age.min} and ${fieldLimits.age.max}`
+                : undefined
+            }
           />
 
           {/* CPP at 65 */}
@@ -124,8 +192,14 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("cppAmount")}
             margin="normal"
             inputProps={fieldLimits.cppAmount}
-            error={cppAmountError}
-            helperText={cppAmountError ? `Maximum CPP amount is $${CPP_MAX}` : undefined}
+            error={isCppAmountError || cppGovError}
+            helperText={
+              cppGovError
+                ? `Maximum CPP amount is $${CPP_MAX}`
+                : isCppAmountError
+                  ? `Enter between ${fieldLimits.cppAmount.min} and ${fieldLimits.cppAmount.max}`
+                  : undefined
+            }
           />
 
           {/* TFSA */}
@@ -146,6 +220,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("tfsaBalance")}
             margin="normal"
             inputProps={fieldLimits.tfsaBalance}
+            error={isTfsaBalanceError}
+            helperText={
+              isTfsaBalanceError
+                ? `Enter between ${fieldLimits.tfsaBalance.min} and ${fieldLimits.tfsaBalance.max}`
+                : undefined
+            }
           />
 
           {/* Expected return */}
@@ -166,6 +246,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("expectedReturn")}
             margin="normal"
             inputProps={fieldLimits.expectedReturn}
+            error={isExpectedReturnError}
+            helperText={
+              isExpectedReturnError
+                ? `Enter between ${fieldLimits.expectedReturn.min} and ${fieldLimits.expectedReturn.max}`
+                : undefined
+            }
           />
 
           {/* Horizon */}
@@ -186,6 +272,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("horizon")}
             margin="normal"
             inputProps={fieldLimits.horizonYears}
+            error={isHorizonError}
+            helperText={
+              isHorizonError
+                ? `Enter between ${fieldLimits.horizonYears.min} and ${fieldLimits.horizonYears.max}`
+                : undefined
+            }
           />
         </Grid>
 
@@ -209,6 +301,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("rrspBalance")}
             margin="normal"
             inputProps={fieldLimits.rrspBalance}
+            error={isRrspBalanceError}
+            helperText={
+              isRrspBalanceError
+                ? `Enter between ${fieldLimits.rrspBalance.min} and ${fieldLimits.rrspBalance.max}`
+                : undefined
+            }
           />
 
           {/* OAS @65 */}
@@ -229,8 +327,14 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("oasAmount")}
             margin="normal"
             inputProps={fieldLimits.oasAmount}
-            error={oasAmountError}
-            helperText={oasAmountError ? `Maximum OAS amount is $${OAS_MAX}` : undefined}
+            error={isOasAmountError || oasGovError}
+            helperText={
+              oasGovError
+                ? `Maximum OAS amount is $${OAS_MAX}`
+                : isOasAmountError
+                  ? `Enter between ${fieldLimits.oasAmount.min} and ${fieldLimits.oasAmount.max}`
+                  : undefined
+            }
           />
 
           {/* Desired spending */}
@@ -251,6 +355,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("desiredSpending")}
             margin="normal"
             inputProps={fieldLimits.desiredSpending}
+            error={isDesiredSpendingError}
+            helperText={
+              isDesiredSpendingError
+                ? `Enter between ${fieldLimits.desiredSpending.min} and ${fieldLimits.desiredSpending.max}`
+                : undefined
+            }
           />
 
           {/* Volatility */}
@@ -271,6 +381,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
             onChange={handleInputChange("stdDevReturn")}
             margin="normal"
             inputProps={fieldLimits.stdDevReturn}
+            error={isStdDevReturnError}
+            helperText={
+              isStdDevReturnError
+                ? `Enter between ${fieldLimits.stdDevReturn.min} and ${fieldLimits.stdDevReturn.max}`
+                : undefined
+            }
           />
 
           {/* Married toggle */}
@@ -319,6 +435,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 onChange={handleInputChange("spouseAge")}
                 margin="normal"
                 inputProps={fieldLimits.age}
+                error={isSpouseAgeError}
+                helperText={
+                  isSpouseAgeError
+                    ? `Enter between ${fieldLimits.age.min} and ${fieldLimits.age.max}`
+                    : undefined
+                }
               />
               {/* Spouse CPP */}
               <TextField
@@ -338,9 +460,13 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 onChange={handleInputChange("spouseCppAmount")}
                 margin="normal"
                 inputProps={fieldLimits.cppAmount}
-                error={spouseCppAmountError}
+                error={isSpouseCppAmountError || spouseCppGovError}
                 helperText={
-                  spouseCppAmountError ? `Maximum CPP amount is $${CPP_MAX}` : undefined
+                  spouseCppGovError
+                    ? `Maximum CPP amount is $${CPP_MAX}`
+                    : isSpouseCppAmountError
+                      ? `Enter between ${fieldLimits.cppAmount.min} and ${fieldLimits.cppAmount.max}`
+                      : undefined
                 }
               />
               {/* Spouse TFSA */}
@@ -361,6 +487,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 onChange={handleInputChange("spouseTfsaBalance")}
                 margin="normal"
                 inputProps={fieldLimits.tfsaBalance}
+                error={isSpouseTfsaBalanceError}
+                helperText={
+                  isSpouseTfsaBalanceError
+                    ? `Enter between ${fieldLimits.tfsaBalance.min} and ${fieldLimits.tfsaBalance.max}`
+                    : undefined
+                }
               />
             </Grid>
 
@@ -383,6 +515,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 onChange={handleInputChange("spouseRrspBalance")}
                 margin="normal"
                 inputProps={fieldLimits.rrspBalance}
+                error={isSpouseRrspBalanceError}
+                helperText={
+                  isSpouseRrspBalanceError
+                    ? `Enter between ${fieldLimits.rrspBalance.min} and ${fieldLimits.rrspBalance.max}`
+                    : undefined
+                }
               />
               {/* Spouse OAS */}
               <TextField
@@ -402,9 +540,13 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 onChange={handleInputChange("spouseOasAmount")}
                 margin="normal"
                 inputProps={fieldLimits.oasAmount}
-                error={spouseOasAmountError}
+                error={isSpouseOasAmountError || spouseOasGovError}
                 helperText={
-                  spouseOasAmountError ? `Maximum OAS amount is $${OAS_MAX}` : undefined
+                  spouseOasGovError
+                    ? `Maximum OAS amount is $${OAS_MAX}`
+                    : isSpouseOasAmountError
+                      ? `Enter between ${fieldLimits.oasAmount.min} and ${fieldLimits.oasAmount.max}`
+                      : undefined
                 }
               />
             </Grid>
@@ -436,6 +578,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   onChange={handleInputChange("bracketFillCeiling")}
                   margin="normal"
                   inputProps={fieldLimits.bracketFillCeiling}
+                  error={isBracketFillCeilingError}
+                  helperText={
+                    isBracketFillCeilingError
+                      ? `Enter between ${fieldLimits.bracketFillCeiling.min} and ${fieldLimits.bracketFillCeiling.max}`
+                      : undefined
+                  }
                 />
               </Grid>
             )}
@@ -459,6 +607,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   onChange={handleInputChange("cppStartAge")}
                   margin="normal"
                   inputProps={fieldLimits.cppStartAge}
+                  error={isCppStartAgeError}
+                  helperText={
+                    isCppStartAgeError
+                      ? `Enter between ${fieldLimits.cppStartAge.min} and ${fieldLimits.cppStartAge.max}`
+                      : undefined
+                  }
                 />
               </Grid>
             )}
@@ -482,6 +636,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   onChange={handleInputChange("lumpSumYear")}
                   margin="normal"
                   inputProps={{ ...fieldLimits.lumpSumYearOffset, max: data.horizon }}
+                  error={isLumpSumYearError}
+                  helperText={
+                    isLumpSumYearError
+                      ? `Enter between ${fieldLimits.lumpSumYearOffset.min} and ${data.horizon}`
+                      : undefined
+                  }
                 />
               </Grid>
             )}
@@ -505,6 +665,12 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   onChange={handleInputChange("emptyByAge")}
                   margin="normal"
                   inputProps={{ ...fieldLimits.emptyByAge, min: data.age + 5 }}
+                  error={isEmptyByAgeError}
+                  helperText={
+                    isEmptyByAgeError
+                      ? `Enter between ${data.age + 5} and ${fieldLimits.emptyByAge.max}`
+                      : undefined
+                  }
                 />
               </Grid>
             )}
