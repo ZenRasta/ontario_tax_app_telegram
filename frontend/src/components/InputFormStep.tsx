@@ -68,7 +68,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
   const hasEBX = strategies.includes("EBX");
 
   const CPP_MAX = 17060;
-  const OAS_MAX = 8250;
+  const OAS_MAX = 8500;
   const cppGovError = data.cppAmount > CPP_MAX;
   const oasGovError = data.oasAmount > OAS_MAX;
   const spouseCppGovError =

@@ -21,7 +21,7 @@ TD_2025 = {
     ],
     'oas_clawback_threshold': 93454,
     'oas_clawback_rate': 0.15,
-    'oas_max_benefit_at_65': 8250,
+    'oas_max_benefit_at_65': 8500,
     'oas_deferral_factor_per_month': 0.006,
     'cpp_max_benefit_at_65': 17060,
     'cpp_deferral_factor_per_year': 0.084,
@@ -71,7 +71,7 @@ CASES = {
         'provincial_tax': Decimal('36336.97'),
         'provincial_surtax': Decimal('7965.61'),
         'total_income_tax': Decimal('101899.36'),
-        'oas_clawback': Decimal('8250.00'),
+        'oas_clawback': Decimal('8500.00'),
     },
 }
 

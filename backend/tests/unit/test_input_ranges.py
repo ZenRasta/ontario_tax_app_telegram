@@ -11,7 +11,7 @@ FIELD_RANGES = {
     "rrsp_balance": (100, None),
     "defined_benefit_pension": (0, None),
     "cpp_at_65": (0, 18000),
-    "oas_at_65": (0, 8250),
+    "oas_at_65": (0, 8500),
     "tfsa_balance": (0, 200000),
     "desired_spending": (20000, 300000),
     "expect_return_pct": (0.5, 12),
