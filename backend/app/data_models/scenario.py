@@ -102,7 +102,7 @@ class SpouseInput(BaseModel):
 
 class StrategyParamsInput(BaseModel):
     # --- Bracket‑Filling
-    bracket_fill_ceiling: Optional[condecimal(gt=0)] = Field(
+    bracket_fill_ceiling: Optional[condecimal(ge=30000, le=250000)] = Field(
         None, description="Taxable‑income ceiling for BF strategy."
     )
 
@@ -167,16 +167,16 @@ class StrategyParamsInput(BaseModel):
 
 
 class ScenarioInput(BaseModel):
-    age: conint(gt=17, lt=120)
-    rrsp_balance: confloat(ge=0)
+    age: conint(ge=50, le=100)
+    rrsp_balance: confloat(ge=100)
     defined_benefit_pension: confloat(ge=0) = 0.0
-    cpp_at_65: confloat(ge=0)
+    cpp_at_65: confloat(ge=0, le=18000)
     oas_at_65: confloat(ge=0)
-    tfsa_balance: confloat(ge=0) = 0.0
-    desired_spending: confloat(gt=0)
-    expect_return_pct: confloat(ge=-20, le=30)
-    stddev_return_pct: confloat(ge=0, le=100)
-    life_expectancy_years: conint(gt=0, lt=70)
+    tfsa_balance: confloat(ge=0, le=200000) = 0.0
+    desired_spending: confloat(ge=20000, le=300000)
+    expect_return_pct: confloat(ge=0.5, le=12)
+    stddev_return_pct: confloat(ge=0.5, le=25)
+    life_expectancy_years: conint(ge=5, le=40)
     province: ProvinceEnum = ProvinceEnum.ON
     goal: GoalEnum
     spouse: Optional[SpouseInput] = None
