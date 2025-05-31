@@ -14,6 +14,7 @@ import datetime as _dt
 from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
+import warnings
 
 from pydantic import (
     BaseModel,
@@ -203,19 +204,34 @@ class ScenarioInput(BaseModel):
             )
         return v
 
-    @root_validator(skip_on_failure=True)
-    def _check_horizon_and_lump(cls, v):
-        if v["age"] + v["life_expectancy_years"] > 120:
-            raise ValueError("Projection exceeds age 120.")
+@root_validator(skip_on_failure=True)
+def _check_horizon_and_lump(cls, v):
+    if v["age"] + v["life_expectancy_years"] > 120:
+        raise ValueError("Projection exceeds age 120.")
 
-        sp = v.get("strategy_params_override")
-        if sp and sp.lump_sum_year_offset is not None:
-            if sp.lump_sum_year_offset > v["life_expectancy_years"]:
-                raise ValueError("lump_sum_year_offset beyond projection horizon.")
-        if sp and sp.target_depletion_age is not None:
-            if sp.target_depletion_age < v["age"]:
-                raise ValueError("target_depletion_age cannot be less than current age.")
-        return v
+    sp = v.get("strategy_params_override")
+    if sp and sp.lump_sum_year_offset is not None:
+        if sp.lump_sum_year_offset > v["life_expectancy_years"]:
+            raise ValueError("lump_sum_year_offset beyond projection horizon.")
+    if sp and sp.target_depletion_age is not None:
+        if sp.target_depletion_age <= v["age"]:
+            raise ValueError("target_depletion_age must be after current age")
+    if sp and sp.cpp_start_age is not None:
+        if sp.cpp_start_age < v["age"]:
+            raise ValueError("cpp_start_age cannot be before current age")
+        if sp.cpp_start_age > 70:
+            raise ValueError("cpp_start_age cannot exceed 70")
+    if v.get("spouse") and abs(v["spouse"].age - v["age"]) > 20:
+        warnings.warn(
+            "Large age difference detected - review strategy suitability",
+            RuntimeWarning,
+        )
+    if v["desired_spending"] > (v["rrsp_balance"] + v["tfsa_balance"]) / 10:
+        warnings.warn(
+            "High spending relative to savings - review sustainability",
+            RuntimeWarning,
+        )
+    return v
 
     # ----------------------- config ----------------------------------- #
 
