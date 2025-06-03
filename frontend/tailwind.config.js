@@ -1,5 +1,5 @@
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: ['./calculator.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {},
   },
