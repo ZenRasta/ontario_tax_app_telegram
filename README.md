@@ -27,9 +27,10 @@ npm ci
 
 ### Landing page
 
-A standalone marketing page is available at `frontend/landing.html`.  Open this
-file in a browser to preview the landing design.  The "Figure out my RRIF
-Strategy" buttons link to the calculator located at `frontend/index.html`.
+The landing page is now the default entry at `frontend/index.html`.  Open this
+file in a browser to preview the marketing design.  The "Figure out my RRIF
+Strategy" buttons link to the calculator located at
+`frontend/calculator.html`.
 
 ## Tax data
 
