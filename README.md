@@ -25,6 +25,12 @@ cd frontend
 npm ci
 ```
 
+### Landing page
+
+A standalone marketing page is available at `frontend/landing.html`.  Open this
+file in a browser to preview the landing design.  The "Figure out my RRIF
+Strategy" buttons link to the calculator located at `frontend/index.html`.
+
 ## Tax data
 
 The consolidated tax tables live in `backend/data/tax_years.yml`.  Additional
