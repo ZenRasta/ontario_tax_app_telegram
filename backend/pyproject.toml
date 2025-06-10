@@ -25,7 +25,6 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"} # For password hashing if ne
 PyYAML = "^6.0" # For reading YAML files
 numpy = "^1.25.0" # For Monte Carlo
 pandas = "^2.0.0" # For data manipulation in Monte Carlo
-openai = "^1.78.1"
 redis = "^6.1.0"
 sqlalchemy = {version = "^2.0", extras = ["asyncio"]}
 aiosqlite = "^0.21.0"
