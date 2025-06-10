@@ -40,6 +40,22 @@ export interface StrategiesResponse {
   recommended: string[];
 }
 
+export interface ScenarioInput {
+  age: number;
+  rrsp_balance: number;
+  tfsa_balance: number;
+  cpp_at_65: number;
+  oas_at_65: number;
+  desired_spending: number;
+  expect_return_pct: number;
+  stddev_return_pct: number;
+  life_expectancy_years: number;
+  province: string;
+  goal: GoalEnum;
+  spouse?: SpouseInfo;
+  strategy_params_override?: StrategyParamsInput;
+}
+
 export interface SummaryMetrics {
   lifetime_tax_paid_nominal: number;
   lifetime_tax_paid_pv: number;
@@ -69,5 +85,16 @@ export interface ComparisonResponseItem {
   total_taxes?: number;
   total_spending?: number;
   final_estate?: number;
+}
+
+export interface ExplainRequest {
+  scenario: ScenarioInput;
+  strategy_code: string;
+  summary: SummaryMetrics;
+  goal: GoalEnum;
+}
+
+export interface ExplainResponse {
+  explanation: string;
 }
 
