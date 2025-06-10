@@ -6,7 +6,7 @@ import StrategyStep from "./components/StrategyStep";
 import InputFormStep from "./components/InputFormStep";
 import ResultsPage from "./components/ResultsPage";
 import type { FormData } from "./types/formData";
-import type { ComparisonResponseItem } from "./types/api";
+import type { ComparisonResponseItem, ScenarioInput } from "./types/api";
 
 /* ------------------------------------------------------------------ */
 const App: React.FC = () => {
@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [resultsData, setResultsData] = useState<ComparisonResponseItem[] | null>(
     null,
   );
+  const [scenarioData, setScenarioData] = useState<ScenarioInput | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /* helpers --------------------------------------------------------- */
@@ -87,6 +88,7 @@ const App: React.FC = () => {
         target_depletion_age: formData.emptyByAge,
       },
     };
+    setScenarioData(scenarioPayload as ScenarioInput);
 
     /* ----------------------------------------------
      * 3) Decide which strategies to run
@@ -181,6 +183,7 @@ const App: React.FC = () => {
             strategies={formData.strategies}
             horizon={formData.horizon}
             results={resultsData}
+            scenario={scenarioData}
             onBack={() => {
               setResultsData(null);
               setCurrentStep(2);

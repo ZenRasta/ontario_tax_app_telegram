@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -11,13 +11,19 @@ import {
 } from '@mui/material';
 import StrategyChart from './StrategyChart';
 
-import type { ComparisonResponseItem } from '../types/api';
+import type {
+  ComparisonResponseItem,
+  ScenarioInput,
+  ExplainResponse,
+  GoalEnum,
+} from '../types/api';
 
 interface ResultsPageProps {
   goal: string;
   strategies: string[];
   horizon: number;
   results: ComparisonResponseItem[]; // array of result objects for each strategy
+  scenario: ScenarioInput | null;
   onBack: () => void;
   onStartOver: () => void;
 }
@@ -27,6 +33,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
   strategies,
   horizon,
   results,
+  scenario,
   onBack,
   onStartOver,
 }) => {
@@ -93,6 +100,43 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
     return bestStrategy;
   }, [goal, processedResults]);
 
+  const [explanation, setExplanation] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchExplanation = async () => {
+      if (!recommended || !scenario) return;
+      const goalEnum: GoalEnum =
+        goal === 'Minimize Tax'
+          ? 'minimize_tax'
+          : goal === 'Maximize Spending'
+          ? 'maximize_spending'
+          : goal === 'Preserve Estate'
+          ? 'preserve_estate'
+          : 'simplify';
+
+      try {
+        const resp = await fetch('/api/v1/explain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            scenario,
+            strategy_code: recommended.strategy_code,
+            summary: recommended.summary,
+            goal: goalEnum,
+          }),
+        });
+        if (!resp.ok) throw new Error('request failed');
+        const data: ExplainResponse = await resp.json();
+        setExplanation(data.explanation);
+      } catch (err) {
+        console.error('Failed to fetch explanation', err);
+        setExplanation(null);
+      }
+    };
+
+    fetchExplanation();
+  }, [recommended, scenario, goal]);
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -102,6 +146,9 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           <Typography variant="h5" color="primary" gutterBottom>
             Recommended Strategy: <strong>{recommended.strategy_name}</strong>
           </Typography>
+        )}
+        {explanation && (
+          <Typography variant="body2" gutterBottom>{explanation}</Typography>
         )}
       <Typography variant="body1" gutterBottom>
         Based on your goal (<em>{goal}</em>), the strategy above is projected to perform the best among those selected.
