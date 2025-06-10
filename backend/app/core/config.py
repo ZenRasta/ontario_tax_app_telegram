@@ -77,6 +77,8 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = Field("gpt-4o-mini", env="OPENAI_MODEL")
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     ANTHROPIC_MODEL: str = Field("claude-3-haiku-20240307", env="ANTHROPIC_MODEL")
+    GEMINI_API_KEY: Optional[str] = Field(default=None, env="GEMINI_API_KEY")
+    GEMINI_MODEL: str = Field("gemini-pro", env="GEMINI_MODEL")
 
     # ------------------------------------------------------------------ #
     model_config = SettingsConfigDict(
