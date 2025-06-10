@@ -47,8 +47,8 @@ async def explain_strategy_with_context(  # noqa: C901
     Calls an LLM to produce a plain-English explanation of a strategy's
     outcomes given the user's scenario and goals.
     """
-    if not settings.OPENAI_API_KEY:
-        logger.warning("OPENAI_API_KEY not set. LLM explanation disabled, returning placeholder.")
+    if not settings.GEMINI_API_KEY:
+        logger.warning("GEMINI_API_KEY not set. LLM explanation disabled, returning placeholder.")
         return "LLM-generated explanation is currently unavailable as the API key is not configured."
 
     # Get strategy metadata (label, blurb) if you have it
@@ -142,31 +142,29 @@ async def explain_strategy_with_context(  # noqa: C901
     # logger.debug(f"LLM Prompt: \n{final_prompt}") # Uncomment for full prompt debugging
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client: # Increased timeout slightly
+        async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                settings.OPENAI_API_ENDPOINT_URL or "https://api.openai.com/v1/chat/completions", # Use configurable endpoint
-                headers={
-                    "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
-                    # Add "OpenAI-Organization": settings.OPENAI_ORG_ID if using orgs
-                },
+                f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}",
                 json={
-                    "model": settings.OPENAI_MODEL,
-                    "messages": [{"role": "user", "content": final_prompt}],
-                    "temperature": 0.6, # Slightly lower for more factual, less creative
-                    "max_tokens": 500,  # Limit response length
-                    # "n": 1, # Number of completions to generate
-                    # "stop": None, # Sequence where the API will stop generating
+                    "contents": [{"parts": [{"text": final_prompt}]}],
+                    "generationConfig": {"temperature": 0.6, "maxOutputTokens": 500},
                 },
             )
-            resp.raise_for_status() # Raises HTTPStatusError for 4xx/5xx responses
+            resp.raise_for_status()
 
             response_data = resp.json()
-            if response_data.get("choices") and response_data["choices"][0].get("message"):
-                content = response_data["choices"][0]["message"].get("content", "")
-                logger.info(f"LLM explanation received successfully for {strategy_code.value}.")
+            if response_data.get("candidates"):
+                content = (
+                    response_data["candidates"][0]["content"]["parts"][0].get("text", "")
+                )
+                logger.info(
+                    f"LLM explanation received successfully for {strategy_code.value}."
+                )
                 return content.strip()
             else:
-                logger.error(f"LLM response missing expected structure for {strategy_code.value}. Response: {response_data}")
+                logger.error(
+                    f"LLM response missing expected structure for {strategy_code.value}. Response: {response_data}"
+                )
                 return "Could not generate an explanation due to an unexpected response format from the AI service."
 
     except httpx.HTTPStatusError as e:
