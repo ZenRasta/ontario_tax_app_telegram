@@ -69,8 +69,10 @@ app.add_middleware(
 # include v1 simulation router (defined in app/api/v1/simulate.py)
 # ------------------------------------------------------------------ #
 from app.api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
+from app.api.v1.explain import router as explain_router  # noqa: E402
 
 app.include_router(simulate_router)
+app.include_router(explain_router)
 
 # ------------------------------------------------------------------ #
 # database init (runs once at start-up)
