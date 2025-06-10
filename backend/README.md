@@ -8,6 +8,18 @@ The backend reads tax tables from YAML files. A real installation of
 **PyYAML** is therefore required. Continuous integration checks that
 `import yaml` succeeds, and `poetry install` will provide the package.
 
+## Environment variables
+
+Create a `.env` file in this directory with your Gemini configuration:
+
+```
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-pro
+```
+
+`GEMINI_MODEL` defaults to `gemini-pro` if omitted.
+
+
 ## Debug API
 
 For troubleshooting, the backend exposes a debug route listing registered

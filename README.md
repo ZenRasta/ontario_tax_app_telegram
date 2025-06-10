@@ -38,6 +38,18 @@ The consolidated tax tables live in `backend/data/tax_years.yml`.  Additional
 per‑year files are stored under the top‑level `tax/` directory.  These YAML files
 are parsed at runtime by the backend via PyYAML.
 
+## Environment variables
+
+The backend reads optional settings from a `.env` file in the `backend` directory. To use the Gemini-based explanation features, provide a Google API key and model name, for example:
+
+```
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-pro
+```
+
+`GEMINI_MODEL` defaults to `gemini-pro` if left unset.
+
+
 ## Running tests
 
 ### Backend
