@@ -29,11 +29,11 @@ openai = "^1.78.1"
 redis = "^6.1.0"
 sqlalchemy = {version = "^2.0", extras = ["asyncio"]}
 aiosqlite = "^0.21.0"
+httpx = "^0.24.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
 pytest-asyncio = "^0.21.0"
-httpx = "^0.24.0" # For testing API calls
 ruff = "^0.0.285" # For linting
 
 [build-system]
