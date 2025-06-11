@@ -47,9 +47,13 @@ async def explain_strategy_with_context(  # noqa: C901
     Calls an LLM to produce a plain-English explanation of a strategy's
     outcomes given the user's scenario and goals.
     """
-    if not settings.GEMINI_API_KEY:
-        logger.warning("GEMINI_API_KEY not set. LLM explanation disabled, returning placeholder.")
-        return "LLM-generated explanation is currently unavailable as the API key is not configured."
+    if not settings.OPENROUTER_API_KEY:
+        logger.warning(
+            "OPENROUTER_API_KEY not set. LLM explanation disabled, returning placeholder."
+        )
+        return (
+            "LLM-generated explanation is currently unavailable as the API key is not configured."
+        )
 
     # Get strategy metadata (label, blurb) if you have it
     # strategy_meta = get_strategy_meta(strategy_code) # Assuming you have this function
@@ -144,19 +148,20 @@ async def explain_strategy_with_context(  # noqa: C901
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}",
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
                 json={
-                    "contents": [{"parts": [{"text": final_prompt}]}],
-                    "generationConfig": {"temperature": 0.6, "maxOutputTokens": 500},
+                    "model": settings.OPENROUTER_MODEL,
+                    "messages": [{"role": "user", "content": final_prompt}],
+                    "temperature": 0.6,
+                    "max_tokens": 500,
                 },
             )
             resp.raise_for_status()
 
             response_data = resp.json()
-            if response_data.get("candidates"):
-                content = (
-                    response_data["candidates"][0]["content"]["parts"][0].get("text", "")
-                )
+            if response_data.get("choices"):
+                content = response_data["choices"][0]["message"].get("content", "")
                 logger.info(
                     f"LLM explanation received successfully for {strategy_code.value}."
                 )
