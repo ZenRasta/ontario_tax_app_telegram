@@ -10,14 +10,14 @@ The backend reads tax tables from YAML files. A real installation of
 
 ## Environment variables
 
-Create a `.env` file in this directory with your Gemini configuration:
+Create a `.env` file in this directory with your OpenRouter configuration:
 
 ```
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-pro
+OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_MODEL=openai/o4-mini
 ```
 
-`GEMINI_MODEL` defaults to `gemini-pro` if omitted.
+`OPENROUTER_MODEL` defaults to `openai/o4-mini` if omitted.
 
 
 ## Debug API

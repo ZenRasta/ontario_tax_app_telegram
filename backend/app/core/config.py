@@ -77,6 +77,8 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = Field("claude-3-haiku-20240307", env="ANTHROPIC_MODEL")
     GEMINI_API_KEY: Optional[str] = Field(default=None, env="GEMINI_API_KEY")
     GEMINI_MODEL: str = Field("gemini-pro", env="GEMINI_MODEL")
+    OPENROUTER_API_KEY: Optional[str] = Field(default=None, env="OPENROUTER_API_KEY")
+    OPENROUTER_MODEL: str = Field("openai/o4-mini", env="OPENROUTER_MODEL")
 
     # ------------------------------------------------------------------ #
     model_config = SettingsConfigDict(

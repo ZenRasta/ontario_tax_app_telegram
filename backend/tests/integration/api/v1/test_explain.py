@@ -10,9 +10,9 @@ EXAMPLE_SUMMARY = SummaryMetrics.Config.json_schema_extra["example"]
 
 @pytest.mark.asyncio
 async def test_explain_endpoint(client, monkeypatch):
-    monkeypatch.setattr(settings, "GEMINI_API_KEY", "fake-key")
+    monkeypatch.setattr(settings, "OPENROUTER_API_KEY", "fake-key")
 
-    async def fake_post(self, url, json):
+    async def fake_post(self, url, headers=None, json=None):
         class _Resp:
             status_code = 200
 
@@ -21,8 +21,8 @@ async def test_explain_endpoint(client, monkeypatch):
 
             def json(self):
                 return {
-                    "candidates": [
-                        {"content": {"parts": [{"text": "sample explanation"}]}}
+                    "choices": [
+                        {"message": {"content": "sample explanation"}}
                     ]
                 }
 

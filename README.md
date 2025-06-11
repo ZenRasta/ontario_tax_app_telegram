@@ -40,14 +40,14 @@ are parsed at runtime by the backend via PyYAML.
 
 ## Environment variables
 
-The backend reads optional settings from a `.env` file in the `backend` directory. To use the Gemini-based explanation features, provide a Google API key and model name, for example:
+The backend reads optional settings from a `.env` file in the `backend` directory. To enable the explanation features, provide an OpenRouter API key and model name, for example:
 
 ```
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-pro
+OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_MODEL=openai/o4-mini
 ```
 
-`GEMINI_MODEL` defaults to `gemini-pro` if left unset.
+`OPENROUTER_MODEL` defaults to `openai/o4-mini` if left unset.
 
 
 ## Running tests
