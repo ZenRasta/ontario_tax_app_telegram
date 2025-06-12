@@ -14,6 +14,12 @@ import { useReactToPrint } from 'react-to-print';
 import StrategyChart from './StrategyChart';
 import type { ComparisonResponseItem, ExplainResponse } from '../types/api';
 
+const currencyFormatter = new Intl.NumberFormat('en-CA', {
+  style: 'currency',
+  currency: 'CAD',
+  maximumFractionDigits: 0,
+});
+
 interface ReportPageProps {
   goal: string;
   horizon: number;
@@ -126,7 +132,7 @@ const ReportPage: React.FC<ReportPageProps> = ({
           <Typography variant="h6" gutterBottom>
             Projection Horizon: {horizon} years
           </Typography>
-          <Table size="small" sx={{ my: 2 }}>
+          <Table size="small" sx={{ my: 2 }} className="w-full report-table">
             <TableHead>
               <TableRow>
                 <TableCell>Strategy</TableCell>
@@ -141,17 +147,17 @@ const ReportPage: React.FC<ReportPageProps> = ({
                   <TableCell>{res.strategy_name}</TableCell>
                   <TableCell align="right">
                     {res.totalTaxes !== null
-                      ? `$${res.totalTaxes.toLocaleString()}`
+                      ? currencyFormatter.format(res.totalTaxes)
                       : '—'}
                   </TableCell>
                   <TableCell align="right">
                     {res.totalSpending !== null
-                      ? `$${res.totalSpending.toLocaleString()}`
+                      ? currencyFormatter.format(res.totalSpending)
                       : '—'}
                   </TableCell>
                   <TableCell align="right">
                     {res.finalEstate !== null
-                      ? `$${res.finalEstate.toLocaleString()}`
+                      ? currencyFormatter.format(res.finalEstate)
                       : '—'}
                   </TableCell>
                 </TableRow>

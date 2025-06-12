@@ -11,3 +11,23 @@
     display: none;
   }
 }
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+  padding: 0.25rem 0.5rem;
+}
+
+@media print {
+  .report-table th,
+  .report-table td {
+    border: 1px solid black;
+  }
+  .report-table thead {
+    background-color: #f0f0f0;
+  }
+}
