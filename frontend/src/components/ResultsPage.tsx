@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import {
   Box,
   Typography,
@@ -148,7 +149,11 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           </Typography>
         )}
         {explanation && (
-          <Typography variant="body2" gutterBottom>{explanation}</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation) }}
+          />
         )}
       <Typography variant="body1" gutterBottom>
         Based on your goal (<em>{goal}</em>), the strategy above is projected to perform the best among those selected.
