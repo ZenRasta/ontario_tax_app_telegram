@@ -51,7 +51,7 @@ beforeEach(() => {
 test('sanitizes explanation HTML before rendering', async () => {
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ explanation: '<script>alert(1)</script>' }),
+    json: async () => ({ summary: '<script>alert(1)</script>', key_outcomes: [], recommendations: '' }),
   }) as jest.Mock;
 
   render(
