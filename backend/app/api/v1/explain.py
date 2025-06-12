@@ -16,12 +16,14 @@ class ExplainRequest(BaseModel):
 
 
 class ExplainResponse(BaseModel):
-    explanation: str
+    summary: str
+    key_outcomes: list[str]
+    recommendations: str
 
 
 @router.post("/explain", response_model=ExplainResponse)
 async def explain(req: ExplainRequest) -> ExplainResponse:
-    text = await explain_strategy_with_context(
+    data = await explain_strategy_with_context(
         req.scenario, req.strategy_code, req.summary, req.goal
     )
-    return ExplainResponse(explanation=text)
+    return ExplainResponse(**data)
