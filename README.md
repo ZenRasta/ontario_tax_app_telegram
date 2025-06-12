@@ -49,6 +49,16 @@ OPENROUTER_MODEL=openai/o4-mini
 
 `OPENROUTER_MODEL` defaults to `openai/o4-mini` if left unset.
 
+## Strategy report
+
+After running a simulation, the results screen includes a **View Report**
+button.  This opens a printable summary with any explanation text provided by
+the LLM service.  Use the **Export PDF** button to trigger the browser's print
+dialog and save the report as a PDF file.
+
+The PDF feature relies on the `react-to-print` package which is installed when
+you run `npm ci` in the `frontend` directory.  Generating the explanation text
+requires the `OPENROUTER_API_KEY` environment variable described above.
 
 ## Running tests
 
