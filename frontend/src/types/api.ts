@@ -95,6 +95,8 @@ export interface ExplainRequest {
 }
 
 export interface ExplainResponse {
-  explanation: string;
+  summary: string;
+  key_outcomes: string[];
+  recommendations: string;
 }
 

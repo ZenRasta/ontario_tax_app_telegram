@@ -11,6 +11,7 @@ import {
   Button,
 } from '@mui/material';
 import StrategyChart from './StrategyChart';
+import ReportPage from './ReportPage';
 
 import type {
   ComparisonResponseItem,
@@ -101,7 +102,8 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
     return bestStrategy;
   }, [goal, processedResults]);
 
-  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<ExplainResponse | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     const fetchExplanation = async () => {
@@ -128,7 +130,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
         });
         if (!resp.ok) throw new Error('request failed');
         const data: ExplainResponse = await resp.json();
-        setExplanation(data.explanation);
+        setExplanation(data);
       } catch (err) {
         console.error('Failed to fetch explanation', err);
         setExplanation(null);
@@ -137,6 +139,19 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
 
     fetchExplanation();
   }, [recommended, scenario, goal]);
+
+  if (showReport && recommended) {
+    return (
+      <ReportPage
+        goal={goal}
+        horizon={horizon}
+        results={processedResults}
+        explanation={explanation}
+        onBack={() => setShowReport(false)}
+        onStartOver={onStartOver}
+      />
+    );
+  }
 
   return (
     <Box>
@@ -152,7 +167,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           <Typography
             variant="body2"
             gutterBottom
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation) }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(explanation.summary) }}
           />
         )}
       <Typography variant="body1" gutterBottom>
@@ -218,6 +233,9 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
       <Box mt={2} textAlign="right">
         <Button variant="outlined" onClick={onBack} sx={{ mr: 2 }}>
           Back
+        </Button>
+        <Button variant="outlined" onClick={() => setShowReport(true)} sx={{ mr: 2 }}>
+          View Report
         </Button>
         <Button variant="contained" color="primary" onClick={onStartOver}>
           Start Over

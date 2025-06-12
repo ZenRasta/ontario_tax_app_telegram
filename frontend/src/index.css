@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  body {
+    margin: 1in;
+    font-size: 12pt;
+  }
+  .no-print {
+    display: none;
+  }
+}
