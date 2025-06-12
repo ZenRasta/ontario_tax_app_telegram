@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 
 import httpx
+import json
 
 from app.core.config import settings  # Use the singleton settings
 from app.data_models.results import SummaryMetrics
@@ -42,18 +43,22 @@ async def explain_strategy_with_context(  # noqa: C901
     # strategy_name: str, # Can get from StrategyMeta or build from code
     summary_metrics: SummaryMetrics,
     goal: GoalEnum
-) -> str:
+) -> dict:
     """
-    Calls an LLM to produce a plain-English explanation of a strategy's
-    outcomes given the user's scenario and goals.
+    Calls an LLM to produce an explanation of a strategy's outcomes.
+
+    Returns a dictionary with ``summary``, ``key_outcomes`` and ``recommendations``
+    keys populated from the LLM response.
     """
     if not settings.OPENROUTER_API_KEY:
         logger.warning(
             "OPENROUTER_API_KEY not set. LLM explanation disabled, returning placeholder."
         )
-        return (
-            "LLM-generated explanation is currently unavailable as the API key is not configured."
-        )
+        return {
+            "summary": "LLM-generated explanation is currently unavailable as the API key is not configured.",
+            "key_outcomes": [],
+            "recommendations": "",
+        }
 
     # Get strategy metadata (label, blurb) if you have it
     # strategy_meta = get_strategy_meta(strategy_code) # Assuming you have this function
@@ -138,7 +143,13 @@ async def explain_strategy_with_context(  # noqa: C901
         prompt_parts.append("Like any financial strategy, this approach has its pros and cons depending on your specific circumstances and how events unfold. For example, changes in tax laws or investment returns could affect the outcome.")
 
     prompt_parts.append(
-        "\nThis explanation is based on the simulation results and the assumptions you provided. It's a good starting point for our discussion. How does this sound to you?"
+        "\nThis explanation is based on the simulation results and the assumptions you provided. It's a good starting point for our discussion."
+    )
+
+    prompt_parts.append(
+        "\nPlease respond only with a JSON object containing these keys:"
+        " summary (a short paragraph), key_outcomes (a list of bullet points),"
+        " and recommendations (short advice)."
     )
 
     final_prompt = "\n".join(prompt_parts)
@@ -165,12 +176,26 @@ async def explain_strategy_with_context(  # noqa: C901
                 logger.info(
                     f"LLM explanation received successfully for {strategy_code.value}."
                 )
-                return content.strip()
+                try:
+                    return json.loads(content)
+                except json.JSONDecodeError:
+                    logger.error(
+                        "Failed to parse JSON from LLM response: %s", content
+                    )
+                    return {
+                        "summary": content.strip(),
+                        "key_outcomes": [],
+                        "recommendations": "",
+                    }
             else:
                 logger.error(
                     f"LLM response missing expected structure for {strategy_code.value}. Response: {response_data}"
                 )
-                return "Could not generate an explanation due to an unexpected response format from the AI service."
+                return {
+                    "summary": "Could not generate an explanation due to an unexpected response format from the AI service.",
+                    "key_outcomes": [],
+                    "recommendations": "",
+                }
 
     except httpx.HTTPStatusError as e:
         logger.error(f"LLM API request failed for {strategy_code.value} with status {e.response.status_code}: {e.response.text}", exc_info=False)
@@ -179,13 +204,25 @@ async def explain_strategy_with_context(  # noqa: C901
             error_detail = "AI explanation service authentication failed. Please check API key."
         elif e.response.status_code == 429:
             error_detail = "AI explanation service rate limit exceeded. Please try again later."
-        return f"Could not generate an explanation at this time. ({error_detail})"
+        return {
+            "summary": f"Could not generate an explanation at this time. ({error_detail})",
+            "key_outcomes": [],
+            "recommendations": "",
+        }
     except httpx.RequestError as e:
         logger.error(f"LLM API request error for {strategy_code.value}: {e}", exc_info=True)
-        return "Could not connect to the AI explanation service. Please check your network connection or try again later."
+        return {
+            "summary": "Could not connect to the AI explanation service. Please check your network connection or try again later.",
+            "key_outcomes": [],
+            "recommendations": "",
+        }
     except Exception as e:
         logger.error(f"Unexpected error during LLM explanation for {strategy_code.value}: {e}", exc_info=True)
-        return "An unexpected error occurred while generating the AI explanation."
+        return {
+            "summary": "An unexpected error occurred while generating the AI explanation.",
+            "key_outcomes": [],
+            "recommendations": "",
+        }
 
 # Example of how you might call it from an endpoint (conceptual)
 # async def get_explanation_endpoint(
@@ -194,5 +231,5 @@ async def explain_strategy_with_context(  # noqa: C901
 #     summary: SummaryMetrics,
 #     user_goal: GoalEnum
 # ):
-#     explanation = await explain_strategy_with_context(scenario_input, strat_code, summary, user_goal)
-#     return {"explanation": explanation}
+#     data = await explain_strategy_with_context(scenario_input, strat_code, summary, user_goal)
+#     return data

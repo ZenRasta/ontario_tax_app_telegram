@@ -22,7 +22,11 @@ async def test_explain_endpoint(client, monkeypatch):
             def json(self):
                 return {
                     "choices": [
-                        {"message": {"content": "sample explanation"}}
+                        {
+                            "message": {
+                                "content": '{"summary": "s", "key_outcomes": ["o"], "recommendations": "r"}'
+                            }
+                        }
                     ]
                 }
 
@@ -38,4 +42,8 @@ async def test_explain_endpoint(client, monkeypatch):
     }
     resp = await client.post("/api/v1/explain", json=payload)
     assert resp.status_code == 200
-    assert resp.json() == {"explanation": "sample explanation"}
+    assert resp.json() == {
+        "summary": "s",
+        "key_outcomes": ["o"],
+        "recommendations": "r",
+    }
