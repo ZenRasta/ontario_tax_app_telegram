@@ -13,6 +13,12 @@ import {
 import StrategyChart from './StrategyChart';
 import ReportPage from './ReportPage';
 
+const currencyFormatter = new Intl.NumberFormat('en-CA', {
+  style: 'currency',
+  currency: 'CAD',
+  maximumFractionDigits: 0,
+});
+
 import type {
   ComparisonResponseItem,
   ScenarioInput,
@@ -178,7 +184,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
       </Typography>
 
       {/* Comparison Table for selected strategies */}
-      <Table size="small" sx={{ my: 2 }}>
+      <Table size="small" sx={{ my: 2 }} className="w-full report-table">
         <TableHead>
           <TableRow>
             <TableCell>Strategy</TableCell>
@@ -203,13 +209,13 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
             >
               <TableCell>{res.strategy_name}</TableCell>
               <TableCell align="right">
-                {res.totalTaxes !== null ? `$${res.totalTaxes.toLocaleString()}` : '—'}
+                {res.totalTaxes !== null ? currencyFormatter.format(res.totalTaxes) : '—'}
               </TableCell>
               <TableCell align="right">
-                {res.totalSpending !== null ? `$${res.totalSpending.toLocaleString()}` : '—'}
+                {res.totalSpending !== null ? currencyFormatter.format(res.totalSpending) : '—'}
               </TableCell>
               <TableCell align="right">
-                {res.finalEstate !== null ? `$${res.finalEstate.toLocaleString()}` : '—'}
+                {res.finalEstate !== null ? currencyFormatter.format(res.finalEstate) : '—'}
               </TableCell>
             </TableRow>
           ))}
