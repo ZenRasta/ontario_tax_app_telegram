@@ -1,4 +1,14 @@
 name: ontario-rrif-calculator
+
+static_sites:
+- name: frontend
+  github:
+    repo: ZenRasta/Ontario_Taxapp_v2
+    branch: main
+  build_command: echo "Static site deployment"
+  output_dir: /
+  index_document: index.html
+
 services:
 - name: backend
   source_dir: /backend
@@ -13,22 +23,3 @@ services:
   - key: PORT
     scope: RUN_TIME
     value: "8000"
-  - key: ENVIRONMENT
-    scope: RUN_TIME
-    value: "production"
-  routes:
-  - path: /api
-  - path: /docs
-  - path: /redoc
-
-static_sites:
-- name: frontend
-  source_dir: /frontend
-  github:
-    repo: ZenRasta/Ontario_Taxapp_v2
-    branch: main
-  build_command: echo "No build needed for static HTML"
-  output_dir: /
-  index_document: index.html
-  routes:
-  - path: /
