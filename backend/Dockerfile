@@ -1,35 +1,28 @@
-# Stage 1: Build the application with Poetry
-FROM python:3.10-slim as builder
-
-WORKDIR /app
-
-# Install poetry
-RUN pip install poetry
-
-# Copy only files necessary for dependency installation
-COPY pyproject.toml poetry.lock* ./
-
-# Install dependencies
-# --no-root: don't install the project itself yet
-# --no-dev: don't install dev dependencies
-RUN poetry config virtualenvs.create false && poetry install --no-root --no-dev --no-interaction --no-ansi
-
-# Stage 2: Create the runtime image
 FROM python:3.10-slim
 
 WORKDIR /app
 
-# Copy installed dependencies from builder stage
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY ./app /app/app
 COPY ./data /app/data
+COPY ./tax /app/tax
+
+# Create a non-root user
+RUN useradd --create-home --shell /bin/bash app
+RUN chown -R app:app /app
+USER app
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Command to run the application
-# Adjust if your main.py is elsewhere or app instance is named differently
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
