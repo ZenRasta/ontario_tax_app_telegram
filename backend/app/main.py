@@ -162,10 +162,11 @@ class StrategiesResponse(BaseModel):
 def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenario: ScenarioInput) -> None:
     if code == StrategyCodeEnum.BF and params.bracket_fill_ceiling is None:
         raise HTTPException(422, "bracket_fill_ceiling required for BF strategy")
-    if code == StrategyCodeEnum.LS and (
-        params.lump_sum_amount is None or params.lump_sum_year_offset is None
-    ):
-        raise HTTPException(422, "lump_sum_amount and lump_sum_year_offset required for LS strategy")
+    if code == StrategyCodeEnum.LS:
+        if params.lump_sum_amount is None:
+            raise HTTPException(422, "lump_sum_amount required for LS strategy. Please enter a value in the 'Lump-Sum Amount ($)' field.")
+        if params.lump_sum_year_offset is None:
+            raise HTTPException(422, "lump_sum_year_offset required for LS strategy. Please enter a value in the 'Lump-Sum Year Offset' field.")
     if code == StrategyCodeEnum.EBX and params.target_depletion_age is None:
         raise HTTPException(422, "target_depletion_age required for EBX strategy")
     if code == StrategyCodeEnum.CD and (
@@ -224,49 +225,73 @@ async def compare(req: CompareRequest):
     if req.strategies is None:
         raise HTTPException(422, "strategies list is required")
 
-    # decide which strategies to run
-    codes = (
-        _auto_strategies(req.scenario.goal)
-        if req.strategies == ["auto"]
-        else req.strategies or []
-    )
-    if not codes:
-        raise HTTPException(400, "strategies list cannot be empty")
-
-    params = req.scenario.strategy_params_override or StrategyParamsInput()
-    items: List[ComparisonResponseItem] = []
-
-    for code in codes:
-        _require_params(code, params, req.scenario)
-
-        # Apply params to scenario before running
-        scenario_with_params = req.scenario.copy(deep=True)
-        scenario_with_params.strategy_params_override = params
-
-        # FIX: Correct argument order - code first, then scenario
-        yearly, summary = engine.run(code, scenario_with_params)
-
-        balances = [
-                YearlyBalance(
-                    year=r.year,
-                    portfolio_end=(
-                        r.end_rrif_balance + r.end_tfsa_balance + r.end_non_reg_balance
-                    ),
-                )
-                for r in yearly
-            ] if yearly else []
-
-        items.append(
-            ComparisonResponseItem(
-                strategy_code=code,
-                strategy_name=_strategy_display(code),
-                yearly_results=yearly,
-                yearly_balances=balances,
-                summary=summary,
-            )
+    try:
+        # decide which strategies to run
+        codes = (
+            _auto_strategies(req.scenario.goal)
+            if req.strategies == ["auto"]
+            else req.strategies or []
         )
+        if not codes:
+            raise HTTPException(400, "strategies list cannot be empty")
 
-    return CompareApiResponse(request_id=req.request_id, comparisons=items)
+        items: List[ComparisonResponseItem] = []
+
+        for code in codes:
+            try:
+                # Get the strategy params from the scenario for each strategy
+                logger.info(f"req.scenario.strategy_params_override = {req.scenario.strategy_params_override}")
+                params = req.scenario.strategy_params_override or StrategyParamsInput()
+                logger.info(f"Strategy {code}: params = {params}")
+                logger.info(f"Strategy {code}: params.lump_sum_amount = {params.lump_sum_amount}, params.lump_sum_year_offset = {params.lump_sum_year_offset}")
+                _require_params(code, params, req.scenario)
+
+                # Apply params to scenario before running
+                scenario_with_params = req.scenario.copy(deep=True)
+                scenario_with_params.strategy_params_override = params
+
+                # FIX: Correct argument order - code first, then scenario
+                yearly, summary = engine.run(code, scenario_with_params)
+
+                balances = [
+                        YearlyBalance(
+                            year=r.year,
+                            portfolio_end=(
+                                r.end_rrif_balance + r.end_tfsa_balance + r.end_non_reg_balance
+                            ),
+                        )
+                        for r in yearly
+                    ] if yearly else []
+
+                items.append(
+                    ComparisonResponseItem(
+                        strategy_code=code,
+                        strategy_name=_strategy_display(code),
+                        yearly_results=yearly,
+                        yearly_balances=balances,
+                        summary=summary,
+                    )
+                )
+            except Exception as strategy_error:
+                logger.error(f"Error running strategy {code}: {str(strategy_error)}")
+                # Create a default summary with error information
+                default_summary = _create_default_summary_metrics(code)
+                items.append(
+                    ComparisonResponseItem(
+                        strategy_code=code,
+                        strategy_name=_strategy_display(code),
+                        yearly_results=[],
+                        yearly_balances=[],
+                        summary=default_summary,
+                        error_detail=str(strategy_error),
+                    )
+                )
+
+        return CompareApiResponse(request_id=req.request_id, comparisons=items)
+    
+    except Exception as exc:
+        logger.error(f"Compare endpoint error: {str(exc)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(exc)}")
 
 # ---------- Monte-Carlo simulation  ----------------------------------
 @router.post("/simulate_mc", tags=["Monte-Carlo"], response_model=dict)

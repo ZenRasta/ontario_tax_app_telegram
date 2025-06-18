@@ -1,10 +1,11 @@
 // frontend/src/App.tsx
 import React, { useState } from "react";
-import { Container, Paper, Typography, Alert } from "@mui/material";
+import { Container, Paper, Typography, Alert, Box } from "@mui/material";
 import GoalStep from "./components/GoalStep";
 import StrategyStep from "./components/StrategyStep";
 import InputFormStep from "./components/InputFormStep";
 import ResultsPage from "./components/ResultsPage";
+import PrivacyDisclaimer from "./components/PrivacyDisclaimer";
 import type { FormData } from "./types/formData";
 import type { ComparisonResponseItem, ScenarioInput } from "./types/api";
 
@@ -59,6 +60,24 @@ const App: React.FC = () => {
     /* ----------------------------------------------
      * 2) Build ScenarioInput payload (snake_case)
      * ---------------------------------------------- */
+    // Build strategy_params_override object, only including defined values
+    const strategyParamsOverride: any = {};
+    if (formData.bracketFillCeiling !== undefined && formData.bracketFillCeiling !== null) {
+      strategyParamsOverride.bracket_fill_ceiling = formData.bracketFillCeiling;
+    }
+    if (formData.cppStartAge !== undefined && formData.cppStartAge !== null) {
+      strategyParamsOverride.cpp_start_age = formData.cppStartAge;
+    }
+    if (formData.lumpSumAmount !== undefined && formData.lumpSumAmount !== null) {
+      strategyParamsOverride.lump_sum_amount = formData.lumpSumAmount;
+    }
+    if (formData.lumpSumYear !== undefined && formData.lumpSumYear !== null) {
+      strategyParamsOverride.lump_sum_year_offset = formData.lumpSumYear;
+    }
+    if (formData.emptyByAge !== undefined && formData.emptyByAge !== null) {
+      strategyParamsOverride.target_depletion_age = formData.emptyByAge;
+    }
+
     const scenarioPayload = {
       age: formData.age,
       rrsp_balance: formData.rrspBalance,
@@ -80,13 +99,7 @@ const App: React.FC = () => {
             oas_at_65: formData.spouseOasAmount,
           }
         : undefined,
-      strategy_params_override: {
-        bracket_fill_ceiling: formData.bracketFillCeiling,
-        cpp_start_age: formData.cppStartAge,
-        lump_sum_amount: formData.lumpSumAmount,
-        lump_sum_year_offset: formData.lumpSumYear,
-        target_depletion_age: formData.emptyByAge,
-      },
+      params: Object.keys(strategyParamsOverride).length > 0 ? strategyParamsOverride : undefined,
     };
     setScenarioData(scenarioPayload as ScenarioInput);
 
@@ -130,9 +143,16 @@ const App: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ my: 4 }}>
       <Paper elevation={2} sx={{ p: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Ontario RRIF Strategy Tester
-        </Typography>
+        {/* Header with Title and Privacy Disclaimer */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ flex: 1 }} />
+          <Typography variant="h4" align="center" sx={{ flex: 2 }}>
+            Ontario RRIF Strategy Tester
+          </Typography>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+            <PrivacyDisclaimer />
+          </Box>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -155,7 +175,26 @@ const App: React.FC = () => {
         {currentStep === 2 && (
           <StrategyStep
             selectedStrategies={formData.strategies}
-            onToggleStrategy={(codes) => updateFormData({ strategies: codes })}
+            onToggleStrategy={(codes) => {
+              const updates: Partial<FormData> = { strategies: codes };
+              
+              // Set default values for strategies that require them
+              if (codes.includes("LS") && !formData.lumpSumAmount) {
+                updates.lumpSumAmount = 90000;
+                updates.lumpSumYear = 20;
+              }
+              if (codes.includes("BF") && !formData.bracketFillCeiling) {
+                updates.bracketFillCeiling = 90000;
+              }
+              if (codes.includes("CD") && !formData.cppStartAge) {
+                updates.cppStartAge = 70;
+              }
+              if (codes.includes("EBX") && !formData.emptyByAge) {
+                updates.emptyByAge = 90;
+              }
+              
+              updateFormData(updates);
+            }}
             onNext={() => {
               if (formData.strategies.includes("SEQ")) {
                 updateFormData({ married: true });
@@ -206,4 +245,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

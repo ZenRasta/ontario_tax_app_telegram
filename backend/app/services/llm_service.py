@@ -147,9 +147,11 @@ async def explain_strategy_with_context(  # noqa: C901
     )
 
     prompt_parts.append(
-        "\nPlease respond only with a JSON object containing these keys:"
-        " summary (a short paragraph), key_outcomes (a list of bullet points),"
-        " and recommendations (short advice)."
+        "\nPlease respond with a JSON object containing these keys:"
+        " summary (a detailed paragraph explaining the strategy and its benefits),"
+        " key_outcomes (a list of 3-5 specific bullet points about projected outcomes),"
+        " recommendations (a detailed paragraph with specific actionable advice)."
+        "\n\nIMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON object."
     )
 
     final_prompt = "\n".join(prompt_parts)
@@ -177,15 +179,52 @@ async def explain_strategy_with_context(  # noqa: C901
                     f"LLM explanation received successfully for {strategy_code.value}."
                 )
                 try:
-                    return json.loads(content)
+                    # Try to parse as JSON first
+                    parsed_content = json.loads(content)
+                    return parsed_content
                 except json.JSONDecodeError:
-                    logger.error(
-                        "Failed to parse JSON from LLM response: %s", content
+                    logger.warning(
+                        "Failed to parse JSON from LLM response, attempting to extract content: %s", content[:200]
                     )
+                    # Try to extract JSON from the content if it's wrapped in other text
+                    import re
+                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                    if json_match:
+                        try:
+                            return json.loads(json_match.group())
+                        except json.JSONDecodeError:
+                            pass
+                    
+                    # Fallback: try to parse the content manually
+                    lines = content.strip().split('\n')
+                    summary = ""
+                    key_outcomes = []
+                    recommendations = ""
+                    
+                    current_section = None
+                    for line in lines:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        if 'summary' in line.lower() or current_section is None:
+                            current_section = 'summary'
+                            if ':' in line:
+                                summary += line.split(':', 1)[1].strip() + " "
+                            else:
+                                summary += line + " "
+                        elif 'outcome' in line.lower() or 'key' in line.lower():
+                            current_section = 'outcomes'
+                        elif 'recommend' in line.lower():
+                            current_section = 'recommendations'
+                        elif current_section == 'outcomes' and (line.startswith('•') or line.startswith('-') or line.startswith('*')):
+                            key_outcomes.append(line.lstrip('•-* '))
+                        elif current_section == 'recommendations':
+                            recommendations += line + " "
+                    
                     return {
-                        "summary": content.strip(),
-                        "key_outcomes": [],
-                        "recommendations": "",
+                        "summary": summary.strip() or content.strip(),
+                        "key_outcomes": key_outcomes or [content.strip()],
+                        "recommendations": recommendations.strip() or "Please consult with a financial advisor for personalized advice.",
                     }
             else:
                 logger.error(

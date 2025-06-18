@@ -289,19 +289,15 @@ class SimulateRequest(BaseModel):
 
         td = load_tax_year_data(_dt.datetime.now().year, sc.province)
 
+        # All strategy validation is handled in the API layer
+        # to provide better error messages
+        
+        # Set defaults for strategies that need them
         if code == StrategyCodeEnum.BF:
             if params.bracket_fill_ceiling is None:
                 if "oas_clawback_threshold" in td:
                     params.bracket_fill_ceiling = td["oas_clawback_threshold"]
-                else:
-                    raise ValueError(
-                        "Tax data missing 'oas_clawback_threshold'; cannot "
-                        "default bracket_fill_ceiling"
-                    )
-
-        if code == StrategyCodeEnum.LS:
-            if params.lump_sum_amount is None:
-                raise ValueError("lump_sum_amount required for LS strategy")
+                # If no default available, let the API layer handle validation
 
         if code == StrategyCodeEnum.CD:
             if params.cpp_start_age is None:
@@ -322,10 +318,4 @@ class CompareRequest(BaseModel):
     strategies: List[StrategyCodeEnum]  # routing layer may accept ["auto"]
     request_id: UUID = Field(default_factory=uuid4)
 
-    # ------------------------------------------------------------------
-    @root_validator(skip_on_failure=True)
-    def _apply_defaults_all(cls, v):
-        for code in v["strategies"]:
-            SimulateRequest(scenario=v["scenario"], strategy_code=code)
-        return v
-
+    # Validation is handled in the API layer for better error messages
