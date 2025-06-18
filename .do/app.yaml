@@ -15,11 +15,17 @@ services:
   github:
     repo: ZenRasta/Ontario_Taxapp_v2
     branch: main
-  run_command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  run_command: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
+  http_port: 8080
+  health_check:
+    http_path: /docs
   envs:
   - key: PORT
     scope: RUN_TIME
-    value: "8000"
+    value: "8080"
+  - key: PYTHONPATH
+    scope: RUN_TIME
+    value: "/app"
