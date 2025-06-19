@@ -1,31 +1,22 @@
 name: ontario-rrif-calculator
 
-static_sites:
-- name: frontend
-  github:
-    repo: ZenRasta/Ontario_Taxapp_v2
-    branch: main
-  build_command: echo "Static site deployment"
-  output_dir: /
-  index_document: index.html
-
 services:
 - name: backend
   source_dir: /backend
   github:
     repo: ZenRasta/Ontario_Taxapp_v2
     branch: main
-  run_command: cd /app && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level info
+  run_command: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level info
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
   http_port: 8080
   health_check:
-    http_path: /api/v1/health
-    initial_delay_seconds: 30
+    http_path: /health
+    initial_delay_seconds: 60
     period_seconds: 10
-    timeout_seconds: 5
-    failure_threshold: 6
+    timeout_seconds: 10
+    failure_threshold: 10
   envs:
   - key: PORT
     scope: RUN_TIME
@@ -54,3 +45,12 @@ services:
   - key: OPENROUTER_BASE_URL
     scope: RUN_TIME
     value: "https://openrouter.ai/api/v1"
+
+static_sites:
+- name: frontend
+  github:
+    repo: ZenRasta/Ontario_Taxapp_v2
+    branch: main
+  build_command: echo "Static site deployment"
+  output_dir: /
+  index_document: index.html

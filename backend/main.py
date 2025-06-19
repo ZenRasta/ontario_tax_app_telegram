@@ -57,6 +57,15 @@ app = FastAPI(
     description="Simulate tax-efficient RRIF/RRSP withdrawal strategies",
 )
 
+# Add root health endpoint for deployment platforms
+@app.get("/health")
+async def root_health():
+    return {"status": "healthy", "service": "ontario-rrif-calculator"}
+
+@app.get("/")
+async def root():
+    return {"message": "Ontario RRIF Calculator API", "status": "running", "docs": "/docs"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_CORS_ORIGINS,
