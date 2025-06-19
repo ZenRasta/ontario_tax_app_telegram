@@ -21,7 +21,7 @@ services:
   instance_size_slug: basic-xxs
   http_port: 8080
   health_check:
-    http_path: /docs
+    http_path: /api/v1/health
   envs:
   - key: PORT
     scope: RUN_TIME
@@ -29,3 +29,24 @@ services:
   - key: PYTHONPATH
     scope: RUN_TIME
     value: "/app"
+  - key: ENVIRONMENT
+    scope: RUN_TIME
+    value: "production"
+  - key: ALLOWED_CORS_ORIGINS
+    scope: RUN_TIME
+    value: "*"
+  - key: DB_URL
+    scope: RUN_TIME
+    value: "sqlite+aiosqlite:///app/rrif_prod.db"
+  - key: TAX_YEARS_FILE
+    scope: RUN_TIME
+    value: "data/tax_years.yml"
+  - key: OPENROUTER_API_KEY
+    scope: RUN_TIME
+    value: "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"
+  - key: OPENROUTER_MODEL
+    scope: RUN_TIME
+    value: "openai/gpt-4o-mini"
+  - key: OPENROUTER_BASE_URL
+    scope: RUN_TIME
+    value: "https://openrouter.ai/api/v1"
