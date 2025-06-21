@@ -147,7 +147,7 @@ const App: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ flex: 1 }} />
           <Typography variant="h4" align="center" sx={{ flex: 2 }}>
-            Ontario RRIF Strategy Tester
+            Ontario RRIF Strategy
           </Typography>
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <PrivacyDisclaimer />
