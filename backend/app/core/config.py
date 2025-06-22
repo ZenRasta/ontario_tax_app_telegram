@@ -81,12 +81,14 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ #
     # LLM
     # ------------------------------------------------------------------ #
+    OPENAI_API_KEY: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     ANTHROPIC_MODEL: str = Field("claude-3-haiku-20240307", env="ANTHROPIC_MODEL")
     GEMINI_API_KEY: Optional[str] = Field(default=None, env="GEMINI_API_KEY")
     GEMINI_MODEL: str = Field("gemini-pro", env="GEMINI_MODEL")
     OPENROUTER_API_KEY: Optional[str] = Field(default=None, env="OPENROUTER_API_KEY")
     OPENROUTER_MODEL: str = Field("openai/o4-mini", env="OPENROUTER_MODEL")
+    OPENROUTER_BASE_URL: str = Field("https://openrouter.ai/api/v1", env="OPENROUTER_BASE_URL")
 
     # ------------------------------------------------------------------ #
     model_config = SettingsConfigDict(

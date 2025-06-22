@@ -50,12 +50,27 @@ async def explain_strategy_with_context(  # noqa: C901
     Returns a dictionary with ``summary``, ``key_outcomes`` and ``recommendations``
     keys populated from the LLM response.
     """
-    if not settings.OPENAI_API_KEY:
+    # Check for available API keys - prefer OpenAI, fallback to OpenRouter
+    api_key = None
+    base_url = "https://api.openai.com/v1"
+    model = "gpt-4o-mini"
+    
+    if settings.OPENAI_API_KEY:
+        api_key = settings.OPENAI_API_KEY
+        model = "gpt-4o-mini"
+        logger.info("Using OpenAI API")
+    elif settings.OPENROUTER_API_KEY:
+        api_key = settings.OPENROUTER_API_KEY
+        base_url = settings.OPENROUTER_BASE_URL
+        model = settings.OPENROUTER_MODEL
+        logger.info(f"Using OpenRouter API with model: {model}")
+    
+    if not api_key:
         logger.warning(
-            "OPENAI_API_KEY not set. LLM explanation disabled, returning placeholder."
+            "No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY). LLM explanation disabled, returning placeholder."
         )
         return {
-            "summary": "LLM-generated explanation is currently unavailable as the API key is not configured.",
+            "summary": "LLM-generated explanation is currently unavailable as no API key is configured.",
             "key_outcomes": [],
             "recommendations": "",
         }
@@ -161,10 +176,10 @@ async def explain_strategy_with_context(  # noqa: C901
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
+                f"{base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}"},
                 json={
-                    "model": "gpt-4o-mini",
+                    "model": model,
                     "messages": [{"role": "user", "content": final_prompt}],
                     "temperature": 0.6,
                     "max_tokens": 500,
@@ -280,9 +295,24 @@ async def explain_oas_calculator_results(
     
     Returns a dictionary with enhanced recommendations and insights.
     """
-    if not settings.OPENAI_API_KEY:
+    # Check for available API keys - prefer OpenAI, fallback to OpenRouter
+    api_key = None
+    base_url = "https://api.openai.com/v1"
+    model = "gpt-4o-mini"
+    
+    if settings.OPENAI_API_KEY:
+        api_key = settings.OPENAI_API_KEY
+        model = "gpt-4o-mini"
+        logger.info("Using OpenAI API for OAS analysis")
+    elif settings.OPENROUTER_API_KEY:
+        api_key = settings.OPENROUTER_API_KEY
+        base_url = settings.OPENROUTER_BASE_URL
+        model = settings.OPENROUTER_MODEL
+        logger.info(f"Using OpenRouter API for OAS analysis with model: {model}")
+    
+    if not api_key:
         logger.warning(
-            "OPENAI_API_KEY not set. LLM explanation disabled, returning basic recommendations."
+            "No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY). LLM explanation disabled, returning basic recommendations."
         )
         return {
             "ai_summary": "AI-powered analysis is currently unavailable.",
@@ -343,10 +373,10 @@ async def explain_oas_calculator_results(
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
+                f"{base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}"},
                 json={
-                    "model": "gpt-4o-mini",
+                    "model": model,
                     "messages": [{"role": "user", "content": final_prompt}],
                     "temperature": 0.7,
                     "max_tokens": 800,
