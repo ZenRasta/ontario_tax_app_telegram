@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your OAS Clawback Analysis Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1976d2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #1976d2;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 16px;
+        }
+        .summary-box {
+            background-color: #e3f2fd;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .summary-box h2 {
+            color: #1976d2;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        .income-breakdown {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .income-breakdown h3 {
+            color: #333;
+            margin-top: 0;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .income-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .income-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .result-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .result-card h4 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .result-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .risk-level {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .risk-low { background-color: #d4edda; color: #155724; }
+        .risk-medium { background-color: #fff3cd; color: #856404; }
+        .risk-high { background-color: #f8d7da; color: #721c24; }
+        .recommendations {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .recommendations h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        .recommendations ul {
+            padding-left: 20px;
+        }
+        .recommendations li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #666;
+            font-size: 14px;
+        }
+        .disclaimer {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #721c24;
+        }
+        @media (max-width: 600px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your OAS Clawback Analysis</h1>
+            <p>Personalized Results for {{ recipient_name }}</p>
+            <p>Generated on {{ calculation_date }}</p>
+        </div>
+
+        <div class="summary-box">
+            <h2>Executive Summary</h2>
+            {% if result.oas_clawback_amount == 0 %}
+            <p><strong>Great news!</strong> Based on your income levels, you will not experience any OAS clawback. You'll receive the full Old Age Security benefit of <strong>${{ "%.0f"|format(result.net_oas_amount) }}</strong> annually.</p>
+            {% else %}
+            <p>Based on your projected income of <strong>${{ "%.0f"|format(result.total_income) }}</strong>, you will experience an OAS clawback of <strong>${{ "%.0f"|format(result.oas_clawback_amount) }}</strong> ({{ "%.1f"|format(result.oas_clawback_percentage) }}% of your OAS benefit).</p>
+            <p>Your net OAS benefit will be <strong>${{ "%.0f"|format(result.net_oas_amount) }}</strong> annually.</p>
+            {% endif %}
+            <p>Risk Level: <span class="risk-level risk-{{ result.risk_level|lower }}">{{ result.risk_level }}</span></p>
+        </div>
+
+        <div class="income-breakdown">
+            <h3>Your Income Breakdown</h3>
+            <div class="income-item">
+                <span>RRIF/RRSP Withdrawals:</span>
+                <span>${{ "%.0f"|format(result.rrif_withdrawals) }}</span>
+            </div>
+            <div class="income-item">
+                <span>CPP Pension:</span>
+                <span>${{ "%.0f"|format(result.cpp_pension) }}</span>
+            </div>
+            <div class="income-item">
+                <span>Work/Other Pension:</span>
+                <span>${{ "%.0f"|format(result.work_pension) }}</span>
+            </div>
+            <div class="income-item">
+                <span>Other Income:</span>
+                <span>${{ "%.0f"|format(result.other_income) }}</span>
+            </div>
+            <div class="income-item">
+                <span>Total Annual Income:</span>
+                <span>${{ "%.0f"|format(result.total_income) }}</span>
+            </div>
+        </div>
+
+        <div class="results-grid">
+            <div class="result-card">
+                <h4>OAS Clawback Amount</h4>
+                <div class="value">${{ "%.0f"|format(result.oas_clawback_amount) }}</div>
+            </div>
+            <div class="result-card">
+                <h4>Net OAS Benefit</h4>
+                <div class="value">${{ "%.0f"|format(result.net_oas_amount) }}</div>
+            </div>
+            <div class="result-card">
+                <h4>Clawback Percentage</h4>
+                <div class="value">{{ "%.1f"|format(result.oas_clawback_percentage) }}%</div>
+            </div>
+            <div class="result-card">
+                <h4>Estimated Tax Rate</h4>
+                <div class="value">{{ "%.1f"|format(result.effective_tax_rate) }}%</div>
+            </div>
+        </div>
+
+        <div class="recommendations">
+            <h3>Personalized Recommendations</h3>
+            <ul>
+                {% for recommendation in result.recommendations %}
+                <li>{{ recommendation }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Important Disclaimer:</strong> This analysis is based on 2024 OAS parameters and simplified tax calculations. Actual results may vary based on changes in tax laws, your specific circumstances, and other factors. Please consult with a qualified financial advisor for personalized advice.
+        </div>
+
+        <div class="footer">
+            <p>This report was generated by Ontario Tax App - OAS Calculator</p>
+            <p>For more comprehensive retirement planning, visit <a href="https://ontariotaxapp.com" style="color: #1976d2;">ontariotaxapp.com</a></p>
+        </div>
+    </div>
+</body>
+</html>

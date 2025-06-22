@@ -71,6 +71,14 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------ #
+    # Email Configuration
+    # ------------------------------------------------------------------ #
+    RESEND_API_KEY: Optional[str] = Field(default=None, env="RESEND_API_KEY")
+    SENDGRID_API_KEY: Optional[str] = Field(default=None, env="SENDGRID_API_KEY")
+    FROM_EMAIL: str = Field(default="noreply@example.com", env="FROM_EMAIL")
+    FROM_NAME: str = Field(default="RRIF Strategy Calculator", env="FROM_NAME")
+
+    # ------------------------------------------------------------------ #
     # LLM
     # ------------------------------------------------------------------ #
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
@@ -94,4 +102,3 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-

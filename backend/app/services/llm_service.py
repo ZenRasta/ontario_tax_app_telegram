@@ -263,6 +263,160 @@ async def explain_strategy_with_context(  # noqa: C901
             "recommendations": "",
         }
 
+async def explain_oas_calculator_results(
+    total_income: float,
+    oas_clawback_amount: float,
+    oas_clawback_percentage: float,
+    net_oas_amount: float,
+    risk_level: str,
+    rrif_withdrawals: float,
+    cpp_pension: float,
+    work_pension: float,
+    other_income: float,
+    recipient_name: str = ""
+) -> dict:
+    """
+    Calls an LLM to provide AI-powered interpretation of OAS calculator results.
+    
+    Returns a dictionary with enhanced recommendations and insights.
+    """
+    if not settings.OPENROUTER_API_KEY:
+        logger.warning(
+            "OPENROUTER_API_KEY not set. LLM explanation disabled, returning basic recommendations."
+        )
+        return {
+            "ai_summary": "AI-powered analysis is currently unavailable.",
+            "strategic_insights": [],
+            "personalized_recommendations": "Please consult with a financial advisor for personalized advice.",
+            "risk_assessment": f"Your OAS clawback risk level is {risk_level}."
+        }
+
+    # Build the prompt for OAS analysis
+    prompt_parts = [
+        "You are a highly experienced Canadian Certified Financial Planner (CFP) specializing in retirement income tax planning for Ontario residents.",
+        f"Your client{' ' + recipient_name if recipient_name else ''} has used an OAS Clawback Calculator and received their results. Your task is to provide expert analysis and actionable recommendations based on their specific situation.",
+        "Focus on practical, implementable strategies that can help optimize their retirement income and minimize OAS clawback impact.",
+        
+        "\n--- Client's OAS Clawback Analysis Results ---",
+        f"Total Annual Income: ${total_income:,.0f}",
+        f"- RRIF/RRSP Withdrawals: ${rrif_withdrawals:,.0f}",
+        f"- CPP Pension: ${cpp_pension:,.0f}",
+        f"- Work/Other Pension: ${work_pension:,.0f}",
+        f"- Other Income: ${other_income:,.0f}",
+        "",
+        f"OAS Clawback Analysis:",
+        f"- Annual OAS Clawback: ${oas_clawback_amount:,.0f}",
+        f"- Clawback Percentage: {oas_clawback_percentage:.1f}% of total OAS benefit",
+        f"- Net OAS Benefit: ${net_oas_amount:,.0f} annually",
+        f"- Risk Level: {risk_level}",
+        "",
+        "Context: The 2024 OAS clawback threshold is $90,997. Above this income level, OAS benefits are reduced by 15% of the excess income.",
+        
+        "\n--- Your Expert Analysis Task ---",
+        "Provide a comprehensive analysis that includes:",
+        "1. Strategic insights about their current income structure and OAS impact",
+        "2. Specific, actionable recommendations to optimize their situation",
+        "3. Tax planning strategies they should consider",
+        "4. Timing considerations for income management",
+        
+        "\nConsider strategies such as:",
+        "- Income splitting with spouse (if applicable)",
+        "- RRIF withdrawal timing and amounts",
+        "- Pension income splitting opportunities",
+        "- TFSA maximization strategies",
+        "- Charitable giving tax benefits",
+        "- OAS deferral strategies",
+        "- Investment loan strategies (if appropriate)",
+        
+        "\nPlease respond with a JSON object containing these keys:",
+        "- ai_summary: A comprehensive 2-3 sentence overview of their situation and key opportunities",
+        "- strategic_insights: A list of 3-4 specific insights about their income structure and tax implications",
+        "- personalized_recommendations: A detailed paragraph with specific, actionable advice tailored to their situation",
+        "- risk_assessment: A brief assessment of their OAS clawback risk and what it means for their retirement planning",
+        
+        "\nIMPORTANT: Return ONLY valid JSON. Do not include any text before or after the JSON object. Be specific and actionable in your recommendations."
+    ]
+
+    final_prompt = "\n".join(prompt_parts)
+    logger.info(f"Generated LLM prompt for OAS calculator analysis. Total income: ${total_income:,.0f}, Clawback: ${oas_clawback_amount:,.0f}")
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
+                json={
+                    "model": settings.OPENROUTER_MODEL,
+                    "messages": [{"role": "user", "content": final_prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 800,
+                },
+            )
+            resp.raise_for_status()
+
+            response_data = resp.json()
+            if response_data.get("choices"):
+                content = response_data["choices"][0]["message"].get("content", "")
+                logger.info("LLM OAS analysis received successfully.")
+                
+                try:
+                    # Try to parse as JSON first
+                    parsed_content = json.loads(content)
+                    return parsed_content
+                except json.JSONDecodeError:
+                    logger.warning("Failed to parse JSON from LLM response, attempting to extract content")
+                    
+                    # Try to extract JSON from the content if it's wrapped in other text
+                    import re
+                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                    if json_match:
+                        try:
+                            return json.loads(json_match.group())
+                        except json.JSONDecodeError:
+                            pass
+                    
+                    # Fallback: create structured response from content
+                    return {
+                        "ai_summary": f"Based on your total income of ${total_income:,.0f}, you have a {risk_level.lower()} risk OAS clawback situation with ${oas_clawback_amount:,.0f} annual clawback.",
+                        "strategic_insights": [
+                            f"Your income is ${total_income - 90997:,.0f} {'above' if total_income > 90997 else 'below'} the OAS clawback threshold",
+                            f"RRIF withdrawals represent {(rrif_withdrawals/total_income)*100:.1f}% of your total income",
+                            f"You're retaining {(net_oas_amount/8560.08)*100:.1f}% of your maximum OAS benefit"
+                        ],
+                        "personalized_recommendations": content.strip() if content.strip() else "Consider consulting with a financial advisor to explore income splitting strategies, RRIF withdrawal timing optimization, and tax-efficient investment approaches to minimize OAS clawback impact.",
+                        "risk_assessment": f"Your {risk_level.lower()} risk level indicates {'minimal impact' if risk_level == 'Low' else 'moderate impact' if risk_level == 'Medium' else 'significant impact'} on your OAS benefits."
+                    }
+            else:
+                logger.error("LLM response missing expected structure for OAS analysis")
+                return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
+
+    except httpx.HTTPStatusError as e:
+        logger.error(f"LLM API request failed for OAS analysis with status {e.response.status_code}")
+        return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
+    except Exception as e:
+        logger.error(f"Unexpected error during LLM OAS analysis: {e}")
+        return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
+
+def _get_fallback_oas_analysis(total_income: float, oas_clawback_amount: float, risk_level: str, rrif_withdrawals: float) -> dict:
+    """Fallback analysis when LLM is unavailable"""
+    if oas_clawback_amount == 0:
+        summary = f"Excellent news! With your total income of ${total_income:,.0f}, you're below the OAS clawback threshold and will receive your full OAS benefit."
+        recommendations = "Continue monitoring your income levels to ensure you stay below the clawback threshold. Consider maximizing TFSA contributions and exploring tax-efficient investment strategies."
+    else:
+        summary = f"With your total income of ${total_income:,.0f}, you're experiencing ${oas_clawback_amount:,.0f} in annual OAS clawback, representing a {risk_level.lower()} risk situation."
+        recommendations = "Consider income splitting strategies with your spouse, optimizing RRIF withdrawal timing, and exploring pension income splitting to reduce your overall tax burden and OAS clawback."
+    
+    return {
+        "ai_summary": summary,
+        "strategic_insights": [
+            f"Your income is ${abs(total_income - 90997):,.0f} {'above' if total_income > 90997 else 'below'} the OAS clawback threshold",
+            f"RRIF withdrawals represent {(rrif_withdrawals/total_income)*100:.1f}% of your total income",
+            "Income timing and splitting strategies could help optimize your situation"
+        ],
+        "personalized_recommendations": recommendations,
+        "risk_assessment": f"Your {risk_level.lower()} risk level suggests {'minimal' if risk_level == 'Low' else 'moderate' if risk_level == 'Medium' else 'significant'} impact on your retirement income planning."
+    }
+
 # Example of how you might call it from an endpoint (conceptual)
 # async def get_explanation_endpoint(
 #     scenario_input: ScenarioInput,

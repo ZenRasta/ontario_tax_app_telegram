@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import DOMPurify from 'dompurify';
 import {
   Box,
@@ -14,11 +14,21 @@ import {
   Grid,
   Card,
   CardContent,
+  Chip,
+  LinearProgress,
 } from '@mui/material';
+import { 
+  PictureAsPdf as PdfIcon, 
+  Psychology as AiIcon,
+  TrendingUp as TrendIcon,
+  Security as SecurityIcon,
+  AccountBalance as TaxIcon 
+} from '@mui/icons-material';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import StrategyChart from './StrategyChart';
 import FinancialProjectionsTable from './FinancialProjectionsTable';
+import OASCalculatorModal from './OASCalculatorModal';
 import type { ComparisonResponseItem, ExplainResponse } from '../types/api';
 
 const currencyFormatter = new Intl.NumberFormat('en-CA', {
