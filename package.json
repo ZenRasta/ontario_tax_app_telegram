@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Ontario RRIF Strategy Calculator",
   "main": "frontend/index.html",
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
   "scripts": {
-    "build": "cd frontend && npm ci && npx vite build && cd .. && cp -r frontend/dist/* .",
+    "build": "cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build && cd .. && cp -r frontend/dist/* .",
     "preview": "cd frontend && npm run preview",
     "dev": "cd frontend && npm run dev"
   },
