@@ -88,6 +88,8 @@ export const ALL_STRATEGIES: StrategyMeta[] = [
     default_complexity: 1,
     typical_goals: ['simplify', 'preserve_estate'],
   },
+];
+
 export interface StrategyOption {
   code: string;
   label: string;
