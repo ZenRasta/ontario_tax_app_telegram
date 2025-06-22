@@ -36,15 +36,9 @@ services:
   - key: TAX_YEARS_FILE
     scope: RUN_TIME
     value: "data/tax_years.yml"
-  - key: OPENROUTER_API_KEY
+  - key: OPENAI_API_KEY
     scope: RUN_TIME
-    value: "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"
-  - key: OPENROUTER_MODEL
-    scope: RUN_TIME
-    value: "deepseek/deepseek-chat"
-  - key: OPENROUTER_BASE_URL
-    scope: RUN_TIME
-    value: "https://openrouter.ai/api/v1"
+    value: "${OPENAI_API_KEY}"
   - key: RESEND_API_KEY
     scope: RUN_TIME
     value: "re_XFws7iY9_EDwGBknV4Vnugutfb6do3mCN"

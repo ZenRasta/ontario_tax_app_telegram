@@ -50,9 +50,9 @@ async def explain_strategy_with_context(  # noqa: C901
     Returns a dictionary with ``summary``, ``key_outcomes`` and ``recommendations``
     keys populated from the LLM response.
     """
-    if not settings.OPENROUTER_API_KEY:
+    if not settings.OPENAI_API_KEY:
         logger.warning(
-            "OPENROUTER_API_KEY not set. LLM explanation disabled, returning placeholder."
+            "OPENAI_API_KEY not set. LLM explanation disabled, returning placeholder."
         )
         return {
             "summary": "LLM-generated explanation is currently unavailable as the API key is not configured.",
@@ -161,10 +161,10 @@ async def explain_strategy_with_context(  # noqa: C901
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
                 json={
-                    "model": settings.OPENROUTER_MODEL,
+                    "model": "gpt-4o-mini",
                     "messages": [{"role": "user", "content": final_prompt}],
                     "temperature": 0.6,
                     "max_tokens": 500,
@@ -280,9 +280,9 @@ async def explain_oas_calculator_results(
     
     Returns a dictionary with enhanced recommendations and insights.
     """
-    if not settings.OPENROUTER_API_KEY:
+    if not settings.OPENAI_API_KEY:
         logger.warning(
-            "OPENROUTER_API_KEY not set. LLM explanation disabled, returning basic recommendations."
+            "OPENAI_API_KEY not set. LLM explanation disabled, returning basic recommendations."
         )
         return {
             "ai_summary": "AI-powered analysis is currently unavailable.",
@@ -343,10 +343,10 @@ async def explain_oas_calculator_results(
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
                 json={
-                    "model": settings.OPENROUTER_MODEL,
+                    "model": "gpt-4o-mini",
                     "messages": [{"role": "user", "content": final_prompt}],
                     "temperature": 0.7,
                     "max_tokens": 800,
