@@ -38,19 +38,37 @@ services:
     value: "data/tax_years.yml"
   - key: OPENROUTER_API_KEY
     scope: RUN_TIME
-    value: "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"
+    value: "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"
   - key: OPENROUTER_MODEL
     scope: RUN_TIME
-    value: "openai/gpt-4o-mini"
+    value: "deepseek/deepseek-chat"
   - key: OPENROUTER_BASE_URL
     scope: RUN_TIME
     value: "https://openrouter.ai/api/v1"
+  - key: RESEND_API_KEY
+    scope: RUN_TIME
+    value: "re_XFws7iY9_EDwGBknV4Vnugutfb6do3mCN"
+  - key: FROM_EMAIL
+    scope: RUN_TIME
+    value: "oascalculator@ontariotaxapp.com"
+  - key: FROM_NAME
+    scope: RUN_TIME
+    value: "Ontario Tax App - OAS Calculator"
 
 static_sites:
 - name: frontend
+  source_dir: /frontend
   github:
     repo: ZenRasta/Ontario_Taxapp_v2
     branch: main
-  build_command: echo "Static site deployment"
-  output_dir: /
+  build_command: npm ci && npm run build
+  output_dir: /dist
   index_document: index.html
+  environment_slug: node-js
+  envs:
+  - key: NODE_ENV
+    scope: BUILD_TIME
+    value: "production"
+  - key: VITE_API_URL
+    scope: BUILD_TIME
+    value: "https://ontario-rrif-calculator-backend.ondigitalocean.app/api/v1"
