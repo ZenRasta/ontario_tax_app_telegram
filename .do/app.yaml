@@ -38,7 +38,7 @@ services:
     value: "data/tax_years.yml"
   - key: OPENROUTER_API_KEY
     scope: RUN_TIME
-    value: "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"
+    value: "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"
   - key: OPENROUTER_MODEL
     scope: RUN_TIME
     value: "deepseek/deepseek-chat"
