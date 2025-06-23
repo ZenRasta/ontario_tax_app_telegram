@@ -46,7 +46,7 @@ const StrategyStep: React.FC<StrategyStepProps> = ({ selectedStrategies, onToggl
               aria-label="strategies" 
               size="small"
               color="primary"
-              multiple
+              exclusive={false}
             >
               <ToggleButton value={code}>
                 {label}
@@ -76,4 +76,3 @@ const StrategyStep: React.FC<StrategyStepProps> = ({ selectedStrategies, onToggl
 };
 
 export default StrategyStep;
-

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
@@ -17,49 +17,74 @@ import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
 interface FormValues {
-  strategy_params: StrategyParamsInput;
   strategy_code: string;
+  strategy_params: {
+    bracket_fill_ceiling?: number;
+    lump_sum_amount?: number;
+    lump_sum_year_offset?: number;
+    target_depletion_age?: number;
+    cpp_start_age?: number;
+    oas_start_age?: number;
+    loan_interest_rate_pct?: number;
+    loan_amount_as_pct_of_rrif?: number;
+  };
 }
 
-const schema = yup.object({
+const strategySchema = yup.object({
   strategy_code: yup.string().required(),
   strategy_params: yup.object({
     bracket_fill_ceiling: yup
       .number()
       .typeError('Required')
-      .when('$bf', (bf: boolean, s: any) => (bf ? s.required() : s)),
+      .when(['$bf'], ([bf], schema: yup.NumberSchema) => 
+        bf ? schema.required('Required when bracket fill is on') : schema.optional()
+      ),
     lump_sum_amount: yup
       .number()
       .typeError('Required')
-      .when('$ls', (ls: boolean, s: any) => (ls ? s.required() : s)),
+      .when(['$ls'], ([ls], schema: yup.NumberSchema) => 
+        ls ? schema.required('Required when lump sum is on') : schema.optional()
+      ),
     lump_sum_year_offset: yup
       .number()
       .typeError('Required')
-      .when('$ls', (ls: boolean, s: any) => (ls ? s.required() : s)),
+      .when(['$ls'], ([ls], schema: yup.NumberSchema) => 
+        ls ? schema.required('Required when lump sum is on') : schema.optional()
+      ),
     target_depletion_age: yup
       .number()
       .typeError('Required')
-      .when('$ebx', (ebx: boolean, s: any) => (ebx ? s.required() : s)),
+      .when(['$ebx'], ([ebx], schema: yup.NumberSchema) => 
+        ebx ? schema.required('Required when empty-by-X is on') : schema.optional()
+      ),
     cpp_start_age: yup
       .number()
       .typeError('Required')
       .min(60)
       .max(70)
-      .when('$delay', (delay: boolean, s: any) => (delay ? s.required() : s)),
+      .when(['$delay'], ([delay], schema: yup.NumberSchema) => 
+        delay ? schema.required('Required when delay is on') : schema.optional()
+      ),
     oas_start_age: yup
       .number()
       .typeError('Required')
       .min(60)
       .max(70)
-      .when('$delay', (delay: boolean, s: any) => (delay ? s.required() : s)),
+      .when(['$delay'], ([delay], schema: yup.NumberSchema) => 
+        delay ? schema.required('Required when delay is on') : schema.optional()
+      ),
     loan_interest_rate_pct: yup
       .number()
       .typeError('Required')
-      .when('$interest', (interest: boolean, s: any) => (interest ? s.required() : s)),
+      .when(['$interest'], ([interest], schema: yup.NumberSchema) => 
+        interest ? schema.required('Required when interest offset is on') : schema.optional()
+      ),
     loan_amount_as_pct_of_rrif: yup
       .number()
       .typeError('Required')
-      .when('$interest', (interest: boolean, s: any) => (interest ? s.required() : s)),
+      .when(['$interest'], ([interest], schema: yup.NumberSchema) => 
+        interest ? schema.required('Required when interest offset is on') : schema.optional()
+      ),
   }).required(),
 });
 
@@ -80,7 +105,7 @@ export default function SimulationForm() {
       strategy_code: 'GM',
     },
     context: { bf, ls, ebx, delay, interest },
-    resolver: yupResolver(schema),
+    resolver: yupResolver(strategySchema) as any,
   });
 
   const [rows, setRows] = useState([]);
