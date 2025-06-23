@@ -23,5 +23,10 @@
     "url": "https://github.com/ZenRasta/Ontario_Taxapp_v2.git"
   },
   "author": "ZenRasta",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.10"
+  }
 }
