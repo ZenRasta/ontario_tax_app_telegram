@@ -2,15 +2,21 @@
   "name": "ontario-rrif-calculator",
   "version": "1.0.0",
   "description": "Ontario RRIF Strategy Calculator",
-  "main": "frontend/index.html",
+  "main": "server/index.js",
+  "type": "module",
   "engines": {
     "node": "18.x",
     "npm": "9.x"
   },
   "scripts": {
-    "build": "cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build && cd .. && cp -r frontend/dist/* .",
-    "preview": "cd frontend && npm run preview",
+    "build": "cd frontend && npm ci && npm run build && cd .. && cp -r frontend/dist .",
+    "start": "node server/index.js",
+    "postinstall": "pip install -r requirements.txt && cd frontend && npm ci && npm run build && cd .. && cp -r frontend/dist .",
     "dev": "cd frontend && npm run dev"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "serve-static": "^1.15.0"
   },
   "repository": {
     "type": "git",
