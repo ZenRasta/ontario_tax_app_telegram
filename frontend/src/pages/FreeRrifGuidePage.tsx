@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Typography, Box, Paper, Alert, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, List, ListItem, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-const FreeRrifGuide: React.FC = () => {
+const FreeRrifGuidePage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Header */}
@@ -318,4 +318,4 @@ const FreeRrifGuide: React.FC = () => {
   );
 };
 
-export default FreeRrifGuide;
+export default FreeRrifGuidePage;
