@@ -29,8 +29,7 @@ npm ci
 
 The landing page is now the default entry at `frontend/index.html`.  Open this
 file in a browser to preview the marketing design.  The "Figure out my RRIF
-Strategy" buttons link to the calculator located at
-`frontend/calculator.html`.
+Strategy" buttons link to the calculator at the `/calculator` route.
 
 ## Tax data
 
@@ -75,4 +74,3 @@ poetry run pytest
 cd frontend
 npm test
 ```
-
