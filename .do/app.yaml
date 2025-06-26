@@ -10,6 +10,7 @@ services:
   http_port: 8080
   instance_count: 1
   instance_size_slug: basic-xxs
+  build_command: echo "Using Dockerfile"
   health_check:
     http_path: /health
     initial_delay_seconds: 60

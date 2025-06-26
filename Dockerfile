@@ -3,9 +3,10 @@ FROM node:18-slim as frontend-builder
 
 # Build frontend
 WORKDIR /app
-COPY package*.json ./
+COPY package.json.bak package.json
+COPY package-lock.json ./
 COPY frontend/package*.json ./frontend/
-RUN npm install
+RUN npm ci
 COPY frontend/ ./frontend/
 RUN npm run --workspace frontend build
 
@@ -34,9 +35,10 @@ COPY tax/ ./tax/
 
 # Copy frontend build and server files
 COPY --from=frontend-builder /app/dist ./dist
-COPY package*.json ./
+COPY package.json.bak package.json
+COPY package-lock.json ./
 COPY server/ ./server/
-RUN npm install --production
+RUN npm ci --only=production
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app
