@@ -2,6 +2,7 @@ name: ontario-rrif-calculator
 
 services:
 - name: web
+  type: service
   github:
     repo: ZenRasta/Ontario_Taxapp_v2
     branch: main
