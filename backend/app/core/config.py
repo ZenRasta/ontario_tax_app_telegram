@@ -29,7 +29,13 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ #
     API_PREFIX: str = Field(default="/api/v1", env="API_PREFIX")
     ALLOWED_CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:5173"], env="ALLOWED_CORS_ORIGINS"
+        default=[
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://whale-app-42k2y.ondigitalocean.app",
+            "*"
+        ], 
+        env="ALLOWED_CORS_ORIGINS"
     )
 
     @field_validator("ALLOWED_CORS_ORIGINS", mode="before")
