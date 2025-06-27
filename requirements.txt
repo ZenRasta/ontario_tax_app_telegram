@@ -1,36 +1,21 @@
-# Core FastAPI dependencies - let pip resolve compatible versions
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 gunicorn>=21.2.0
 pydantic>=2.0.0
 python-multipart
-
-# Database dependencies  
 aiosqlite>=0.20.0
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.0
-
-# Security dependencies
 bcrypt>=4.0.0
 cryptography>=44.0.0
 passlib>=1.7.0
 python-jose>=3.4.0
-
-# HTTP and networking
 httpx>=0.24.0
-
-# Data processing
 pandas>=2.0.0
 numpy>=1.24.0
-
-# Configuration and utilities
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
 pyyaml>=6.0.0
-
-# Additional dependencies
 redis>=5.0.0
 email-validator>=2.0.0
-
-# These will be auto-resolved by pip:
-# anyio, starlette, typing-extensions, httpcore, h11, sniffio
+python-dateutil>=2.9.0
