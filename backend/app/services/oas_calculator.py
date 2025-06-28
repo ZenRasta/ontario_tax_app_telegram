@@ -92,19 +92,24 @@ class OASCalculator:
                     tax_data = yaml.safe_load(file)
                     
                 for year, data in tax_data.items():
-                    if isinstance(data, dict) and 'oas' in data:
-                        oas_data = data['oas']
+                    if isinstance(data, dict):
+                        # Extract OAS parameters from the tax year data
+                        max_annual_oas = data.get('oas_max_benefit_at_65', 8560.08)
+                        max_monthly_oas = max_annual_oas / 12
+                        
                         self.parameters_cache[year] = OASParameters(
-                            max_monthly_oas=oas_data.get('max_monthly', 713.34),
-                            max_annual_oas=oas_data.get('max_annual', 8560.08),
-                            clawback_threshold=oas_data.get('clawback_threshold', 90997),
-                            clawback_rate=oas_data.get('clawback_rate', 0.15),
-                            max_monthly_gis_single=oas_data.get('max_gis_single', 1065.47),
-                            max_monthly_gis_married=oas_data.get('max_gis_married', 641.35),
-                            gis_income_threshold=oas_data.get('gis_threshold', 21624),
-                            deferral_bonus_rate=oas_data.get('deferral_bonus_rate', 0.006),
-                            max_deferral_months=oas_data.get('max_deferral_months', 60)
+                            max_monthly_oas=max_monthly_oas,
+                            max_annual_oas=max_annual_oas,
+                            clawback_threshold=data.get('oas_clawback_threshold', 90997),
+                            clawback_rate=data.get('oas_clawback_rate', 0.15),
+                            max_monthly_gis_single=1065.47,  # Default values - not in tax file
+                            max_monthly_gis_married=641.35,
+                            gis_income_threshold=21624,
+                            deferral_bonus_rate=data.get('oas_deferral_factor_per_month', 0.006),
+                            max_deferral_months=60
                         )
+                        
+                logger.info(f"Tax years data loaded successfully for years: {list(self.parameters_cache.keys())}")
             else:
                 logger.warning("Tax years data file not found, using default parameters")
                 self._set_default_parameters()
