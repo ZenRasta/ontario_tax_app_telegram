@@ -6,9 +6,9 @@ import logging
 import httpx
 import json
 
-from app.core.config import settings  # Use the singleton settings
-from app.data_models.results import SummaryMetrics
-from app.data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
+from ..core.config import settings  # Use the singleton settings
+from ..data_models.results import SummaryMetrics
+from ..data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
 
 # from app.data_models.strategy import get_strategy_meta # If you have strategy descriptions there
 

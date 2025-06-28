@@ -16,8 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 from pydantic import BaseModel
 
-from app.core.config import settings
-from app.data_models.results import (
+from .core.config import settings
+from .data_models.results import (
     CompareResponse as CompareApiResponse,
     ComparisonResponseItem,
     MonteCarloPath,
@@ -25,7 +25,7 @@ from app.data_models.results import (
     SummaryMetrics,
     SimulationResponse as SimulationApiResponse,
 )
-from app.data_models.scenario import (
+from .data_models.scenario import (
     CompareRequest,
     GoalEnum,
     ScenarioInput,
@@ -33,11 +33,11 @@ from app.data_models.scenario import (
     StrategyCodeEnum,
     StrategyParamsInput,
 )
-from app.data_models.strategy import ALL_STRATEGIES, StrategyMeta
-from app.db.session_manager import create_db_and_tables
-from app.services.monte_carlo_service import MonteCarloService
-from app.services.strategy_engine.engine import _STRATEGY_REGISTRY, StrategyEngine
-from app.utils.year_data_loader import load_tax_year_data
+from .data_models.strategy import ALL_STRATEGIES, StrategyMeta
+from .db.session_manager import create_db_and_tables
+from .services.monte_carlo_service import MonteCarloService
+from .services.strategy_engine.engine import _STRATEGY_REGISTRY, StrategyEngine
+from .utils.year_data_loader import load_tax_year_data
 
 # ------------------------------------------------------------------ #
 # logging
@@ -68,9 +68,9 @@ app.add_middleware(
 # ------------------------------------------------------------------ #
 # include v1 simulation router (defined in app/api/v1/simulate.py)
 # ------------------------------------------------------------------ #
-from app.api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
-from app.api.v1.explain import router as explain_router  # noqa: E402
-from app.api.v1.oas_calculator import router as oas_calculator_router  # noqa: E402
+from .api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
+from .api.v1.explain import router as explain_router  # noqa: E402
+from .api.v1.oas_calculator import router as oas_calculator_router  # noqa: E402
 
 app.include_router(simulate_router)
 app.include_router(explain_router)

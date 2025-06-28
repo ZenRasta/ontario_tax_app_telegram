@@ -25,7 +25,7 @@ from pydantic import (
     root_validator,
 )
 
-from app.utils.year_data_loader import load_tax_year_data
+from ..utils.year_data_loader import load_tax_year_data
 
 # --------------------------------------------------------------------------- #
 # Enumerations

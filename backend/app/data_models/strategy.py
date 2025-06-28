@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from app.data_models.scenario import GoalEnum, StrategyCodeEnum
+from .scenario import GoalEnum, StrategyCodeEnum
 
 
 class StrategyMeta(BaseModel):
@@ -95,4 +95,3 @@ ALL_STRATEGIES: List[StrategyMeta] = [
 # Helper – fetch metadata quickly without a comprehension everywhere
 def get_strategy_meta(code: StrategyCodeEnum) -> Optional[StrategyMeta]:
     return next((m for m in ALL_STRATEGIES if m.code == code), None)
-

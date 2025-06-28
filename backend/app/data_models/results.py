@@ -21,7 +21,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, confloat, conint
 
 # Import StrategyCodeEnum from scenario.py
-from app.data_models.scenario import StrategyCodeEnum
+from .scenario import StrategyCodeEnum
 
 # --------------------------------------------------------------------------- #
 # Yearly Simulation Result

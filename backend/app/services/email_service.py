@@ -16,7 +16,7 @@ from pathlib import Path
 
 import httpx
 from jinja2 import Environment, FileSystemLoader
-from app.core.config import settings
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
