@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 import logging
 
-from app.services.oas_calculator import SimpleOASInput, simple_oas_calculator
+from ...services.oas_calculator import SimpleOASInput, simple_oas_calculator
 
 logger = logging.getLogger(__name__)
 

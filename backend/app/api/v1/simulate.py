@@ -1,7 +1,7 @@
 # backend/app/api/v1/simulate.py
 from fastapi import APIRouter, HTTPException
-from app.data_models.scenario import CompareRequest          # or SimulateRequest
-from app.services.strategy_engine.engine import run_strategy_batch
+from ...data_models.scenario import CompareRequest          # or SimulateRequest
+from ...services.strategy_engine.engine import run_strategy_batch
 
 router = APIRouter(prefix="/api/v1", tags=["simulation"])
 
@@ -18,4 +18,3 @@ def simulate(req: CompareRequest):
         return {"comparisons": [s.dict() for s in summaries]}
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-

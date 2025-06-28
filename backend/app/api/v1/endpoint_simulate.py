@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from typing import List
 
-from app.data_models.scenario import CompareRequest
-from app.data_models.results import ResultSummary
-from app.services.strategy_engine.engine import run_strategy_batch
+from ...data_models.scenario import CompareRequest
+from ...data_models.results import ResultSummary
+from ...services.strategy_engine.engine import run_strategy_batch
 
 
 router = APIRouter(prefix="/api/v1", tags=["simulate"])
