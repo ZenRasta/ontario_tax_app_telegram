@@ -3,7 +3,7 @@
 Combined FastAPI + Static File Server for DigitalOcean App Platform
 
 This serves:
-- FastAPI backend at /api/* routes
+- FastAPI backend at /api/* routes (backend app has /api/v1 prefix internally)
 - Frontend static files for all other routes
 """
 
@@ -19,8 +19,9 @@ from backend.app.main import app as backend_app
 # Create the main app
 app = FastAPI(title="Ontario Tax App", description="Combined Frontend + Backend")
 
-# Mount the backend API under /api
-app.mount("/api", backend_app)
+# The backend app already has routes prefixed with /api/v1, so mount it at root
+# This will make /api/v1/* routes available directly
+app.mount("", backend_app)
 
 # Determine the frontend build directory
 frontend_build_dir = Path("frontend/dist")
@@ -34,11 +35,29 @@ if frontend_build_dir.exists():
     assets_dir = frontend_build_dir / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
-    
-    # Serve the frontend for all other routes
+
+# Health check for the combined service (must be defined before catch-all)
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "ontario-tax-app-combined"}
+
+@app.get("/")
+async def root():
+    """Serve the frontend index.html for the root route"""
+    index_path = frontend_build_dir / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"message": "Ontario Tax App", "frontend_dir": str(frontend_build_dir)}
+
+# Serve the frontend for all other routes (must be last due to catch-all)
+if frontend_build_dir.exists():
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         """Serve the frontend SPA for all non-API routes"""
+        # Skip API routes - they should be handled by the backend app
+        if full_path.startswith("api/"):
+            return {"error": "API route not found"}
+        
         # Check if it's a specific file request
         file_path = frontend_build_dir / full_path
         if file_path.is_file():
@@ -56,20 +75,7 @@ else:
     @app.get("/{full_path:path}")
     async def serve_fallback(full_path: str):
         """Fallback when frontend is not available"""
-        return {"message": "Frontend not available", "api_docs": "/api/docs"}
-
-# Health check for the combined service
-@app.get("/health")
-async def health():
-    return {"status": "healthy", "service": "ontario-tax-app-combined"}
-
-@app.get("/")
-async def root():
-    """Serve the frontend index.html for the root route"""
-    index_path = frontend_build_dir / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path)
-    return {"message": "Ontario Tax App", "frontend_dir": str(frontend_build_dir)}
+        return {"message": "Frontend not available", "api_docs": "/api/v1/docs"}
 
 if __name__ == "__main__":
     import uvicorn
