@@ -84,10 +84,27 @@ class OASCalculator:
     def _load_oas_parameters(self):
         """Load OAS parameters from configuration files"""
         try:
-            # Try to load from existing tax data structure
-            tax_data_path = Path(__file__).parent.parent / "data" / "tax_years.yml"
+            # Try multiple possible locations for the tax data file
+            possible_paths = [
+                # Standard location relative to this file
+                Path(__file__).parent.parent / "data" / "tax_years.yml",
+                # Alternative location in case of different deployment structure
+                Path(__file__).parent.parent.parent / "backend" / "data" / "tax_years.yml",
+                # Root level data directory
+                Path(__file__).parent.parent.parent / "data" / "tax_years.yml",
+                # Current working directory
+                Path.cwd() / "backend" / "data" / "tax_years.yml",
+                Path.cwd() / "data" / "tax_years.yml",
+            ]
             
-            if tax_data_path.exists():
+            tax_data_path = None
+            for path in possible_paths:
+                if path.exists():
+                    tax_data_path = path
+                    break
+            
+            if tax_data_path:
+                logger.info(f"Loading tax years data from: {tax_data_path}")
                 with open(tax_data_path, 'r') as file:
                     tax_data = yaml.safe_load(file)
                     
@@ -111,7 +128,8 @@ class OASCalculator:
                         
                 logger.info(f"Tax years data loaded successfully for years: {list(self.parameters_cache.keys())}")
             else:
-                logger.warning("Tax years data file not found, using default parameters")
+                logger.warning(f"Tax years data file not found in any of these locations: {[str(p) for p in possible_paths]}")
+                logger.warning("Using default OAS parameters")
                 self._set_default_parameters()
                 
         except Exception as e:
