@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.data_models.scenario import ScenarioInput, StrategyCodeEnum, GoalEnum
-from app.data_models.results import SummaryMetrics
-from app.services.llm_service import explain_strategy_with_context
+from ...data_models.scenario import ScenarioInput, StrategyCodeEnum, GoalEnum
+from ...data_models.results import SummaryMetrics
+from ...services.llm_service import explain_strategy_with_context
 
 router = APIRouter(prefix="/api/v1", tags=["explain"])
 

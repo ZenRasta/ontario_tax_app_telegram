@@ -23,9 +23,9 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
 
-from app.data_models.scenario import StrategyCodeEnum
-from app.services.strategy_engine import tax_rules
-from app.services.strategy_engine.engine import register
+from ....data_models.scenario import StrategyCodeEnum
+from .. import tax_rules
+from ..engine import register
 
 from .base_strategy import BaseStrategy, EngineState, YearScratch
 
@@ -197,4 +197,3 @@ class DelayCppOasStrategy(BaseStrategy):
                 end_non_reg=end_non,
             )
         )
-

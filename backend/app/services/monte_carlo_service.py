@@ -4,13 +4,13 @@ from typing import Callable, List, Tuple
 
 import numpy as np
 
-from app.data_models.results import MonteCarloPath, SummaryMetrics
-from app.data_models.scenario import (
+from ..data_models.results import MonteCarloPath, SummaryMetrics
+from ..data_models.scenario import (
     ScenarioInput,
     StrategyCodeEnum,
     StrategyParamsInput,
 )
-from app.services.strategy_engine.engine import StrategyEngine
+from .strategy_engine.engine import StrategyEngine
 
 
 class MonteCarloService:

@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool import NullPool
 
-from app.core.config import settings
+from ..core.config import settings
 
 # --------------------------------------------------------------------- #
 # Engine
@@ -45,7 +45,7 @@ AsyncSessionLocal = async_sessionmaker(
 # --------------------------------------------------------------------- #
 # Prefer importing Base from your models file so everything shares ONE MetaData
 try:
-    from app.db.schemas import DbBase  # noqa: F401
+    from .schemas import DbBase  # noqa: F401
 except ImportError:
     DbBase = declarative_base()
 
@@ -69,4 +69,3 @@ async def get_async_db_session() -> AsyncGenerator[AsyncSession, None]:
         finally:
             # session closes automatically via context‑manager
             await session.close()
-

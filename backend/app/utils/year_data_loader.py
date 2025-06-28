@@ -30,7 +30,7 @@ try:
 except ModuleNotFoundError:  # no PyYAML available → fallback parser
     yaml = None  # noqa: N816 (lower-case on purpose)
 
-from app.services.strategy_engine.tax_rules import TaxYearData
+from ..services.strategy_engine.tax_rules import TaxYearData
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_PATH = REPO_ROOT / "backend" / "data" / "tax_years.yml"
@@ -159,4 +159,3 @@ def load_tax_year_data(year: int, province: str = "ON") -> TaxYearData:
 # --------------------------------------------------------------------------- #
 if __name__ == "__main__":
     print(load_tax_year_data(_dt.datetime.now().year, "ON"))
-

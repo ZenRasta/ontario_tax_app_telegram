@@ -524,7 +524,7 @@ class SimpleOASClawbackCalculator:
         
         try:
             # Import here to avoid circular imports
-            from app.services.email_service import OASCalculatorResult, email_service
+            from .email_service import OASCalculatorResult, email_service
             
             # Calculate the clawback first (this always works)
             result = self.calculate_clawback(input_data)
@@ -546,7 +546,7 @@ class SimpleOASClawbackCalculator:
                 
                 # Get AI-powered analysis of the results
                 try:
-                    from app.services.llm_service import explain_oas_calculator_results
+                    from .llm_service import explain_oas_calculator_results
                     
                     ai_analysis = await explain_oas_calculator_results(
                         total_income=result.total_income,

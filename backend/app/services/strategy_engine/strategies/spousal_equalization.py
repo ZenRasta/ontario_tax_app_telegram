@@ -28,10 +28,10 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from app.data_models.scenario import StrategyCodeEnum
-from app.services.strategy_engine import tax_rules
-from app.services.strategy_engine.engine import register
-from app.services.strategy_engine.strategies.gradual_meltdown import (
+from ....data_models.scenario import StrategyCodeEnum
+from .. import tax_rules
+from ..engine import register
+from .gradual_meltdown import (
     ASSUMED_INFLATION,
     MAX_ITER,
     TAXABLE_PORTION_NONREG_GROWTH,
@@ -57,7 +57,7 @@ class SpousalEqualizationStrategy(BaseStrategy):
         spouse = self.params.spouse or self.scenario.spouse
         if not spouse:
             # No spouse data → fall back to Gradual Meltdown goal‑seek behaviour
-            from app.services.strategy_engine.strategies.gradual_meltdown import (
+            from .gradual_meltdown import (
                 GradualMeltdownStrategy,
             )
 
@@ -240,4 +240,3 @@ class SpousalEqualizationStrategy(BaseStrategy):
                 end_non_reg=end_non,
             )
         )
-

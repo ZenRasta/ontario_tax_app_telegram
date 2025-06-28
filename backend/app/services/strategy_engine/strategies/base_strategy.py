@@ -21,19 +21,19 @@ from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import List
 
-from app.data_models.scenario import (
+from ....data_models.scenario import (
     ScenarioInput,
     StrategyParamsInput,
     StrategyCodeEnum,
 )
-from app.data_models.results import (
+from ....data_models.results import (
     IncomeSources,
     SummaryMetrics,
     TaxBreakdown,
     YearlyResult,
 )
-from app.services.strategy_engine.tax_rules import TaxYearData
-from app.services.strategy_engine.state import EngineState, YearScratch  # ensure this file exists
+from ..tax_rules import TaxYearData
+from ..state import EngineState, YearScratch  # ensure this file exists
 
 # real discount rate used for PV calcs (2 % after inflation)
 REAL_DISCOUNT_RATE = Decimal("0.02")

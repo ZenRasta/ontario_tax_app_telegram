@@ -13,7 +13,7 @@ from decimal import Decimal
 from typing import List, Optional, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:  # avoid circular import at runtime
-    from app.data_models.scenario import ScenarioInput
+    from ...data_models.scenario import ScenarioInput
 
 
 # ------------------------------------------------------------------ #
@@ -88,4 +88,3 @@ class EngineState:
                 "non_reg": Decimal("0"),
             },
         )
-

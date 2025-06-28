@@ -17,20 +17,20 @@ from typing import Any, Dict, List, Tuple, Type
 import importlib
 import pkgutil
 
-from app.utils.year_data_loader import load_tax_year_data
+from ...utils.year_data_loader import load_tax_year_data
 
-from app.data_models.results import (
+from ...data_models.results import (
     ResultSummary,
     SummaryMetrics,
     YearlyBalance,
 )
-from app.data_models.scenario import (
+from ...data_models.scenario import (
     ScenarioInput,
     StrategyParamsInput,
     StrategyCodeEnum,
 )
-from app.data_models.strategy import get_strategy_meta
-from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
+from ...data_models.strategy import get_strategy_meta
+from .strategies.base_strategy import BaseStrategy
 from . import strategies as _strategies_pkg
 
 
@@ -239,5 +239,3 @@ class StrategyEngine:
         code_str = code.value if hasattr(code, 'value') else str(code)
 
         return run_single_strategy(code_str, sc, params, self.tax_year_data_loader)
-
-

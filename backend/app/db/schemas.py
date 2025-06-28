@@ -30,8 +30,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_models.scenario import StrategyCodeEnum
-from app.db.session_manager import DbBase
+from ..data_models.scenario import StrategyCodeEnum
+from .session_manager import DbBase
 
 
 # --------------------------------------------------------------------------- #
@@ -167,4 +167,3 @@ class SessionCache(DbBase):
         if not row or row.expires_at < datetime.utcnow():
             return None
         return row.json_value
-
