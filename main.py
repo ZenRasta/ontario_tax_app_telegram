@@ -28,9 +28,12 @@ if not frontend_build_dir.exists():
     # Fallback to development structure
     frontend_build_dir = Path("frontend/public")
 
-# Mount static files
+# Mount static files only if they exist
 if frontend_build_dir.exists():
-    app.mount("/assets", StaticFiles(directory=frontend_build_dir / "assets"), name="assets")
+    # Check if assets directory exists before mounting
+    assets_dir = frontend_build_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
     
     # Serve the frontend for all other routes
     @app.get("/{full_path:path}")
@@ -48,6 +51,12 @@ if frontend_build_dir.exists():
         
         # Fallback
         return {"error": "Frontend not found", "path": str(frontend_build_dir)}
+else:
+    # If no frontend directory exists, create a simple fallback
+    @app.get("/{full_path:path}")
+    async def serve_fallback(full_path: str):
+        """Fallback when frontend is not available"""
+        return {"message": "Frontend not available", "api_docs": "/api/docs"}
 
 # Health check for the combined service
 @app.get("/health")
