@@ -34,6 +34,9 @@ frontend_build_dir = Path("frontend/dist")
 if not frontend_build_dir.exists():
     # Fallback to development structure
     frontend_build_dir = Path("frontend/public")
+    if not frontend_build_dir.exists():
+        # Final fallback - create a minimal structure
+        frontend_build_dir = Path(".")
 
 # Mount static files only if they exist
 if frontend_build_dir.exists():
@@ -51,7 +54,7 @@ async def health():
 # This ensures proper route precedence and avoids mounting conflicts
 from backend.app.main import router as backend_router, debug_router as backend_debug_router
 app.include_router(backend_router, prefix="/api/v1")
-app.include_router(backend_debug_router, prefix="/api/v1/debug")
+app.include_router(backend_debug_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():

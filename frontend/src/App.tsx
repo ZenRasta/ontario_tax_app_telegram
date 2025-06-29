@@ -61,7 +61,7 @@ const App: React.FC = () => {
      * 2) Build ScenarioInput payload (snake_case)
      * ---------------------------------------------- */
     // Build strategy_params_override object, only including defined values
-    const strategyParamsOverride: any = {};
+    const strategyParamsOverride: Record<string, any> = {};
     if (formData.bracketFillCeiling !== undefined && formData.bracketFillCeiling !== null) {
       strategyParamsOverride.bracket_fill_ceiling = formData.bracketFillCeiling;
     }
@@ -117,6 +117,7 @@ const App: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          request_id: crypto.randomUUID(),
           scenario: scenarioPayload,
           strategies: strategyList,
         }),
