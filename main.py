@@ -42,15 +42,16 @@ if frontend_build_dir.exists():
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-# Mount the backend app at root FIRST - this will make backend's /api/v1/* routes available as /api/v1/*
-# The backend app already has routes with /api/v1 prefix, so mounting at root gives us the correct paths
-# CRITICAL: This must be done BEFORE defining any other routes to ensure proper precedence
-app.mount("", backend_app)
-
-# Health check for the combined service (defined after mounting to avoid conflicts)
+# Health check for the combined service
 @app.get("/health")
 async def health():
     return {"status": "healthy", "service": "ontario-tax-app-combined"}
+
+# Include all routes from the backend app directly into the main app
+# This ensures proper route precedence and avoids mounting conflicts
+from backend.app.main import router as backend_router, debug_router as backend_debug_router
+app.include_router(backend_router, prefix="/api/v1")
+app.include_router(backend_debug_router, prefix="/api/v1/debug")
 
 @app.get("/")
 async def root():
