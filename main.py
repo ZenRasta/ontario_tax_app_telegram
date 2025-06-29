@@ -19,10 +19,6 @@ from backend.app.main import app as backend_app
 # Create the main app
 app = FastAPI(title="Ontario Tax App", description="Combined Frontend + Backend")
 
-# The backend app already has routes prefixed with /api/v1, so mount it at root
-# This will make /api/v1/* routes available directly
-app.mount("", backend_app)
-
 # Determine the frontend build directory
 frontend_build_dir = Path("frontend/dist")
 if not frontend_build_dir.exists():
@@ -36,7 +32,7 @@ if frontend_build_dir.exists():
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-# Health check for the combined service (must be defined before catch-all)
+# Health check for the combined service (must be defined before mounting backend)
 @app.get("/health")
 async def health():
     return {"status": "healthy", "service": "ontario-tax-app-combined"}
@@ -48,6 +44,10 @@ async def root():
     if index_path.exists():
         return FileResponse(index_path)
     return {"message": "Ontario Tax App", "frontend_dir": str(frontend_build_dir)}
+
+# Include all routes from the backend app directly into the main app
+# This avoids mounting issues and ensures proper route precedence
+app.include_router(backend_app.router)
 
 # Serve the frontend for all other routes (must be last due to catch-all)
 if frontend_build_dir.exists():
