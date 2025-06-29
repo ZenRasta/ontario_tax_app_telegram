@@ -9,15 +9,25 @@ This serves:
 
 import os
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 # Import the backend FastAPI app
 from backend.app.main import app as backend_app
 
 # Create the main app
 app = FastAPI(title="Ontario Tax App", description="Combined Frontend + Backend")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Determine the frontend build directory
 frontend_build_dir = Path("frontend/dist")
@@ -32,7 +42,12 @@ if frontend_build_dir.exists():
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-# Health check for the combined service (must be defined before mounting backend)
+# Mount the backend app at root FIRST - this will make backend's /api/v1/* routes available as /api/v1/*
+# The backend app already has routes with /api/v1 prefix, so mounting at root gives us the correct paths
+# CRITICAL: This must be done BEFORE defining any other routes to ensure proper precedence
+app.mount("", backend_app)
+
+# Health check for the combined service (defined after mounting to avoid conflicts)
 @app.get("/health")
 async def health():
     return {"status": "healthy", "service": "ontario-tax-app-combined"}
@@ -45,18 +60,15 @@ async def root():
         return FileResponse(index_path)
     return {"message": "Ontario Tax App", "frontend_dir": str(frontend_build_dir)}
 
-# Include all routes from the backend app directly into the main app
-# This avoids mounting issues and ensures proper route precedence
-app.include_router(backend_app.router)
-
 # Serve the frontend for all other routes (must be last due to catch-all)
+# This catch-all route should NOT match /api/* routes due to mounting above
 if frontend_build_dir.exists():
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         """Serve the frontend SPA for all non-API routes"""
-        # Skip API routes - they should be handled by the backend app
+        # This should never be reached for /api/* routes due to mounting above
         if full_path.startswith("api/"):
-            return {"error": "API route not found"}
+            raise HTTPException(status_code=404, detail="API route not found")
         
         # Check if it's a specific file request
         file_path = frontend_build_dir / full_path
@@ -69,12 +81,14 @@ if frontend_build_dir.exists():
             return FileResponse(index_path)
         
         # Fallback
-        return {"error": "Frontend not found", "path": str(frontend_build_dir)}
+        raise HTTPException(status_code=404, detail="Frontend file not found")
 else:
     # If no frontend directory exists, create a simple fallback
     @app.get("/{full_path:path}")
     async def serve_fallback(full_path: str):
         """Fallback when frontend is not available"""
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API route not found")
         return {"message": "Frontend not available", "api_docs": "/api/v1/docs"}
 
 if __name__ == "__main__":
