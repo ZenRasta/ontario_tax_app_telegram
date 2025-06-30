@@ -29,7 +29,7 @@ async def health():
 
 # Include all routes from the backend app directly into the main app
 from backend.app.main import router as backend_router
-app.include_router(backend_router, prefix="/api/v1")
+app.include_router(backend_router, prefix="/v1")
 
 if __name__ == "__main__":
     import uvicorn
