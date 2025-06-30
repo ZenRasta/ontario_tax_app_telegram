@@ -29,7 +29,15 @@ async def health():
 
 # Include all routes from the backend app directly into the main app
 from backend.app.main import router as backend_router
+from backend.app.api.v1.explain import router as explain_router
+from backend.app.api.v1.oas_calculator import router as oas_calculator_router
+
+# Mount the main backend router with /v1 prefix for core simulation endpoints
 app.include_router(backend_router, prefix="/v1")
+
+# Mount the additional routers directly (they already have /api/v1 prefixes)
+app.include_router(explain_router)
+app.include_router(oas_calculator_router)
 
 if __name__ == "__main__":
     import uvicorn
