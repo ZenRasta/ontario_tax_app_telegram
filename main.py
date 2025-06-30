@@ -28,9 +28,8 @@ async def health():
     return {"status": "healthy", "service": "ontario-tax-app-backend"}
 
 # Include all routes from the backend app directly into the main app
-from backend.app.main import router as backend_router, debug_router as backend_debug_router
+from backend.app.main import router as backend_router
 app.include_router(backend_router, prefix="/api/v1")
-app.include_router(debug_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
