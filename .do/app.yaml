@@ -43,4 +43,4 @@ services:
     cd frontend && npm ci && npm run build
     # Install Python dependencies
     cd .. && pip install -r requirements.txt
-  run_command: python main.py
+  run_command: gunicorn --worker-tmp-dir /dev/shm --config gunicorn.conf.py main:app --bind 0.0.0.0:8080
