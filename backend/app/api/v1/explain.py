@@ -5,7 +5,7 @@ from ...data_models.scenario import ScenarioInput, StrategyCodeEnum, GoalEnum
 from ...data_models.results import SummaryMetrics
 from ...services.llm_service import explain_strategy_with_context
 
-router = APIRouter(prefix="/api/v1", tags=["explain"])
+router = APIRouter(tags=["explain"])
 
 
 class ExplainRequest(BaseModel):
