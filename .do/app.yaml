@@ -1,46 +1,99 @@
 alerts:
-- rule: DEPLOYMENT_FAILED
-- rule: DOMAIN_FAILED
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
 features:
-- buildpack-stack=ubuntu-22
+  - buildpack-stack=ubuntu-22        # same as before
+
 name: whale-app
 region: nyc
+
+#####################################
+#  NEW INGRESS RULES                #
+#####################################
+ingress:
+  rules:
+    # 1️⃣  Send /v1/* to the API
+    - component:
+        name: ontario-taxapp-v2       # << back-end service (see below)
+      match:
+        path:
+          prefix: /v1
+
+    # 2️⃣  Keep legacy /api/* working
+    - component:
+        name: ontario-taxapp-v2
+      match:
+        path:
+          prefix: /api
+
+    # 3️⃣  Everything else → static React app
+    - component:
+        name: ontario-taxapp-v2-frontend
+      match:
+        path:
+          prefix: /
+
+#####################################
+#  PYTHON BACK-END SERVICE          #
+#####################################
 services:
-- environment_slug: python
-  envs:
-  - key: DATABASE_URL
-    scope: RUN_AND_BUILD_TIME
-    value: postgresql://user:password@localhost:5432/retirement_sessions_db
-  - key: TAX_YEARS_FILE
-    scope: RUN_AND_BUILD_TIME
-    value: backend/data/tax_years.yml
-  - key: SESSION_DATA_TTL_HOURS
-    scope: RUN_AND_BUILD_TIME
-    value: "24"
-  - key: OPENAI_API_KEY
-    scope: RUN_AND_BUILD_TIME
-    value: ${OPENAI_API_KEY}
-  - key: RESEND_API_KEY
-    scope: RUN_AND_BUILD_TIME
-    value: re_XFws7iY9_EDwGBknV4Vnugutfb6do3mCN
-  - key: FROM_EMAIL
-    scope: RUN_AND_BUILD_TIME
-    value: oascalculator@ontariotaxapp.com
-  - key: FROM_NAME
-    scope: RUN_AND_BUILD_TIME
-    value: Ontario Tax App - OAS Calculator
-  github:
-    branch: main
-    deploy_on_push: true
-    repo: ZenRasta/Ontario_Taxapp_v2
-  http_port: 8080
-  instance_count: 1
-  instance_size_slug: apps-s-1vcpu-1gb
-  name: ontario-taxapp-v2
-  source_dir: /
-  build_command: |
-    # Build the frontend first
-    cd frontend && npm ci && npm run build
-    # Install Python dependencies
-    cd .. && pip install -r requirements.txt
-  run_command: gunicorn --worker-tmp-dir /dev/shm --config gunicorn.conf.py main:app --bind 0.0.0.0:8080
+  - name: ontario-taxapp-v2          # ← referenced in rules[0-1]
+    environment_slug: python
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    source_dir: /
+
+    github:
+      repo: ZenRasta/Ontario_Taxapp_v2
+      branch: main
+      deploy_on_push: true
+
+    # --- ENV VARS (unchanged) ---
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: postgresql://user:password@localhost:5432/retirement_sessions_db
+      - key: TAX_YEARS_FILE
+        scope: RUN_AND_BUILD_TIME
+        value: backend/data/tax_years.yml
+      - key: SESSION_DATA_TTL_HOURS
+        scope: RUN_AND_BUILD_TIME
+        value: "24"
+      - key: OPENAI_API_KEY
+        scope: RUN_AND_BUILD_TIME
+        value: ${OPENAI_API_KEY}
+      - key: RESEND_API_KEY
+        scope: RUN_AND_BUILD_TIME
+        value: re_XFws7iY9_EDwGBknV4Vnugutfb6do3mCN
+      - key: FROM_EMAIL
+        scope: RUN_AND_BUILD_TIME
+        value: oascalculator@ontariotaxapp.com
+      - key: FROM_NAME
+        scope: RUN_AND_BUILD_TIME
+        value: Ontario Tax App - OAS Calculator
+
+    # --- Build & run ---
+    build_command: |
+      # install Python deps only
+      pip install -r requirements.txt
+    run_command: >
+      gunicorn --worker-tmp-dir /dev/shm --config gunicorn.conf.py
+      main:app --bind 0.0.0.0:8080
+
+#####################################
+#  STATIC REACT FRONT-END           #
+#####################################
+static_sites:
+  - name: ontario-taxapp-v2-frontend   # ← referenced in rule[2]
+    source_dir: frontend
+    build_command: |
+      npm ci && npm run build
+    output_dir: build
+    catchall_document: index.html      # SPA routing support
+
+    github:
+      repo: ZenRasta/Ontario_Taxapp_v2
+      branch: main
+      deploy_on_push: true
