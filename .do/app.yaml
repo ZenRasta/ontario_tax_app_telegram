@@ -4,69 +4,68 @@ features:
   - buildpack-stack=ubuntu-22
 
 #######################################
-# 1️⃣  PYTHON BACK-END SERVICE
+#  GLOBAL ROUTES  (order matters!)
+#######################################
+routes:
+  - path: /v1
+    preserve_path: true
+    component:
+      name: ontario-taxapp-v2          # python API
+  - path: /api
+    preserve_path: true
+    component:
+      name: ontario-taxapp-v2
+  - path: /
+    preserve_path: true
+    component:
+      name: ontario-taxapp-v2-frontend # react static site
+
+#######################################
+#  PYTHON BACK-END
 #######################################
 services:
-  - name: ontario-taxapp-v2          # <-- keep your existing container
+  - name: ontario-taxapp-v2
     environment_slug: python
     source_dir: /
     http_port: 8080
     instance_count: 1
     instance_size_slug: apps-s-1vcpu-1gb
-
     build_command: |
-      pip install -r requirements.txt            # API only
+      pip install -r requirements.txt
     run_command: >
       gunicorn --worker-tmp-dir /dev/shm
       --config gunicorn.conf.py
       main:app --bind 0.0.0.0:8080
-
-    ###################################
-    # ROUTES → where traffic goes in
-    ###################################
-    routes:
-      - path: /v1                              # NEW
-      - path: /api                             # legacy
-
-    ###################################
-    # ENV VARS (unchanged)
-    ###################################
     envs:
       - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
         value: postgresql://user:password@localhost:5432/retirement_sessions_db
-        scope: RUN_AND_BUILD_TIME
       - key: TAX_YEARS_FILE
+        scope: RUN_AND_BUILD_TIME
         value: backend/data/tax_years.yml
-        scope: RUN_AND_BUILD_TIME
       - key: SESSION_DATA_TTL_HOURS
+        scope: RUN_AND_BUILD_TIME
         value: "24"
-        scope: RUN_AND_BUILD_TIME
       - key: OPENAI_API_KEY
+        scope: RUN_AND_BUILD_TIME
         value: ${OPENAI_API_KEY}
-        scope: RUN_AND_BUILD_TIME
       - key: RESEND_API_KEY
+        scope: RUN_AND_BUILD_TIME
         value: re_XFws7iY9_EDwGBknV4Vnugutfb6do3mCN
-        scope: RUN_AND_BUILD_TIME
       - key: FROM_EMAIL
+        scope: RUN_AND_BUILD_TIME
         value: oascalculator@ontariotaxapp.com
-        scope: RUN_AND_BUILD_TIME
       - key: FROM_NAME
-        value: Ontario Tax App - OAS Calculator
         scope: RUN_AND_BUILD_TIME
+        value: Ontario Tax App - OAS Calculator
 
 #######################################
-# 2️⃣  REACT STATIC SITE
+#  REACT STATIC FRONT-END
 #######################################
 static_sites:
-  - name: frontend                       # <-- new component
-    source_dir: frontend                 # location of package.json
+  - name: ontario-taxapp-v2-frontend
+    source_dir: frontend
     build_command: |
       npm ci && npm run build
     output_dir: build
     catchall_document: index.html
-
-    ###################################
-    # ROUTE – everything else
-    ###################################
-    routes:
-      - path: /                          # SPA root
