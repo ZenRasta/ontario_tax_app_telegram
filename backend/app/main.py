@@ -68,13 +68,14 @@ app.add_middleware(
 # ------------------------------------------------------------------ #
 # include v1 simulation router (defined in app/api/v1/simulate.py)
 # ------------------------------------------------------------------ #
-from .api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
-from .api.v1.explain import router as explain_router  # noqa: E402
+from .api.v1.simulate import router as simulate_router  # noqa: E402
+from .api.v1.explain import router as explain_router    # noqa: E402
 from .api.v1.oas_calculator import router as oas_calculator_router  # noqa: E402
 
 app.include_router(simulate_router, prefix=settings.API_PREFIX)
-app.include_router(explain_router, prefix=settings.API_PREFIX)
+app.include_router(explain_router,  prefix=settings.API_PREFIX)
 app.include_router(oas_calculator_router, prefix=settings.API_PREFIX)
+
 
 # ------------------------------------------------------------------ #
 # database init (runs once at start-up)
