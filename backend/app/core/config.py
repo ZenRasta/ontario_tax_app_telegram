@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ #
     # FastAPI / CORS
     # ------------------------------------------------------------------ #
-    API_PREFIX: str = Field(default="/api/v1", env="API_PREFIX")
+    API_PREFIX: str = Field(default="/v1", env="API_PREFIX")
     ALLOWED_CORS_ORIGINS: List[str] = Field(
         default=[
             "http://localhost:5173",
