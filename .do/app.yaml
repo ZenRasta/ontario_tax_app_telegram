@@ -35,7 +35,7 @@ services:
     run_command: >
       gunicorn --worker-tmp-dir /dev/shm
       --config gunicorn.conf.py
-      main:app --bind 0.0.0.0:8080
+      backend.app.main:app --bind 0.0.0.0:8080
     envs:
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
