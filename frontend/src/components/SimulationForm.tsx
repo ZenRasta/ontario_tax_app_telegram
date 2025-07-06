@@ -118,7 +118,7 @@ export default function SimulationForm() {
       strategy_code: data.strategy_code,
     };
     try {
-      const resp = await fetch('/api/v1/simulate', {
+       const res = await fetch(`${API_PREFIX}/simulate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
