@@ -71,10 +71,12 @@ app.add_middleware(
 from .api.v1.simulate import router as simulate_router  # noqa: E402
 from .api.v1.explain import router as explain_router    # noqa: E402
 from .api.v1.oas_calculator import router as oas_calculator_router  # noqa: E402
+from .api.v1.test import router as test_router  # noqa: E402
 
 app.include_router(simulate_router, prefix=settings.API_PREFIX)
 app.include_router(explain_router,  prefix=settings.API_PREFIX)
 app.include_router(oas_calculator_router, prefix=settings.API_PREFIX)
+app.include_router(test_router, prefix=settings.API_PREFIX)
 
 
 # ------------------------------------------------------------------ #
