@@ -113,7 +113,7 @@ const App: React.FC = () => {
      * 4) POST to /api/v1/compare
      * ---------------------------------------------- */
     try {
-      const res = await fetch("/api/v1/compare", {
+        const res = await fetch(`${API_PREFIX}/compare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
