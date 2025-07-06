@@ -130,7 +130,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           : 'simplify';
 
       try {
-        const resp = await fetch('/api/v1/explain', {
+          const res = await fetch(`${API_PREFIX}/compare`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
