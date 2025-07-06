@@ -124,8 +124,8 @@ const OASCalculatorModal: React.FC<OASCalculatorModalProps> = ({ open, onClose }
         email_address: formData.email_address,
         recipient_name: formData.recipient_name || '',
       };
-
-      const response = await fetch('/api/v1/oas-calculator/calculate', {
+      
+      const res = await fetch(`${API_PREFIX}/oas-calculator/calculate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
