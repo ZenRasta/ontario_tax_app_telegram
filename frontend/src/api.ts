@@ -1,10 +1,23 @@
+
+const API_PREFIX =
+  import.meta.env.VITE_API_URL   // Vite convention
+  || process.env.REACT_APP_API_URL // CRA convention
+  || "/v1";                       // fallback
+
+// POST /v1/compare
 export async function runSimulation(data: Record<string, any>) {
-  return fetch('/api/v1/compare', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      request_id: crypto.randomUUID(),
-      ...data
-    })
+  return fetch(`${API_PREFIX}/compare`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ request_id: crypto.randomUUID(), ...data }),
+  }).then(r => r.json());
+}
+
+// POST /v1/explain
+export async function getExplanation(payload: ExplainRequest) {
+  return fetch(`${API_PREFIX}/explain`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   }).then(r => r.json());
 }
