@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
+
 interface OASCalculatorModalProps {
   open: boolean;
   onClose: () => void;
@@ -133,11 +135,11 @@ const OASCalculatorModal: React.FC<OASCalculatorModalProps> = ({ open, onClose }
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
 
-      const data = await response.json();
+      const data = await res.json();
 
       if (data.success) {
         setResult(data.calculation_result);

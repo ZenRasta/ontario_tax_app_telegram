@@ -16,6 +16,8 @@ import type { StrategyParamsInput } from '../types/api';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
+
 interface FormValues {
   strategy_code: string;
   strategy_params: {
@@ -123,8 +125,8 @@ export default function SimulationForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (!resp.ok) throw new Error('request failed');
-      const result = await resp.json();
+      if (!res.ok) throw new Error('request failed');
+      const result = await res.json();
       setRows(result.yearly_results || []);
     } catch (err) {
       console.error(err);

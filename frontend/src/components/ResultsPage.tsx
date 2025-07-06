@@ -13,6 +13,8 @@ import {
 import StrategyChart from './StrategyChart';
 import ReportPage from './ReportPage';
 
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
+
 const currencyFormatter = new Intl.NumberFormat('en-CA', {
   style: 'currency',
   currency: 'CAD',
@@ -130,7 +132,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           : 'simplify';
 
       try {
-          const res = await fetch(`${API_PREFIX}/compare`, {
+          const res = await fetch(`${API_PREFIX}/explain`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -140,8 +142,8 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
             goal: goalEnum,
           }),
         });
-        if (!resp.ok) throw new Error('request failed');
-        const data: ExplainResponse = await resp.json();
+        if (!res.ok) throw new Error('request failed');
+        const data: ExplainResponse = await res.json();
         setExplanation(data);
       } catch (err) {
         console.error('Failed to fetch explanation', err);

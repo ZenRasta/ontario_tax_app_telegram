@@ -9,6 +9,8 @@ import PrivacyDisclaimer from "./components/PrivacyDisclaimer";
 import type { FormData } from "./types/formData";
 import type { ComparisonResponseItem, ScenarioInput } from "./types/api";
 
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
+
 /* ------------------------------------------------------------------ */
 const App: React.FC = () => {
   /* state ----------------------------------------------------------- */

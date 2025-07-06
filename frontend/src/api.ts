@@ -1,8 +1,7 @@
 
-const API_PREFIX =
-  import.meta.env.VITE_API_URL   // Vite convention
-  || process.env.REACT_APP_API_URL // CRA convention
-  || "/v1";                       // fallback
+import { ExplainRequest } from './types/api';
+
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
 
 // POST /v1/compare
 export async function runSimulation(data: Record<string, any>) {

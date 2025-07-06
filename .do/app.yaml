@@ -69,3 +69,7 @@ static_sites:
       npm ci && npm run build
     output_dir: build
     catchall_document: index.html
+    envs:
+      - key: VITE_API_PREFIX
+        value: /v1
+        scope: RUN_AND_BUILD_TIME
