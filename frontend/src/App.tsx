@@ -15,15 +15,15 @@ const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/v1';
 const App: React.FC = () => {
   /* state ----------------------------------------------------------- */
   const [formData, setFormData] = useState<FormData>({
-    age: 65,
-    rrspBalance: 500_000,
-    tfsaBalance: 100_000,
-    cppAmount: 12_000,
-    oasAmount: 8_000,
-    desiredSpending: 60_000,
-    expectedReturn: 5,
-    stdDevReturn: 8,
-    horizon: 30,
+    age: 0, // Will show as placeholder
+    rrspBalance: 0, // Will show as placeholder
+    tfsaBalance: 0, // Will show as placeholder
+    cppAmount: 0, // Will show as placeholder
+    oasAmount: 0, // Will show as placeholder
+    desiredSpending: 0, // Will show as placeholder
+    expectedReturn: 0, // Will show as placeholder
+    stdDevReturn: 0, // Will show as placeholder
+    horizon: 0, // Will show as placeholder
     married: false,
     lumpSumAmount: undefined,
     goal: "",

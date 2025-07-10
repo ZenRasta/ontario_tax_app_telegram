@@ -39,6 +39,7 @@ class OASCalculatorResult:
     oas_clawback_percentage: float
     net_oas_amount: float
     effective_tax_rate: float
+    risk_level: str
     recommendations: List[str]
 
 class EmailService:

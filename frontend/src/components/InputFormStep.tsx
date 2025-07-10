@@ -167,7 +167,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.age}
+            value={data.age || ""}
+            placeholder="e.g., 65"
             onChange={handleInputChange("age")}
             margin="normal"
             inputProps={fieldLimits.age}
@@ -193,7 +194,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.cppAmount}
+            value={data.cppAmount || ""}
+            placeholder="e.g., 12000"
             onChange={handleInputChange("cppAmount")}
             margin="normal"
             inputProps={fieldLimits.cppAmount}
@@ -221,7 +223,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.tfsaBalance}
+            value={data.tfsaBalance || ""}
+            placeholder="e.g., 100000"
             onChange={handleInputChange("tfsaBalance")}
             margin="normal"
             inputProps={fieldLimits.tfsaBalance}
@@ -247,7 +250,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.expectedReturn}
+            value={data.expectedReturn || ""}
+            placeholder="e.g., 5"
             onChange={handleInputChange("expectedReturn")}
             margin="normal"
             inputProps={fieldLimits.expectedReturn}
@@ -273,7 +277,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.horizon}
+            value={data.horizon || ""}
+            placeholder="e.g., 30"
             onChange={handleInputChange("horizon")}
             margin="normal"
             inputProps={fieldLimits.horizonYears}
@@ -302,7 +307,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.rrspBalance}
+            value={data.rrspBalance || ""}
+            placeholder="e.g., 500000"
             onChange={handleInputChange("rrspBalance")}
             margin="normal"
             inputProps={fieldLimits.rrspBalance}
@@ -328,7 +334,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.oasAmount}
+            value={data.oasAmount || ""}
+            placeholder="e.g., 8000"
             onChange={handleInputChange("oasAmount")}
             margin="normal"
             inputProps={fieldLimits.oasAmount}
@@ -356,7 +363,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.desiredSpending}
+            value={data.desiredSpending || ""}
+            placeholder="e.g., 60000"
             onChange={handleInputChange("desiredSpending")}
             margin="normal"
             inputProps={fieldLimits.desiredSpending}
@@ -382,7 +390,8 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                 </Tooltip>
               </Box>
             }
-            value={data.stdDevReturn}
+            value={data.stdDevReturn || ""}
+            placeholder="e.g., 8"
             onChange={handleInputChange("stdDevReturn")}
             margin="normal"
             inputProps={fieldLimits.stdDevReturn}
@@ -437,6 +446,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   </Box>
                 }
                 value={data.spouseAge ?? ""}
+                placeholder="e.g., 62"
                 onChange={handleInputChange("spouseAge")}
                 margin="normal"
                 inputProps={fieldLimits.age}
@@ -462,6 +472,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   </Box>
                 }
                 value={data.spouseCppAmount ?? ""}
+                placeholder="e.g., 10000"
                 onChange={handleInputChange("spouseCppAmount")}
                 margin="normal"
                 inputProps={fieldLimits.cppAmount}
@@ -489,6 +500,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   </Box>
                 }
                 value={data.spouseTfsaBalance ?? ""}
+                placeholder="e.g., 80000"
                 onChange={handleInputChange("spouseTfsaBalance")}
                 margin="normal"
                 inputProps={fieldLimits.tfsaBalance}
@@ -517,6 +529,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   </Box>
                 }
                 value={data.spouseRrspBalance ?? ""}
+                placeholder="e.g., 300000"
                 onChange={handleInputChange("spouseRrspBalance")}
                 margin="normal"
                 inputProps={fieldLimits.rrspBalance}
@@ -542,6 +555,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                   </Box>
                 }
                 value={data.spouseOasAmount ?? ""}
+                placeholder="e.g., 7500"
                 onChange={handleInputChange("spouseOasAmount")}
                 margin="normal"
                 inputProps={fieldLimits.oasAmount}
@@ -580,6 +594,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                     </Box>
                   }
                   value={data.bracketFillCeiling ?? ""}
+                  placeholder="e.g., 90000"
                   onChange={handleInputChange("bracketFillCeiling")}
                   margin="normal"
                   inputProps={fieldLimits.bracketFillCeiling}
@@ -609,6 +624,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                     </Box>
                   }
                   value={data.cppStartAge ?? ""}
+                  placeholder="e.g., 70"
                   onChange={handleInputChange("cppStartAge")}
                   margin="normal"
                   inputProps={fieldLimits.cppStartAge}
@@ -639,6 +655,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                       </Box>
                     }
                     value={data.lumpSumAmount ?? ""}
+                    placeholder="e.g., 90000"
                     onChange={handleInputChange("lumpSumAmount")}
                     margin="normal"
                     inputProps={fieldLimits.lumpSumAmount}
@@ -665,6 +682,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                       </Box>
                     }
                     value={data.lumpSumYear ?? ""}
+                    placeholder="e.g., 20"
                     onChange={handleInputChange("lumpSumYear")}
                     margin="normal"
                     inputProps={{ ...fieldLimits.lumpSumYearOffset, max: data.horizon }}
@@ -695,6 +713,7 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
                     </Box>
                   }
                   value={data.emptyByAge ?? ""}
+                  placeholder="e.g., 90"
                   onChange={handleInputChange("emptyByAge")}
                   margin="normal"
                   inputProps={{ ...fieldLimits.emptyByAge, min: data.age + 5 }}
@@ -725,4 +744,3 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
 };
 
 export default InputFormStep;
-

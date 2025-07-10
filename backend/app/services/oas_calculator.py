@@ -619,6 +619,7 @@ class SimpleOASClawbackCalculator:
                     oas_clawback_percentage=result.oas_clawback_percentage,
                     net_oas_amount=result.net_oas_amount,
                     effective_tax_rate=result.effective_tax_rate,
+                    risk_level=result.risk_level,
                     recommendations=enhanced_recommendations
                 )
                 

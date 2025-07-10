@@ -13,7 +13,7 @@ from ...services.oas_calculator import SimpleOASInput, simple_oas_calculator
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/oas-calculator", tags=["OAS Calculator"])
+router = APIRouter(prefix="/oas-calculator", tags=["OAS Calculator"])
 
 class OASCalculatorRequest(BaseModel):
     """Request model for OAS clawback calculation"""
