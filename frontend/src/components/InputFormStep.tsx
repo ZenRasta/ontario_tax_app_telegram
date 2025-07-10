@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Grid,
@@ -9,6 +9,7 @@ import {
   IconButton,
   Typography,
   Button,
+  Alert,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import type { FormData } from "../types/formData";
@@ -47,19 +48,103 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
   onBack,
   onSubmit,
 }) => {
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   /** generic handler for <TextField> */
   const handleInputChange =
     (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const value =
         e.target.type === "number" ? Number(e.target.value) : e.target.value;
       onChange({ [field]: value } as Partial<FormData>);
+      // Clear validation error when user starts typing
+      if (validationError) {
+        setValidationError(null);
+      }
     };
 
   /** marital-status toggle */
   const handleMarriedChange = (
     _: React.ChangeEvent<HTMLInputElement>,
     checked: boolean
-  ) => onChange({ married: checked });
+  ) => {
+    onChange({ married: checked });
+    // Clear validation error when user makes changes
+    if (validationError) {
+      setValidationError(null);
+    }
+  };
+
+  /** Form validation */
+  const validateForm = (): boolean => {
+    // Check required main fields
+    const requiredFields = [
+      { field: 'age', name: 'Age' },
+      { field: 'rrspBalance', name: 'RRSP Balance' },
+      { field: 'desiredSpending', name: 'Desired Spending' },
+      { field: 'expectedReturn', name: 'Expected Return %' },
+      { field: 'stdDevReturn', name: 'Std Dev Return %' },
+      { field: 'horizon', name: 'Horizon (years)' }
+    ];
+
+    for (const { field, name } of requiredFields) {
+      const value = data[field as keyof FormData];
+      if (!value || value === 0) {
+        setValidationError("Please complete all required fields");
+        return false;
+      }
+    }
+
+    // Check spouse fields if married
+    if (data.married) {
+      const spouseFields = [
+        { field: 'spouseAge', name: 'Spouse Age' }
+      ];
+
+      for (const { field, name } of spouseFields) {
+        const value = data[field as keyof FormData];
+        if (!value || value === 0) {
+          setValidationError("Please complete all spouse information fields");
+          return false;
+        }
+      }
+    }
+
+    // Check advanced strategy fields if strategies are selected
+    if (data.strategies.includes("BF") && (!data.bracketFillCeiling || data.bracketFillCeiling === 0)) {
+      setValidationError("Please complete the Bracket-Fill Ceiling field");
+      return false;
+    }
+
+    if (data.strategies.includes("CD") && (!data.cppStartAge || data.cppStartAge === 0)) {
+      setValidationError("Please complete the CPP Start Age field");
+      return false;
+    }
+
+    if (data.strategies.includes("LS")) {
+      if (!data.lumpSumAmount || data.lumpSumAmount === 0) {
+        setValidationError("Please complete the Lump-Sum Amount field");
+        return false;
+      }
+      if (!data.lumpSumYear || data.lumpSumYear === 0) {
+        setValidationError("Please complete the Lump-Sum Year Offset field");
+        return false;
+      }
+    }
+
+    if (data.strategies.includes("EBX") && (!data.emptyByAge || data.emptyByAge === 0)) {
+      setValidationError("Please complete the Empty-by Age field");
+      return false;
+    }
+
+    return true;
+  };
+
+  /** Handle form submission with validation */
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onSubmit();
+    }
+  };
 
   // Boolean flags to decide which advanced fields show
   const { strategies } = data;
@@ -730,12 +815,19 @@ const InputFormStep: React.FC<InputFormStepProps> = ({
         </Box>
       )}
 
+      {/* -------------- VALIDATION ERROR -------------------------------- */}
+      {validationError && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {validationError}
+        </Alert>
+      )}
+
       {/* -------------- NAV BUTTONS ------------------------------------ */}
       <Box mt={4} textAlign="right">
         <Button variant="outlined" onClick={onBack} sx={{ mr: 2 }}>
           Back
         </Button>
-        <Button variant="contained" onClick={onSubmit}>
+        <Button variant="contained" onClick={handleSubmit}>
           Run Simulation
         </Button>
       </Box>
