@@ -48,6 +48,22 @@ OPENROUTER_MODEL=openai/o4-mini
 
 `OPENROUTER_MODEL` defaults to `openai/o4-mini` if left unset.
 
+## Telegram bot
+
+The project includes a simple Telegram bot that echoes tax strategy summaries
+using the existing LLM service. Configure your bot token in the `.env` file:
+
+```
+TELEGRAM_BOT_TOKEN=your-telegram-token
+```
+
+Keep real tokens out of version control. After installing backend dependencies
+with Poetry, start the bot from the repository root:
+
+```
+poetry run python bot/main.py
+```
+
 ## Strategy report
 
 After running a simulation, the results screen includes a **View Report**
