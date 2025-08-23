@@ -12,7 +12,6 @@ import logging
 import os
 from typing import Iterable
 
-import httpx
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -24,6 +23,7 @@ from telegram.ext import (
 
 from backend.app.core.config import settings
 from backend.app.utils.year_data_loader import load_tax_year_data
+from backend.app.utils.openrouter import chat_completion
 
 
 logging.basicConfig(level=logging.INFO)
@@ -79,23 +79,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if any(k in lowered for k in KEYWORDS):
         if settings.OPENROUTER_API_KEY:
             try:
-                async with httpx.AsyncClient(timeout=60) as client:
-                    resp = await client.post(
-                        f"{settings.OPENROUTER_BASE_URL}/chat/completions",
-                        headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
-                        json={
-                            "model": settings.OPENROUTER_MODEL,
-                            "messages": [
-                                {
-                                    "role": "system",
-                                    "content": "You are a helpful Ontario tax assistant.",
-                                },
-                                {"role": "user", "content": text},
-                            ],
-                        },
-                    )
-                    resp.raise_for_status()
-                    reply = resp.json()["choices"][0]["message"]["content"].strip()
+                messages = [
+                    {
+                        "role": "system",
+                        "content": "You are a helpful Ontario tax assistant.",
+                    },
+                    {"role": "user", "content": text},
+                ]
+                reply = await chat_completion(messages)
             except Exception:
                 logger.exception("OpenRouter request failed")
                 reply = (
