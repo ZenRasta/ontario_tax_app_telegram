@@ -97,6 +97,11 @@ class Settings(BaseSettings):
     OPENROUTER_BASE_URL: str = Field("https://openrouter.ai/api/v1", env="OPENROUTER_BASE_URL")
 
     # ------------------------------------------------------------------ #
+    # Telegram Bot
+    # ------------------------------------------------------------------ #
+    TELEGRAM_BOT_TOKEN: Optional[str] = Field(default=None, env="TELEGRAM_BOT_TOKEN")
+
+    # ------------------------------------------------------------------ #
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",

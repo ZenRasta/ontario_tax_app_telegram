@@ -73,6 +73,22 @@ The backend automatically loads environment variables from a `.env` file in the 
    - Add a worker process that runs the polling script in the `bot/` directory.
 5. After deployment, verify the API with `curl https://<backend-url>/health` and ensure your frontend origin is included in `ALLOWED_CORS_ORIGINS` for CORS.
 
+## Telegram bot
+
+The project includes a simple Telegram bot that echoes tax strategy summaries
+using the existing LLM service. Configure your bot token in the `.env` file:
+
+```
+TELEGRAM_BOT_TOKEN=your-telegram-token
+```
+
+Keep real tokens out of version control. After installing backend dependencies
+with Poetry, start the bot from the repository root:
+
+```
+poetry run python bot/main.py
+```
+
 ## Strategy report
 
 After running a simulation, the results screen includes a **View Report**
