@@ -6,7 +6,7 @@ import logging
 import httpx
 import json
 
-from ..core.config import settings  # Use the singleton settings
+from ..utils.openrouter import chat_completion
 from ..data_models.results import SummaryMetrics
 from ..data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
 
@@ -50,30 +50,7 @@ async def explain_strategy_with_context(  # noqa: C901
     Returns a dictionary with ``summary``, ``key_outcomes`` and ``recommendations``
     keys populated from the LLM response.
     """
-    # Check for available API keys - prefer OpenAI, fallback to OpenRouter
-    api_key = None
-    base_url = "https://api.openai.com/v1"
-    model = "gpt-4o-mini"
-    
-    if settings.OPENAI_API_KEY:
-        api_key = settings.OPENAI_API_KEY
-        model = "gpt-4o-mini"
-        logger.info("Using OpenAI API")
-    elif settings.OPENROUTER_API_KEY:
-        api_key = settings.OPENROUTER_API_KEY
-        base_url = settings.OPENROUTER_BASE_URL
-        model = settings.OPENROUTER_MODEL
-        logger.info(f"Using OpenRouter API with model: {model}")
-    
-    if not api_key:
-        logger.warning(
-            "No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY). LLM explanation disabled, returning placeholder."
-        )
-        return {
-            "summary": "LLM-generated explanation is currently unavailable as no API key is configured.",
-            "key_outcomes": [],
-            "recommendations": "",
-        }
+    # Use OpenRouter for chat completions
 
     # Get strategy metadata (label, blurb) if you have it
     # strategy_meta = get_strategy_meta(strategy_code) # Assuming you have this function
@@ -174,83 +151,67 @@ async def explain_strategy_with_context(  # noqa: C901
     # logger.debug(f"LLM Prompt: \n{final_prompt}") # Uncomment for full prompt debugging
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                f"{base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}"},
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": final_prompt}],
-                    "temperature": 0.6,
-                    "max_tokens": 500,
-                },
+        content = await chat_completion([{"role": "user", "content": final_prompt}])
+        logger.info(
+            f"LLM explanation received successfully for {strategy_code.value}."
+        )
+        try:
+            # Try to parse as JSON first
+            parsed_content = json.loads(content)
+            return parsed_content
+        except json.JSONDecodeError:
+            logger.warning(
+                "Failed to parse JSON from LLM response, attempting to extract content: %s", content[:200]
             )
-            resp.raise_for_status()
-
-            response_data = resp.json()
-            if response_data.get("choices"):
-                content = response_data["choices"][0]["message"].get("content", "")
-                logger.info(
-                    f"LLM explanation received successfully for {strategy_code.value}."
-                )
+            # Try to extract JSON from the content if it's wrapped in other text
+            import re
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
                 try:
-                    # Try to parse as JSON first
-                    parsed_content = json.loads(content)
-                    return parsed_content
+                    return json.loads(json_match.group())
                 except json.JSONDecodeError:
-                    logger.warning(
-                        "Failed to parse JSON from LLM response, attempting to extract content: %s", content[:200]
-                    )
-                    # Try to extract JSON from the content if it's wrapped in other text
-                    import re
-                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
-                    if json_match:
-                        try:
-                            return json.loads(json_match.group())
-                        except json.JSONDecodeError:
-                            pass
-                    
-                    # Fallback: try to parse the content manually
-                    lines = content.strip().split('\n')
-                    summary = ""
-                    key_outcomes = []
-                    recommendations = ""
-                    
-                    current_section = None
-                    for line in lines:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        if 'summary' in line.lower() or current_section is None:
-                            current_section = 'summary'
-                            if ':' in line:
-                                summary += line.split(':', 1)[1].strip() + " "
-                            else:
-                                summary += line + " "
-                        elif 'outcome' in line.lower() or 'key' in line.lower():
-                            current_section = 'outcomes'
-                        elif 'recommend' in line.lower():
-                            current_section = 'recommendations'
-                        elif current_section == 'outcomes' and (line.startswith('•') or line.startswith('-') or line.startswith('*')):
-                            key_outcomes.append(line.lstrip('•-* '))
-                        elif current_section == 'recommendations':
-                            recommendations += line + " "
-                    
-                    return {
-                        "summary": summary.strip() or content.strip(),
-                        "key_outcomes": key_outcomes or [content.strip()],
-                        "recommendations": recommendations.strip() or "Please consult with a financial advisor for personalized advice.",
-                    }
-            else:
-                logger.error(
-                    f"LLM response missing expected structure for {strategy_code.value}. Response: {response_data}"
-                )
-                return {
-                    "summary": "Could not generate an explanation due to an unexpected response format from the AI service.",
-                    "key_outcomes": [],
-                    "recommendations": "",
-                }
+                    pass
 
+            # Fallback: try to parse the content manually
+            lines = content.strip().split('\n')
+            summary = ""
+            key_outcomes = []
+            recommendations = ""
+
+            current_section = None
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                if 'summary' in line.lower() or current_section is None:
+                    current_section = 'summary'
+                    if ':' in line:
+                        summary += line.split(':', 1)[1].strip() + " "
+                    else:
+                        summary += line + " "
+                elif 'outcome' in line.lower() or 'key' in line.lower():
+                    current_section = 'outcomes'
+                elif 'recommend' in line.lower():
+                    current_section = 'recommendations'
+                elif current_section == 'outcomes' and (line.startswith('•') or line.startswith('-') or line.startswith('*')):
+                    key_outcomes.append(line.lstrip('•-* '))
+                elif current_section == 'recommendations':
+                    recommendations += line + " "
+
+            return {
+                "summary": summary.strip() or content.strip(),
+                "key_outcomes": key_outcomes or [content.strip()],
+                "recommendations": recommendations.strip() or "Please consult with a financial advisor for personalized advice.",
+            }
+    except RuntimeError as e:
+        logger.warning(
+            "LLM explanation disabled: %s", e
+        )
+        return {
+            "summary": "LLM-generated explanation is currently unavailable as no API key is configured.",
+            "key_outcomes": [],
+            "recommendations": "",
+        }
     except httpx.HTTPStatusError as e:
         logger.error(f"LLM API request failed for {strategy_code.value} with status {e.response.status_code}: {e.response.text}", exc_info=False)
         error_detail = f"AI explanation service returned an error (Status {e.response.status_code})."
@@ -295,31 +256,7 @@ async def explain_oas_calculator_results(
     
     Returns a dictionary with enhanced recommendations and insights.
     """
-    # Check for available API keys - prefer OpenAI, fallback to OpenRouter
-    api_key = None
-    base_url = "https://api.openai.com/v1"
-    model = "gpt-4o-mini"
-    
-    if settings.OPENAI_API_KEY:
-        api_key = settings.OPENAI_API_KEY
-        model = "gpt-4o-mini"
-        logger.info("Using OpenAI API for OAS analysis")
-    elif settings.OPENROUTER_API_KEY:
-        api_key = settings.OPENROUTER_API_KEY
-        base_url = settings.OPENROUTER_BASE_URL
-        model = settings.OPENROUTER_MODEL
-        logger.info(f"Using OpenRouter API for OAS analysis with model: {model}")
-    
-    if not api_key:
-        logger.warning(
-            "No LLM API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY). LLM explanation disabled, returning basic recommendations."
-        )
-        return {
-            "ai_summary": "AI-powered analysis is currently unavailable.",
-            "strategic_insights": [],
-            "personalized_recommendations": "Please consult with a financial advisor for personalized advice.",
-            "risk_assessment": f"Your OAS clawback risk level is {risk_level}."
-        }
+    # Use OpenRouter for chat completions
 
     # Build the prompt for OAS analysis
     prompt_parts = [
@@ -371,57 +308,44 @@ async def explain_oas_calculator_results(
     logger.info(f"Generated LLM prompt for OAS calculator analysis. Total income: ${total_income:,.0f}, Clawback: ${oas_clawback_amount:,.0f}")
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                f"{base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}"},
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": final_prompt}],
-                    "temperature": 0.7,
-                    "max_tokens": 800,
-                },
-            )
-            resp.raise_for_status()
+        content = await chat_completion([{"role": "user", "content": final_prompt}])
+        logger.info("LLM OAS analysis received successfully.")
 
-            response_data = resp.json()
-            if response_data.get("choices"):
-                content = response_data["choices"][0]["message"].get("content", "")
-                logger.info("LLM OAS analysis received successfully.")
-                
+        try:
+            # Try to parse as JSON first
+            parsed_content = json.loads(content)
+            return parsed_content
+        except json.JSONDecodeError:
+            logger.warning("Failed to parse JSON from LLM response, attempting to extract content")
+
+            # Try to extract JSON from the content if it's wrapped in other text
+            import re
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
                 try:
-                    # Try to parse as JSON first
-                    parsed_content = json.loads(content)
-                    return parsed_content
+                    return json.loads(json_match.group())
                 except json.JSONDecodeError:
-                    logger.warning("Failed to parse JSON from LLM response, attempting to extract content")
-                    
-                    # Try to extract JSON from the content if it's wrapped in other text
-                    import re
-                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
-                    if json_match:
-                        try:
-                            return json.loads(json_match.group())
-                        except json.JSONDecodeError:
-                            pass
-                    
-                    # Fallback: create structured response from content
-                    return {
-                        "ai_summary": f"Based on your total income of ${total_income:,.0f}, you have a {risk_level.lower()} risk OAS clawback situation with ${oas_clawback_amount:,.0f} annual clawback.",
-                        "strategic_insights": [
-                            f"Your income is ${total_income - 90997:,.0f} {'above' if total_income > 90997 else 'below'} the OAS clawback threshold",
-                            f"RRIF withdrawals represent {(rrif_withdrawals/total_income)*100:.1f}% of your total income",
-                            f"You're retaining {(net_oas_amount/8560.08)*100:.1f}% of your maximum OAS benefit"
-                        ],
-                        "personalized_recommendations": content.strip() if content.strip() else "Consider consulting with a financial advisor to explore income splitting strategies, RRIF withdrawal timing optimization, and tax-efficient investment approaches to minimize OAS clawback impact.",
-                        "risk_assessment": f"Your {risk_level.lower()} risk level indicates {'minimal impact' if risk_level == 'Low' else 'moderate impact' if risk_level == 'Medium' else 'significant impact'} on your OAS benefits."
-                    }
-            else:
-                logger.error("LLM response missing expected structure for OAS analysis")
-                return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
+                    pass
 
+            # Fallback: create structured response from content
+            return {
+                "ai_summary": f"Based on your total income of ${total_income:,.0f}, you have a {risk_level.lower()} risk OAS clawback situation with ${oas_clawback_amount:,.0f} annual clawback.",
+                "strategic_insights": [
+                    f"Your income is ${total_income - 90997:,.0f} {'above' if total_income > 90997 else 'below'} the OAS clawback threshold",
+                    f"RRIF withdrawals represent {(rrif_withdrawals/total_income)*100:.1f}% of your total income",
+                    f"You're retaining {(net_oas_amount/8560.08)*100:.1f}% of your maximum OAS benefit"
+                ],
+                "personalized_recommendations": content.strip() if content.strip() else "Consider consulting with a financial advisor to explore income splitting strategies, RRIF withdrawal timing optimization, and tax-efficient investment approaches to minimize OAS clawback impact.",
+                "risk_assessment": f"Your {risk_level.lower()} risk level indicates {'minimal impact' if risk_level == 'Low' else 'moderate impact' if risk_level == 'Medium' else 'significant impact'} on your OAS benefits."
+            }
+    except RuntimeError as e:
+        logger.warning("LLM OAS analysis disabled: %s", e)
+        return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
     except httpx.HTTPStatusError as e:
         logger.error(f"LLM API request failed for OAS analysis with status {e.response.status_code}")
+        return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
+    except httpx.RequestError as e:
+        logger.error(f"LLM API request error for OAS analysis: {e}")
         return _get_fallback_oas_analysis(total_income, oas_clawback_amount, risk_level, rrif_withdrawals)
     except Exception as e:
         logger.error(f"Unexpected error during LLM OAS analysis: {e}")
