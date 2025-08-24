@@ -1,4 +1,4 @@
-"""Utility functions for interacting with the OpenRouter API."""
+"""Helpers for interacting with the OpenRouter API."""
 from __future__ import annotations
 
 import httpx

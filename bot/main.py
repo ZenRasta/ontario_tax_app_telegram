@@ -23,7 +23,7 @@ from telegram.ext import (
 
 from backend.app.core.config import settings
 from backend.app.utils.year_data_loader import load_tax_year_data
-from backend.app.utils import openrouter
+from backend.app.utils.openrouter import chat_completion
 
 
 logging.basicConfig(level=logging.INFO)
@@ -93,7 +93,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                         ),
                     },
                 ]
-                reply = await openrouter.chat_completion(messages)
+                reply = await chat_completion(messages)
             except Exception:
                 logger.exception("OpenRouter request failed")
                 reply = (
