@@ -23,7 +23,7 @@ from telegram.ext import (
 
 from backend.app.core.config import settings
 from backend.app.utils.year_data_loader import load_tax_year_data
-from backend.app.utils.openrouter import chat_completion
+from backend.app.utils import openrouter
 
 
 logging.basicConfig(level=logging.INFO)
@@ -79,14 +79,21 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if any(k in lowered for k in KEYWORDS):
         if settings.OPENROUTER_API_KEY:
             try:
+                user_query = text
                 messages = [
                     {
                         "role": "system",
                         "content": "You are a helpful Ontario tax assistant.",
                     },
-                    {"role": "user", "content": text},
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Provide tax strategy advice for '{user_query}' in Ontario, Canada. "
+                            "Keep it concise and add disclaimers."
+                        ),
+                    },
                 ]
-                reply = await chat_completion(messages)
+                reply = await openrouter.chat_completion(messages)
             except Exception:
                 logger.exception("OpenRouter request failed")
                 reply = (
